@@ -1934,7 +1934,7 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
             tooltip: { callbacks: { afterLabel: ctx => {
               const n = w.n_per_level[ctx.dataIndex];
               const isNull = w.actual[ctx.dataIndex] === null;
-              return 'N=' + (n || 0) + ' sessions' + (isNull ? ' (INSUFFICIENT-N, <150)' : '');
+              return 'N=' + (n || 0) + ' sessions' + (isNull ? ' (no data)' : '');
             } } }
           },
           scales: { y: { max: 100, ticks: { callback: v => v + '%' } } }
@@ -2064,7 +2064,7 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
             plugins: {
               legend: { display: false },
               title: { display: true, text: 'Drop rate per level (1 − end/start) — amber=intro-blocker, red=>25% (kill)' },
-              tooltip: { callbacks: { afterLabel: ctx => { const i = ctx.dataIndex; const n = dp.n_per_level[i]; const isIntro = intro.has(i + 1); return 'N=' + n + (dp.data[i] === null ? ' (INSUFFICIENT-N, <150)' : '') + (isIntro ? ' · designed intro-blocker' : ''); } } }
+              tooltip: { callbacks: { afterLabel: ctx => { const i = ctx.dataIndex; const n = dp.n_per_level[i]; const isIntro = intro.has(i + 1); return 'N=' + n + (dp.data[i] === null ? ' (no starts data)' : '') + (isIntro ? ' · designed intro-blocker' : ''); } } }
             },
             scales: { y: { title: { display: true, text: 'Drop %' }, ticks: { callback: v => v + '%' } } }
           }
