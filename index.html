@@ -1874,6 +1874,9 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
     }
 
     // ── Tab 0: override TILES (main verdict tiles)
+    // CRITICAL: always sync t.spark from d.spark (including null). If the
+    // pipeline doesn't have multi-day data, d.spark is null and the spark
+    // should render blank — NOT inherit v3.1's demo array.
     if (typeof TILES !== 'undefined' && Array.isArray(data.tab_0 && data.tab_0.main_tiles)) {
       data.tab_0.main_tiles.forEach((d, i) => {
         if (i >= TILES.length) return;
@@ -1887,7 +1890,7 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
         } else if (d.value != null) {
           t.value = d.value;
           t.status = d.status;
-          if (d.spark) t.spark = d.spark;
+          t.spark = (d.spark && d.spark.some(v => v !== null)) ? d.spark : null;
         }
       });
     }
@@ -1906,7 +1909,7 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
         } else if (d.value != null) {
           t.value = d.value;
           t.status = d.status;
-          if (d.spark) t.spark = d.spark;
+          t.spark = (d.spark && d.spark.some(v => v !== null)) ? d.spark : null;
           if (d.n != null) t.srcId = (t.srcId || '') + ' · N=' + d.n.toLocaleString();
         }
       });
