@@ -5,8 +5,8 @@
     "source": "local-dump: C:\\Users\\CPU60395-local\\Downloads\\Telegram Desktop\\metrics",
     "target_date": "2026-05-12",
     "today_vn": "2026-05-13",
-    "generated_at": "2026-05-13T07:25:36.015Z",
-    "scope": "Tabs 0-4 only · multi-day retention INSUFFICIENT",
+    "generated_at": "2026-05-13T07:38:56.545Z",
+    "scope": "Tabs 0-5 (Tab 5 narrative now live) · multi-day retention INSUFFICIENT",
     "insufficient_n_threshold": 1,
     "spark_window_days": 0,
     "sparklines_disabled": "No multi-day history in local dump",
@@ -748,5 +748,136 @@
   "tab_4": {
     "status": "INSUFFICIENT",
     "reason": "Tutorial popup events (tutorial_popup_shown/dismissed) not instrumented in current build — 0 hits in a 30,500-event scan. Tab 4 cannot be populated until events are wired."
+  },
+  "tab_5": {
+    "status": "COVERED",
+    "chart_cutscene_skip": {
+      "labels": [
+        "L1 · 0.mp4",
+        "L5 · 1.mp4",
+        "L10 · 2.mp4",
+        "L11 · 3.mp4",
+        "L21 · 4.mp4",
+        "L31 · 5.mp4",
+        "L40 · 6.mp4"
+      ],
+      "data": [
+        62.5,
+        74.8,
+        73.9,
+        78.8,
+        71.4,
+        83.3,
+        92.3
+      ],
+      "tooltip_extra": [
+        {
+          "N": 200,
+          "len": 49,
+          "avg_skip_sec": 23.5,
+          "before_level": 1
+        },
+        {
+          "N": 107,
+          "len": 35,
+          "avg_skip_sec": 8.7,
+          "before_level": 5
+        },
+        {
+          "N": 69,
+          "len": 24,
+          "avg_skip_sec": 6.3,
+          "before_level": 10
+        },
+        {
+          "N": 66,
+          "len": 31,
+          "avg_skip_sec": 6.9,
+          "before_level": 11
+        },
+        {
+          "N": 35,
+          "len": 42,
+          "avg_skip_sec": 5.4,
+          "before_level": 21
+        },
+        {
+          "N": 18,
+          "len": 26,
+          "avg_skip_sec": 3.8,
+          "before_level": 31
+        },
+        {
+          "N": 13,
+          "len": 36,
+          "avg_skip_sec": 8.3,
+          "before_level": 40
+        }
+      ]
+    },
+    "chart_cutscene_complete": {
+      "labels": [
+        "L1 · 0.mp4",
+        "L5 · 1.mp4",
+        "L10 · 2.mp4",
+        "L11 · 3.mp4",
+        "L21 · 4.mp4",
+        "L31 · 5.mp4",
+        "L40 · 6.mp4"
+      ],
+      "data": [
+        26.5,
+        17.8,
+        26.1,
+        19.7,
+        28.6,
+        16.7,
+        7.7
+      ],
+      "tooltip_extra": [
+        {
+          "N": 200,
+          "len": 49,
+          "before_level": 1
+        },
+        {
+          "N": 107,
+          "len": 35,
+          "before_level": 5
+        },
+        {
+          "N": 69,
+          "len": 24,
+          "before_level": 10
+        },
+        {
+          "N": 66,
+          "len": 31,
+          "before_level": 11
+        },
+        {
+          "N": 35,
+          "len": 42,
+          "before_level": 21
+        },
+        {
+          "N": 18,
+          "len": 26,
+          "before_level": 31
+        },
+        {
+          "N": 13,
+          "len": 36,
+          "before_level": 40
+        }
+      ]
+    },
+    "chart_m17a_status": "INSUFFICIENT — per-user cutscene-finish-rate × D3-retained correlation requires multi-day cohort extract.",
+    "totals": {
+      "shown": 508,
+      "skipped": 360,
+      "completed": 117,
+      "unique_cutscenes": 7
+    }
   }
 }

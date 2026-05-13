@@ -1803,7 +1803,7 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
      ════════════════════════════════════════════════════════════════════ -->
 <script>
 (function pipelineSidecar() {
-  const TABS_OUT_OF_SCOPE = [5, 6, 7, 8, 9, 10, 11];
+  const TABS_OUT_OF_SCOPE = [6, 7, 8, 9, 10, 11];  // Tab 5 (Narrative) re-enabled
   const INSUFFICIENT_CHARTS = {
     'ch-retention':       { tab: 'tab_1', label: 'Retention (D1/D3 cohort)' },
     'ch-sessions-day':    { tab: 'tab_1', label: 'Sessions / day per DAU' },
@@ -1866,7 +1866,7 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
       'N=<b>' + (g.total_sessions || 0).toLocaleString() + '</b> sessions · ' +
       'Devices=<b>' + (g.total_devices || 0).toLocaleString() + '</b> · ' +
       '<b>' + (g.n_levels_with_data || 0) + '</b> levels · ' +
-      'Scope: Tabs 0–4 only',
+      'Scope: Tabs 0–5',
       '#0EA5E9', '#fff'
     );
     if (meta.coverage_note) {
@@ -2114,6 +2114,76 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
 
     // ── Tab 4: still INSUFFICIENT in this build (tutorial events not instrumented)
     stampInsufficient('ch-tutorial', 'Tutorial popup metrics F01-F08<br><span style="font-weight:400;color:#9CA3AF;">' + ((data.tab_4 && data.tab_4.reason) || 'tutorial_popup_* events not instrumented') + '</span>');
+
+    // ── Tab 5: Narrative — per-cutscene skip + finish; m17a still needs multi-day
+    if (data.tab_5 && data.tab_5.status === 'COVERED') {
+      const t5 = data.tab_5;
+      if (t5.chart_cutscene_skip) {
+        const cs = t5.chart_cutscene_skip;
+        overrideChart('ch-cutscene-skip', {
+          type: 'bar',
+          data: {
+            labels: cs.labels,
+            datasets: [{
+              label: 'Skip rate %',
+              data: cs.data,
+              backgroundColor: cs.data.map(v => v == null ? '#9CA3AF' : v > 60 ? '#DC2626' : v > 30 ? '#F59E0B' : '#10B981')
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              title: { display: true, text: 'Cutscene skip rate per scene (red >60% = kill, amber 30-60% = warn)' },
+              tooltip: { callbacks: { afterLabel: ctx => {
+                const ex = cs.tooltip_extra && cs.tooltip_extra[ctx.dataIndex];
+                if (!ex) return '';
+                const parts = ['N=' + ex.N + ' shows'];
+                if (ex.before_level != null) parts.push('before L' + ex.before_level);
+                if (ex.len) parts.push('length ' + ex.len + 's');
+                if (ex.avg_skip_sec != null) parts.push('avg skip at ' + ex.avg_skip_sec + 's');
+                return parts.join(' · ');
+              } } }
+            },
+            scales: { x: { title: { display: true, text: '%' }, max: 100, ticks: { callback: v => v + '%' } } }
+          }
+        });
+      }
+      if (t5.chart_cutscene_complete) {
+        const cc = t5.chart_cutscene_complete;
+        overrideChart('ch-cutscene-complete', {
+          type: 'bar',
+          data: {
+            labels: cc.labels,
+            datasets: [{
+              label: 'Finish rate %',
+              data: cc.data,
+              backgroundColor: cc.data.map(v => v == null ? '#9CA3AF' : v >= 70 ? '#10B981' : v >= 40 ? '#F59E0B' : '#DC2626')
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              title: { display: true, text: 'Cutscene finish rate per scene (green ≥70% = pass, red <40% = kill)' },
+              tooltip: { callbacks: { afterLabel: ctx => {
+                const ex = cc.tooltip_extra && cc.tooltip_extra[ctx.dataIndex];
+                if (!ex) return '';
+                const parts = ['N=' + ex.N + ' shows'];
+                if (ex.before_level != null) parts.push('before L' + ex.before_level);
+                if (ex.len) parts.push('length ' + ex.len + 's');
+                return parts.join(' · ');
+              } } }
+            },
+            scales: { x: { title: { display: true, text: '%' }, max: 100, ticks: { callback: v => v + '%' } } }
+          }
+        });
+      }
+      // m17a correlation requires multi-day data; stamp it INSUFFICIENT
+      stampInsufficient('ch-m17a', 'M17a cutscene_finish × D3 retention correlation<br><span style="font-weight:400;color:#9CA3AF;">' + (t5.chart_m17a_status || 'Multi-day cohort extract required') + '</span>');
+    }
   }
 
   // ── Entry
