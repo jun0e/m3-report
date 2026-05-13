@@ -2183,6 +2183,31 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
       }
       // m17a correlation requires multi-day data; stamp it INSUFFICIENT
       stampInsufficient('ch-m17a', 'M17a cutscene_finish × D3 retention correlation<br><span style="font-weight:400;color:#9CA3AF;">' + (t5.chart_m17a_status || 'Multi-day cohort extract required') + '</span>');
+
+      // Replace v3.1 hardcoded alert + insights with derived ones
+      const tab5Section = document.getElementById('tab-5');
+      if (tab5Section) {
+        // The v3.1 alert is a sibling div with class "alert" — the one near top of tab-5 saying "M17a correlation across W18 cohorts is +0.32 (Pass)".
+        const alertEl = tab5Section.querySelector('.alert');
+        if (alertEl) {
+          ['pass', 'warn', 'kill', 'info'].forEach(c => alertEl.classList.remove(c));
+          if (t5.alert_text) {
+            alertEl.classList.add('kill');
+            alertEl.innerHTML = '<span class="label">✗ KILL</span><span>' + t5.alert_text + '</span>';
+          } else {
+            alertEl.classList.add('info');
+            alertEl.innerHTML = '<span class="label">ℹ INFO</span><span>Tab 5 charts now show per-cutscene actuals from VN-12 event log. M17a correlation INSUFFICIENT (multi-day required).</span>';
+          }
+        }
+
+        // insights-5 section — replace contents with derived insights
+        const insightsSection = document.getElementById('insights-5');
+        if (insightsSection && Array.isArray(t5.insights)) {
+          const ICON = { urgent: '🔴', watch: '🟡', ok: '🟢', info: '⚪' };
+          insightsSection.innerHTML = '<h3>📌 Insights — narrative (derived from VN-12 event log)</h3>' +
+            t5.insights.map(ins => '<div class="insight ' + ins.level + '"><span class="icon">' + (ICON[ins.level] || '⚪') + '</span><div class="body">' + ins.text + '</div></div>').join('');
+        }
+      }
     }
   }
 
