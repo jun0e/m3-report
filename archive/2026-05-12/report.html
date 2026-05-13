@@ -2052,6 +2052,40 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
       if (data.tab_2.chart_drop_per_level) {
         const dp = data.tab_2.chart_drop_per_level;
         const intro = new Set(dp.intro_levels || []);
+        // Inline plugin: render value labels on every bar so 0.0%-height bars
+        // are still visible. Chart.js's default rendering hides zero-height bars.
+        const valueLabelPlugin = {
+          id: 'valueLabels',
+          afterDatasetsDraw(chart) {
+            const ctx = chart.ctx;
+            const dsMeta = chart.getDatasetMeta(0);
+            const yScale = chart.scales.y;
+            const zeroY = yScale ? yScale.getPixelForValue(0) : null;
+            chart.data.datasets[0].data.forEach((value, idx) => {
+              if (value === null || value === undefined) return;
+              const bar = dsMeta.data[idx];
+              if (!bar) return;
+              ctx.save();
+              ctx.fillStyle = '#374151';
+              ctx.font = 'bold 9px Arial, sans-serif';
+              ctx.textAlign = 'center';
+              const isZero = Math.abs(value) < 0.05;
+              if (isZero) {
+                // Draw a 2px sliver at y=0 in a distinct color so the level is visually present
+                ctx.fillStyle = '#9CA3AF';
+                ctx.fillRect(bar.x - bar.width / 2, zeroY - 1, bar.width, 2);
+                ctx.fillStyle = '#374151';
+                ctx.textBaseline = 'top';
+                ctx.fillText('0%', bar.x, zeroY + 3);
+              } else if (Math.abs(value) < 1) {
+                // Near-zero — label so the tiny bar is unambiguous
+                ctx.textBaseline = value >= 0 ? 'bottom' : 'top';
+                ctx.fillText(value.toFixed(1) + '%', bar.x, bar.y + (value >= 0 ? -2 : 10));
+              }
+              ctx.restore();
+            });
+          }
+        };
         overrideChart('ch-drop-per-level', {
           type: 'bar',
           data: {
@@ -2066,11 +2100,12 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
             responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: false },
-              title: { display: true, text: 'Drop rate per level (1 − end/start) — amber=intro-blocker, red=>25% (kill)' },
+              title: { display: true, text: 'Drop rate per level (1 − end/start) — amber=intro-blocker, red=>25% (kill) · 0% bars show as grey sliver + label' },
               tooltip: { callbacks: { afterLabel: ctx => { const i = ctx.dataIndex; const n = dp.n_per_level[i]; const isIntro = intro.has(i + 1); return 'N=' + n + (dp.data[i] === null ? ' (no starts data)' : '') + (isIntro ? ' · designed intro-blocker' : ''); } } }
             },
             scales: { y: { title: { display: true, text: 'Drop %' }, ticks: { callback: v => v + '%' } } }
-          }
+          },
+          plugins: [valueLabelPlugin]
         });
       }
     } else {
