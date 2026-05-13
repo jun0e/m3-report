@@ -196,8 +196,8 @@
       </div>
 
       <div class="chart-card">
-        <h3>Avg time-to-skip per cutscene</h3>
-        <div class="meta">Seconds into playback before user hits skip. Falls from 23.5s → 8.3s.</div>
+        <h3>Avg time-to-skip per cutscene vs cutscene length</h3>
+        <div class="meta">Red line = avg seconds-into-playback at skip. Grey dashed = cutscene length (the ceiling — what users <i>could</i> have watched). Gap = unwatched seconds.</div>
         <div class="chart-canvas-wrap"><canvas id="ch-cs-time"></canvas></div>
       </div>
     </div>
@@ -430,13 +430,13 @@ const OFF = { users: 193, sessions: 319, sessions_per_user: 1.65,
 
 // Per-cutscene (from full-data.json cutscenes.per_cutscene)
 const CUTSCENES = [
-  { id: 'CS_01_before_L1',  shown: 200, skip_pct: 62.5, finish_pct: 26.5, avg_skip_sec: 23.2, before_level: 1 },
-  { id: 'CS_02_before_L5',  shown: 107, skip_pct: 74.8, finish_pct: 17.8, avg_skip_sec:  8.7, before_level: 5 },
-  { id: 'CS_03_before_L10', shown:  69, skip_pct: 73.9, finish_pct: 26.1, avg_skip_sec:  6.3, before_level: 10 },
-  { id: 'CS_04_before_L11', shown:  66, skip_pct: 78.8, finish_pct: 19.7, avg_skip_sec:  6.9, before_level: 11 },
-  { id: 'CS_05_before_L21', shown:  35, skip_pct: 71.4, finish_pct: 28.6, avg_skip_sec:  5.4, before_level: 21 },
-  { id: 'CS_06_before_L31', shown:  18, skip_pct: 83.3, finish_pct: 16.7, avg_skip_sec:  3.8, before_level: 31 },
-  { id: 'CS_07_before_L40', shown:  13, skip_pct: 92.3, finish_pct:  7.7, avg_skip_sec:  8.3, before_level: 40 }
+  { id: 'CS_01_before_L1',  shown: 200, skip_pct: 62.5, finish_pct: 26.5, avg_skip_sec: 23.2, before_level: 1,  length_sec: 49 },
+  { id: 'CS_02_before_L5',  shown: 107, skip_pct: 74.8, finish_pct: 17.8, avg_skip_sec:  8.7, before_level: 5,  length_sec: 35 },
+  { id: 'CS_03_before_L10', shown:  69, skip_pct: 73.9, finish_pct: 26.1, avg_skip_sec:  6.3, before_level: 10, length_sec: 24 },
+  { id: 'CS_04_before_L11', shown:  66, skip_pct: 78.8, finish_pct: 19.7, avg_skip_sec:  6.9, before_level: 11, length_sec: 31 },
+  { id: 'CS_05_before_L21', shown:  35, skip_pct: 71.4, finish_pct: 28.6, avg_skip_sec:  5.4, before_level: 21, length_sec: 42 },
+  { id: 'CS_06_before_L31', shown:  18, skip_pct: 83.3, finish_pct: 16.7, avg_skip_sec:  3.8, before_level: 31, length_sec: 26 },
+  { id: 'CS_07_before_L40', shown:  13, skip_pct: 92.3, finish_pct:  7.7, avg_skip_sec:  8.3, before_level: 40, length_sec: 36 }
 ];
 
 document.getElementById('generated').textContent = '2026-05-13 UTC · pipeline v2 + ABTest holdout';
@@ -555,17 +555,52 @@ new Chart(document.getElementById('ch-cs-time'), {
   type: 'line',
   data: {
     labels: CUTSCENES.map(c => 'L' + c.before_level),
-    datasets: [{
-      label: 'Avg time before skip (sec)',
-      data: CUTSCENES.map(c => c.avg_skip_sec),
-      borderColor: '#DC2626', backgroundColor: 'rgba(220, 38, 38, 0.1)',
-      pointBackgroundColor: '#DC2626', tension: 0.3, fill: true
-    }]
+    datasets: [
+      {
+        label: 'Cutscene length (max watchable, sec)',
+        data: CUTSCENES.map(c => c.length_sec),
+        borderColor: '#6B7280',
+        backgroundColor: 'rgba(107, 114, 128, 0.08)',
+        borderDash: [6, 4],
+        borderWidth: 1.5,
+        pointBackgroundColor: '#6B7280',
+        pointRadius: 3,
+        tension: 0,
+        fill: false,
+        order: 0
+      },
+      {
+        label: 'Avg time before skip (sec)',
+        data: CUTSCENES.map(c => c.avg_skip_sec),
+        borderColor: '#DC2626',
+        backgroundColor: 'rgba(220, 38, 38, 0.15)',
+        borderWidth: 2,
+        pointBackgroundColor: '#DC2626',
+        pointRadius: 4,
+        tension: 0.3,
+        fill: true,
+        order: 1
+      }
+    ]
   },
   options: {
     responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: ctx => 'Cutscene length: also varies. Insta-skip < 10s' } } },
-    scales: { y: { beginAtZero: true, ticks: { callback: v => v + 's' } }, x: { title: { display: true, text: 'Before level' } } }
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 18, font: { size: 11 } } },
+      tooltip: { callbacks: {
+        afterLabel: ctx => {
+          const c = CUTSCENES[ctx.dataIndex];
+          const watched_pct = c.length_sec ? (c.avg_skip_sec / c.length_sec * 100).toFixed(0) : '—';
+          return ctx.dataset.label.includes('skip')
+            ? 'Of ' + c.length_sec + 's length, avg watched ≈ ' + watched_pct + '% before skip'
+            : 'Length: ' + c.length_sec + 's';
+        }
+      } }
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: v => v + 's' }, title: { display: true, text: 'Seconds' } },
+      x: { title: { display: true, text: 'Before level' } }
+    }
   }
 });
 
