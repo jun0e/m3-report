@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cutscene A/B Analysis — VN 2026-05-12</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --slate: #1F2937;
+    --slate-2: #374151;
+    --cyan: #0EA5E9;
+    --amber: #F59E0B;
+    --pass-bg: #D1FAE5; --pass-fg: #065F46;
+    --warn-bg: #FEF3C7; --warn-fg: #92400E;
+    --kill-bg: #FEE2E2; --kill-fg: #991B1B;
+    --info-bg: #DBEAFE; --info-fg: #1E40AF;
+    --gray-50: #F9FAFB; --gray-200: #E5E7EB; --gray-500: #6B7280;
+    --bg: #F3F4F6; --card: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, system-ui, Arial, sans-serif; background: var(--bg); color: #111; font-size: 13px; line-height: 1.5; }
+  header { background: var(--slate); color: #fff; padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  header h1 { font-size: 18px; margin: 0; font-weight: 700; }
+  header .meta { font-size: 11px; color: #cbd5e1; }
+  header .ab-pill { background: var(--cyan); color: #fff; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; }
+
+  main { max-width: 1400px; margin: 0 auto; padding: 22px 28px 60px; }
+
+  .banner { padding: 10px 16px; border-radius: 8px; margin-bottom: 18px; font-size: 12px; font-weight: 600; display: flex; gap: 12px; align-items: center; line-height: 1.5; }
+  .banner.kill { background: var(--kill-bg); color: var(--kill-fg); border-left: 4px solid #DC2626; }
+  .banner.info { background: var(--info-bg); color: var(--info-fg); border-left: 4px solid var(--cyan); }
+  .banner b { font-weight: 700; }
+
+  h2 { font-size: 15px; margin: 26px 0 10px; color: var(--slate); border-left: 4px solid var(--cyan); padding-left: 10px; }
+  h2 .sub { font-weight: 400; color: var(--gray-500); font-size: 11px; margin-left: 8px; }
+
+  .tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .tile { background: var(--card); border-radius: 8px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-top: 4px solid var(--gray-200); position: relative; }
+  .tile.pro-narr { border-top-color: #10B981; }
+  .tile.anti-narr { border-top-color: #DC2626; }
+  .tile.neutral { border-top-color: var(--amber); }
+  .tile-name { font-size: 11px; color: var(--gray-500); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+  .tile-delta { font-size: 24px; font-weight: 800; color: var(--slate); margin: 6px 0 2px; line-height: 1.1; }
+  .tile-detail { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
+  .tile-verdict { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 12px; letter-spacing: 0.4px; margin-top: 6px; }
+  .tile.pro-narr .tile-verdict { background: var(--pass-bg); color: var(--pass-fg); }
+  .tile.anti-narr .tile-verdict { background: var(--kill-bg); color: var(--kill-fg); }
+  .tile.neutral .tile-verdict { background: var(--warn-bg); color: var(--warn-fg); }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 16px; }
+  .chart-card { background: var(--card); border-radius: 8px; padding: 14px 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-card h3 { font-size: 13px; margin: 0 0 4px; color: var(--slate); font-weight: 700; }
+  .chart-card .meta { font-size: 11px; color: var(--gray-500); margin-bottom: 10px; }
+  .chart-canvas-wrap { position: relative; height: 300px; width: 100%; }
+  .chart-canvas-wrap.tall { height: 360px; }
+  .chart-canvas-wrap canvas { position: absolute; left: 0; top: 0; width: 100% !important; height: 100% !important; }
+
+  table.full-metrics { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; font-size: 12px; }
+  table.full-metrics th, table.full-metrics td { padding: 8px 14px; text-align: left; border-bottom: 1px solid var(--gray-200); }
+  table.full-metrics th { background: var(--slate); color: #fff; font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
+  table.full-metrics td.num { text-align: right; font-family: 'SF Mono', Monaco, monospace; font-variant-numeric: tabular-nums; }
+  table.full-metrics tr:hover { background: var(--gray-50); }
+  table.full-metrics .delta-pos { color: #065F46; font-weight: 600; }
+  table.full-metrics .delta-neg { color: #991B1B; font-weight: 600; }
+  table.full-metrics .delta-neutral { color: var(--gray-500); }
+
+  .audit-box { background: var(--card); border-radius: 8px; padding: 14px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 16px; }
+  .audit-box dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; font-size: 12px; }
+  .audit-box dt { color: var(--gray-500); font-weight: 600; }
+  .audit-box dd { margin: 0; font-family: 'SF Mono', Monaco, monospace; font-size: 11px; }
+
+  footer { color: var(--gray-500); font-size: 11px; padding: 30px 0 10px; text-align: center; }
+  footer a { color: var(--cyan); text-decoration: none; }
+  code { background: rgba(0,0,0,0.08); padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🎬 Cutscene A/B Causal Analysis</h1>
+    <div class="meta">VN <span id="date"></span> · GrowthBook-bucketed holdout · <span id="user-count"></span></div>
+  </div>
+  <div class="ab-pill">on vs off · 50/50</div>
+</header>
+
+<main>
+
+  <div class="banner kill" id="sanity-banner">
+    <span>⚠</span>
+    <span><b>Bucketing-leak bug:</b> <span id="leak-n"></span> of <span id="total-cs"></span> cutscene shows (<span id="leak-pct"></span>%) came from “off”-bucket users. Likely cause: pre-login default <code>user_id="10001"</code> is in force-rule “on”; first cutscene fires before <code>setUserId()</code>; bucket flips after login but event is logged with post-login user_id. <b>Fix at source:</b> emit <code>cutscene_group</code> field at event-time, don't derive retroactively.</span>
+  </div>
+
+  <h2>Headline deltas — “on” minus “off” <span class="sub">tile color = directional reading for narrative wedge thesis</span></h2>
+  <div class="tile-grid" id="tile-grid"></div>
+
+  <h2>A/B rule (from <code>ABTestConfig.json</code>) <span class="sub">verified by re-implementing the GrowthBook FNV-1a v2 bucketing</span></h2>
+  <div class="audit-box">
+    <dl>
+      <dt>Feature</dt><dd id="ab-feature"></dd>
+      <dt>Variations</dt><dd id="ab-variations"></dd>
+      <dt>Weights</dt><dd id="ab-weights"></dd>
+      <dt>Coverage</dt><dd id="ab-coverage"></dd>
+      <dt>Hash version</dt><dd id="ab-hashv"></dd>
+      <dt>Hash attribute</dt><dd id="ab-hashattr"></dd>
+      <dt>Seed</dt><dd id="ab-seed"></dd>
+      <dt>Forced "on"</dt><dd id="ab-forced-on"></dd>
+      <dt>Forced "off"</dt><dd id="ab-forced-off"></dd>
+      <dt>Actual split (observed)</dt><dd id="ab-actual-split"></dd>
+      <dt>Window</dt><dd id="ab-window"></dd>
+      <dt>Events scanned · kept</dt><dd id="ab-events"></dd>
+    </dl>
+  </div>
+
+  <h2>Per-metric comparison <span class="sub">grouped bar — "on" bucket vs "off" bucket</span></h2>
+  <div class="grid2">
+    <div class="chart-card full">
+      <h3>Engagement & retention</h3>
+      <div class="meta">Direction matters: higher is better for sessions/user · win rate · L50 reach · boss win · session length</div>
+      <div class="chart-canvas-wrap tall"><canvas id="ch-metrics"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Monetization & abandonment</h3>
+      <div class="meta">Higher gold-spend on Extra Move = stronger Katkoff monetization signal</div>
+      <div class="chart-canvas-wrap"><canvas id="ch-mon"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Group composition</h3>
+      <div class="meta">Users · devices · sessions per arm</div>
+      <div class="chart-canvas-wrap"><canvas id="ch-comp"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Cutscene engagement (within "on" arm)</h3>
+      <div class="meta">Of 503 shows: 357 skipped, 115 completed, 31 inconclusive</div>
+      <div class="chart-canvas-wrap"><canvas id="ch-cs-engage"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Bucket audit — observed split</h3>
+      <div class="meta">Configured 50/50, observed 47.8/52.2 — within sampling noise at N=370</div>
+      <div class="chart-canvas-wrap"><canvas id="ch-bucket"></canvas></div>
+    </div>
+  </div>
+
+  <h2>Full metrics table</h2>
+  <table class="full-metrics" id="metrics-table">
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th class="num">"on" (cutscenes shown)</th>
+        <th class="num">"off" (holdout)</th>
+        <th class="num">Δ on − off</th>
+        <th>Reading</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Caveats & next moves</h2>
+  <div class="audit-box">
+    <p style="margin-top:0;"><b>1. N is borderline.</b> ~180 users/arm. Below Bayesian min-N=250/arm thresholds from typical retention-test power calcs. Treat single-day deltas as directional, not confirmatory.</p>
+    <p><b>2. The bucketing-leak bug</b> (8/511 = 1.6%) contaminates the "off" arm slightly. Fix at the cutscene player: stamp <code>cutscene_group</code> into the event at emit-time so attribution is unambiguous.</p>
+    <p><b>3. Net read of the wedge:</b> ✓ <b>+25% sessions/user</b> (cutscenes pull players back) · ✗ <b>−44% session length</b> · ✗ <b>−0.6pp L50 reach</b> · ✗ <b>−11% Extra Move spend (monetization)</b> · ✗ <b>+45% abandon rate</b>. Four anti-narrative signals vs one pro-narrative signal. <b>Closer to the BR23 prior</b> than to the wedge thesis.</p>
+    <p><b>4. Multi-day extract</b> would unlock D1/D3/D7 retention deltas — the actual wedge-proof bar. The bucketing math is already in place; just need more days of dump.</p>
+    <p style="margin-bottom:0;"><b>5. Pre-register</b> what counts as wedge-proven before the test reads at scale. Suggested bar from the debate analyst report: ≥ 2pp D3 retention lift with 95% Bayesian credibility AND ≥ $0.05 ARPU lift over 14 days, both attributable to the narrative arm via the GrowthBook holdout.</p>
+  </div>
+
+  <footer>
+    Generated <span id="generated-at"></span> · source: <a href="./ab-cutscene-analysis.json">ab-cutscene-analysis.json</a> · <a href="./report.html">back to main dashboard</a>
+  </footer>
+</main>
+
+<script>
+// ──────────────────────────────────────────────────────────────────────────────
+// DATA — inlined from ab-cutscene-analysis.json for self-contained portability
+// ──────────────────────────────────────────────────────────────────────────────
+const DATA = {
+  "meta": {
+    "generated_at": "2026-05-13T09:44:38.500Z",
+    "date": "2026-05-12",
+    "window_utc": { "start": "2026-05-11T17:00:00.000Z", "end": "2026-05-12T17:00:00.000Z" },
+    "scanned_events": 253040,
+    "kept_in_window": 185292,
+    "ab_rule": {
+      "seed": "234c1894-32d7-4b2b-8611-8c280676c19f",
+      "hashVersion": 2, "hashAttribute": "id", "coverage": 1,
+      "weights": [0.5, 0.5], "variations": ["off", "on"],
+      "forced_on": ["10001", "1009542061"], "forced_off": ["10002"]
+    }
+  },
+  "sanity_check": { "cutscene_shown_off_should_be_zero": 8, "cutscene_shown_on_count": 503, "sanity_pass": false },
+  "groups": {
+    "on":  { "users": 179, "devices": 172, "sessions": 370, "installs": 171, "day_install_logins": 294,
+             "cutscene_shown": 503, "cutscene_skipped": 357, "cutscene_completed": 115,
+             "cutscene_skip_pct": 71, "cutscene_finish_pct": 22.9,
+             "level_starts": 2580, "level_ends": 2413, "level_wins": 2016, "level_fails": 397,
+             "win_rate_pct": 83.5, "l50_reach_pct": 5.6, "l50_users": 10,
+             "sessions_per_user": 2.07, "median_session_len_min": 4.8,
+             "gold_granted": 49927, "gold_spent": 17950, "gold_spent_extra_move": 17250, "net_gold": 31977,
+             "lives_lost_fail": 373, "lives_lost_abandon": 32,
+             "boss_attempts": 127, "boss_wins": 119, "boss_win_rate_pct": 93.7 },
+    "off": { "users": 193, "devices": 188, "sessions": 319, "installs": 187, "day_install_logins": 295,
+             "cutscene_shown": 8, "cutscene_skipped": 5, "cutscene_completed": 2,
+             "cutscene_skip_pct": 62.5, "cutscene_finish_pct": 25,
+             "level_starts": 2863, "level_ends": 2780, "level_wins": 2308, "level_fails": 472,
+             "win_rate_pct": 83, "l50_reach_pct": 6.2, "l50_users": 12,
+             "sessions_per_user": 1.65, "median_session_len_min": 8.5,
+             "gold_granted": 58545, "gold_spent": 19450, "gold_spent_extra_move": 19450, "net_gold": 39095,
+             "lives_lost_fail": 450, "lives_lost_abandon": 22,
+             "boss_attempts": 149, "boss_wins": 134, "boss_win_rate_pct": 89.9 }
+  },
+  "per_user_bucket_audit": { "total_users_bucketed": 372, "on_count": 177, "off_count": 193, "forced_on": 2, "forced_off": 0 }
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
+// HEADER + META HYDRATION
+// ──────────────────────────────────────────────────────────────────────────────
+const on = DATA.groups.on, off = DATA.groups.off;
+const m = DATA.meta, ab = m.ab_rule, sc = DATA.sanity_check, bk = DATA.per_user_bucket_audit;
+
+document.getElementById('date').textContent = m.date;
+document.getElementById('user-count').textContent = (on.users + off.users) + ' users · ' + DATA.meta.kept_in_window.toLocaleString() + ' events';
+document.getElementById('leak-n').textContent = sc.cutscene_shown_off_should_be_zero;
+document.getElementById('total-cs').textContent = sc.cutscene_shown_off_should_be_zero + sc.cutscene_shown_on_count;
+document.getElementById('leak-pct').textContent = (sc.cutscene_shown_off_should_be_zero / (sc.cutscene_shown_off_should_be_zero + sc.cutscene_shown_on_count) * 100).toFixed(1);
+
+document.getElementById('ab-feature').textContent = 'cutscene';
+document.getElementById('ab-variations').textContent = '[' + ab.variations.join(', ') + ']';
+document.getElementById('ab-weights').textContent = '[' + ab.weights.join(', ') + ']';
+document.getElementById('ab-coverage').textContent = (ab.coverage * 100) + '%';
+document.getElementById('ab-hashv').textContent = 'v' + ab.hashVersion + ' (FNV-1a 32-bit double-hash)';
+document.getElementById('ab-hashattr').textContent = ab.hashAttribute;
+document.getElementById('ab-seed').textContent = ab.seed;
+document.getElementById('ab-forced-on').textContent = ab.forced_on.join(', ');
+document.getElementById('ab-forced-off').textContent = ab.forced_off.join(', ');
+const obsOnPct = (bk.on_count / (bk.on_count + bk.off_count) * 100).toFixed(1);
+const obsOffPct = (bk.off_count / (bk.on_count + bk.off_count) * 100).toFixed(1);
+document.getElementById('ab-actual-split').textContent = obsOnPct + '% on · ' + obsOffPct + '% off (target 50/50, N=' + (bk.on_count + bk.off_count) + ')';
+document.getElementById('ab-window').textContent = m.window_utc.start + ' → ' + m.window_utc.end;
+document.getElementById('ab-events').textContent = m.scanned_events.toLocaleString() + ' scanned · ' + m.kept_in_window.toLocaleString() + ' kept';
+document.getElementById('generated-at').textContent = new Date(m.generated_at).toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+
+// ──────────────────────────────────────────────────────────────────────────────
+// HEADLINE TILES
+// ──────────────────────────────────────────────────────────────────────────────
+function pct(v) { return (v >= 0 ? '+' : '') + v.toFixed(1) + '%'; }
+function pp(v) { return (v >= 0 ? '+' : '') + v.toFixed(1) + 'pp'; }
+function num(v) { return (v >= 0 ? '+' : '') + v.toLocaleString(); }
+
+const tiles = [
+  {
+    name: 'Sessions / user',
+    onv: on.sessions_per_user, offv: off.sessions_per_user,
+    delta: ((on.sessions_per_user / off.sessions_per_user - 1) * 100),
+    fmt: 'pct',
+    verdict: 'PRO-NARRATIVE', kind: 'pro-narr',
+    detail: on.sessions_per_user.toFixed(2) + ' vs ' + off.sessions_per_user.toFixed(2)
+  },
+  {
+    name: 'Median session length',
+    onv: on.median_session_len_min, offv: off.median_session_len_min,
+    delta: ((on.median_session_len_min / off.median_session_len_min - 1) * 100),
+    fmt: 'pct',
+    verdict: 'ANTI-NARRATIVE', kind: 'anti-narr',
+    detail: on.median_session_len_min + 'min vs ' + off.median_session_len_min + 'min'
+  },
+  {
+    name: 'L50 reach',
+    onv: on.l50_reach_pct, offv: off.l50_reach_pct,
+    delta: (on.l50_reach_pct - off.l50_reach_pct),
+    fmt: 'pp',
+    verdict: 'ANTI-NARRATIVE', kind: 'anti-narr',
+    detail: on.l50_reach_pct + '% vs ' + off.l50_reach_pct + '% · 10 vs 12 users'
+  },
+  {
+    name: 'Extra Move spend (gold)',
+    onv: on.gold_spent_extra_move, offv: off.gold_spent_extra_move,
+    delta: ((on.gold_spent_extra_move / off.gold_spent_extra_move - 1) * 100),
+    fmt: 'pct',
+    verdict: 'ANTI-NARRATIVE · monetization', kind: 'anti-narr',
+    detail: on.gold_spent_extra_move.toLocaleString() + ' vs ' + off.gold_spent_extra_move.toLocaleString()
+  },
+  {
+    name: 'Lives lost to abandon',
+    onv: on.lives_lost_abandon, offv: off.lives_lost_abandon,
+    delta: ((on.lives_lost_abandon / off.lives_lost_abandon - 1) * 100),
+    fmt: 'pct',
+    verdict: 'ANTI-NARRATIVE', kind: 'anti-narr',
+    detail: on.lives_lost_abandon + ' events vs ' + off.lives_lost_abandon
+  },
+  {
+    name: 'Boss win rate',
+    onv: on.boss_win_rate_pct, offv: off.boss_win_rate_pct,
+    delta: (on.boss_win_rate_pct - off.boss_win_rate_pct),
+    fmt: 'pp',
+    verdict: 'PRO-NARRATIVE · or selection', kind: 'pro-narr',
+    detail: on.boss_win_rate_pct + '% vs ' + off.boss_win_rate_pct + '%'
+  },
+  {
+    name: 'Level win rate',
+    onv: on.win_rate_pct, offv: off.win_rate_pct,
+    delta: (on.win_rate_pct - off.win_rate_pct),
+    fmt: 'pp',
+    verdict: 'NEUTRAL', kind: 'neutral',
+    detail: on.win_rate_pct + '% vs ' + off.win_rate_pct + '%'
+  }
+];
+
+const tileGrid = document.getElementById('tile-grid');
+tiles.forEach(t => {
+  const el = document.createElement('div');
+  el.className = 'tile ' + t.kind;
+  const deltaStr = t.fmt === 'pct' ? pct(t.delta) : t.fmt === 'pp' ? pp(t.delta) : num(t.delta);
+  el.innerHTML = `
+    <div class="tile-name">${t.name}</div>
+    <div class="tile-delta">${deltaStr}</div>
+    <div class="tile-detail">${t.detail}</div>
+    <span class="tile-verdict">${t.verdict}</span>
+  `;
+  tileGrid.appendChild(el);
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// CHART 1: engagement & retention metrics
+// ──────────────────────────────────────────────────────────────────────────────
+const palette = { on: '#0EA5E9', off: '#6B7280', amber: '#F59E0B', green: '#10B981', red: '#DC2626' };
+
+new Chart(document.getElementById('ch-metrics'), {
+  type: 'bar',
+  data: {
+    labels: ['Sessions / user', 'Median session length (min)', 'Win rate %', 'Boss win rate %', 'L50 reach %'],
+    datasets: [
+      { label: '"on" (cutscenes shown)', data: [on.sessions_per_user, on.median_session_len_min, on.win_rate_pct, on.boss_win_rate_pct, on.l50_reach_pct], backgroundColor: palette.on },
+      { label: '"off" (holdout)', data: [off.sessions_per_user, off.median_session_len_min, off.win_rate_pct, off.boss_win_rate_pct, off.l50_reach_pct], backgroundColor: palette.off }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { afterLabel: ctx => { const lbls = ['sessions/user','minutes','percent','percent','percent']; return lbls[ctx.dataIndex] || ''; } } } },
+    scales: { y: { beginAtZero: true } }
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// CHART 2: monetization & abandonment
+// ──────────────────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('ch-mon'), {
+  type: 'bar',
+  data: {
+    labels: ['Gold granted', 'Gold spent (Extra Move)', 'Net gold flow', 'Lives lost: fail', 'Lives lost: abandon'],
+    datasets: [
+      { label: '"on"',  data: [on.gold_granted, on.gold_spent_extra_move, on.net_gold, on.lives_lost_fail, on.lives_lost_abandon], backgroundColor: palette.on },
+      { label: '"off"', data: [off.gold_granted, off.gold_spent_extra_move, off.net_gold, off.lives_lost_fail, off.lives_lost_abandon], backgroundColor: palette.off }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' } },
+    scales: { y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString() } } }
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// CHART 3: group composition
+// ──────────────────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('ch-comp'), {
+  type: 'bar',
+  data: {
+    labels: ['Users', 'Devices', 'Sessions', 'Installs', 'Day-install logins'],
+    datasets: [
+      { label: '"on"',  data: [on.users, on.devices, on.sessions, on.installs, on.day_install_logins], backgroundColor: palette.on },
+      { label: '"off"', data: [off.users, off.devices, off.sessions, off.installs, off.day_install_logins], backgroundColor: palette.off }
+    ]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' } },
+    scales: { x: { beginAtZero: true } }
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// CHART 4: cutscene engagement breakdown ("on" arm)
+// ──────────────────────────────────────────────────────────────────────────────
+const inconclusiveOn = on.cutscene_shown - on.cutscene_skipped - on.cutscene_completed;
+new Chart(document.getElementById('ch-cs-engage'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Skipped (' + on.cutscene_skipped + ')', 'Completed (' + on.cutscene_completed + ')', 'Inconclusive (' + inconclusiveOn + ')'],
+    datasets: [{
+      data: [on.cutscene_skipped, on.cutscene_completed, inconclusiveOn],
+      backgroundColor: [palette.red, palette.green, palette.amber]
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'right' }, tooltip: { callbacks: { label: ctx => { const total = on.cutscene_shown; const pct = (ctx.raw / total * 100).toFixed(1); return ctx.label + ' · ' + pct + '%'; } } } }
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// CHART 5: bucket audit (observed vs target)
+// ──────────────────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('ch-bucket'), {
+  type: 'bar',
+  data: {
+    labels: ['"on" bucket', '"off" bucket'],
+    datasets: [
+      { label: 'Target (50/50)', data: [50, 50], backgroundColor: palette.amber },
+      { label: 'Observed (' + (bk.on_count + bk.off_count) + ' users)', data: [+obsOnPct, +obsOffPct], backgroundColor: palette.on }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } } },
+    scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } }
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// FULL METRICS TABLE
+// ──────────────────────────────────────────────────────────────────────────────
+const rows = [
+  ['Users', on.users, off.users, on.users - off.users, 'count'],
+  ['Devices', on.devices, off.devices, on.devices - off.devices, 'count'],
+  ['Sessions', on.sessions, off.sessions, on.sessions - off.sessions, 'count'],
+  ['Sessions / user', on.sessions_per_user, off.sessions_per_user, +(on.sessions_per_user - off.sessions_per_user).toFixed(2), 'higher = more return → ✓ pro-narrative'],
+  ['Median session length (min)', on.median_session_len_min, off.median_session_len_min, +(on.median_session_len_min - off.median_session_len_min).toFixed(1), 'higher = deeper engagement → ✗ anti-narrative'],
+  ['Installs', on.installs, off.installs, on.installs - off.installs, 'count'],
+  ['Day-install logins', on.day_install_logins, off.day_install_logins, on.day_install_logins - off.day_install_logins, 'count'],
+  ['Cutscene shown', on.cutscene_shown, off.cutscene_shown, on.cutscene_shown - off.cutscene_shown, 'off should be 0; bucketing-leak bug at 1.6%'],
+  ['Cutscene skipped', on.cutscene_skipped, off.cutscene_skipped, on.cutscene_skipped - off.cutscene_skipped, 'count'],
+  ['Cutscene completed', on.cutscene_completed, off.cutscene_completed, on.cutscene_completed - off.cutscene_completed, 'count'],
+  ['Cutscene skip rate %', on.cutscene_skip_pct, off.cutscene_skip_pct, +(on.cutscene_skip_pct - off.cutscene_skip_pct).toFixed(1), 'off N=8 is noise'],
+  ['Cutscene finish rate %', on.cutscene_finish_pct, off.cutscene_finish_pct, +(on.cutscene_finish_pct - off.cutscene_finish_pct).toFixed(1), 'off N=8 is noise'],
+  ['Level starts', on.level_starts, off.level_starts, on.level_starts - off.level_starts, 'count'],
+  ['Level ends', on.level_ends, off.level_ends, on.level_ends - off.level_ends, 'count'],
+  ['Win rate %', on.win_rate_pct, off.win_rate_pct, +(on.win_rate_pct - off.win_rate_pct).toFixed(1), 'no skill confound between arms'],
+  ['L50 reach %', on.l50_reach_pct, off.l50_reach_pct, +(on.l50_reach_pct - off.l50_reach_pct).toFixed(1), 'higher = better → ✗ anti-narrative'],
+  ['L50 users', on.l50_users, off.l50_users, on.l50_users - off.l50_users, 'absolute count'],
+  ['Gold granted', on.gold_granted, off.gold_granted, on.gold_granted - off.gold_granted, 'on side earns less (proxy for fewer level clears)'],
+  ['Gold spent (total)', on.gold_spent, off.gold_spent, on.gold_spent - off.gold_spent, 'monetization signal'],
+  ['Gold spent on Extra Move', on.gold_spent_extra_move, off.gold_spent_extra_move, on.gold_spent_extra_move - off.gold_spent_extra_move, 'Katkoff load-bearing IAP path → ✗ anti-narrative'],
+  ['Net gold flow', on.net_gold, off.net_gold, on.net_gold - off.net_gold, 'positive = stockpiling'],
+  ['Lives lost: fail', on.lives_lost_fail, off.lives_lost_fail, on.lives_lost_fail - off.lives_lost_fail, 'standard fail loss'],
+  ['Lives lost: abandon', on.lives_lost_abandon, off.lives_lost_abandon, on.lives_lost_abandon - off.lives_lost_abandon, 'voluntary quit → ✗ anti-narrative'],
+  ['Boss attempts', on.boss_attempts, off.boss_attempts, on.boss_attempts - off.boss_attempts, 'count'],
+  ['Boss wins', on.boss_wins, off.boss_wins, on.boss_wins - off.boss_wins, 'count'],
+  ['Boss win rate %', on.boss_win_rate_pct, off.boss_win_rate_pct, +(on.boss_win_rate_pct - off.boss_win_rate_pct).toFixed(1), '✓ pro-narrative OR selection effect (engaged players are also better)']
+];
+const tbody = document.querySelector('#metrics-table tbody');
+function fmtNum(v) { if (typeof v !== 'number') return v; return v % 1 === 0 ? v.toLocaleString() : v.toFixed(2); }
+rows.forEach(r => {
+  const [label, onVal, offVal, delta, reading] = r;
+  const tr = document.createElement('tr');
+  let deltaCls = 'delta-neutral';
+  if (typeof delta === 'number' && Math.abs(delta) > 0) {
+    if (reading.includes('pro-narrative')) deltaCls = delta > 0 ? 'delta-pos' : 'delta-neg';
+    else if (reading.includes('anti-narrative')) deltaCls = delta < 0 ? 'delta-pos' : 'delta-neg';
+  }
+  tr.innerHTML = `<td>${label}</td><td class="num">${fmtNum(onVal)}</td><td class="num">${fmtNum(offVal)}</td><td class="num ${deltaCls}">${typeof delta === 'number' && delta >= 0 ? '+' : ''}${fmtNum(delta)}</td><td>${reading}</td>`;
+  tbody.appendChild(tr);
+});
+</script>
+</body>
+</html>
