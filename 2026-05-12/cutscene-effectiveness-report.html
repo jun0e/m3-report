@@ -1253,32 +1253,40 @@ new Chart(document.getElementById('ch-segment-time'), {
 // All numbers below come from data already inlined; no external fetch.
 // ──────────────────────────────────────────────────────────────────────────────
 (function refinedSkip() {
-  // Build per-cutscene refined splits
-  // CUTSCENES has: shown, skip_pct, finish_pct, before_level, length_sec
-  // CS_SKIP_DIST has: lv, buckets[7], total (skip count for that cutscene)
-  // Bucket indices: 0=0-1s, 1=1-3s, 2=3-5s, 3=5-10s, 4=10-20s, 5=20-30s, 6=30s+
+  // Build per-cutscene refined splits.
+  // CS_SKIP_DIST.buckets has 8 entries: [0..6] = skip-time bins, [7] = Completed count.
+  // CS_SKIP_DIST.total is the SUM of all 8 buckets (skips + completed), NOT skips only —
+  // the previous version used it as a skip total and double-counted completions into
+  // engaged-skip. Now we sum buckets[0..6] for the skip total, take buckets[7] as the
+  // completed count directly, and never derive completed from finish_pct × shown
+  // (which incurs an extra rounding error). Denom = max(shown, resolved) so the L40
+  // instrumentation anomaly (resolved > shown by 1) doesn't push stacks past 100%.
   const rows = CUTSCENES.map(c => {
     const dist = CS_SKIP_DIST.find(d => d.lv === c.before_level);
-    const totalSkips = dist ? dist.total : 0;
-    const insta = dist ? (dist.buckets[0] + dist.buckets[1]) : 0;
+    const skipBuckets = dist ? dist.buckets.slice(0, 7) : [0,0,0,0,0,0,0];
+    const completed   = dist ? (dist.buckets[7] || 0) : 0;
+    const totalSkips  = skipBuckets.reduce((a, b) => a + b, 0);
+    const insta       = skipBuckets[0] + skipBuckets[1];
     const engagedSkip = totalSkips - insta;
-    const completed = c.shown * (c.finish_pct || 0) / 100;
-    const completedRounded = Math.round(completed);
-    const inconclusive = Math.max(0, c.shown - totalSkips - completedRounded);
+    const resolved    = totalSkips + completed;
+    const denom       = Math.max(c.shown, resolved);
+    const inconclusive = Math.max(0, denom - resolved);
     return {
-      level: c.before_level, shown: c.shown,
-      insta, engagedSkip, completed: completedRounded, inconclusive
+      level: c.before_level, shown: c.shown, denom,
+      insta, engagedSkip, completed, inconclusive
     };
   });
 
-  // Aggregate
+  // Aggregate — sum per-row denoms (not just shown) so the aggregate percentages
+  // align with the row-level normalization when shown ≠ resolved on any scene.
   const agg = rows.reduce((a, r) => ({
     shown: a.shown + r.shown,
+    denom: a.denom + r.denom,
     insta: a.insta + r.insta,
     engagedSkip: a.engagedSkip + r.engagedSkip,
     completed: a.completed + r.completed,
     inconclusive: a.inconclusive + r.inconclusive
-  }), { shown: 0, insta: 0, engagedSkip: 0, completed: 0, inconclusive: 0 });
+  }), { shown: 0, denom: 0, insta: 0, engagedSkip: 0, completed: 0, inconclusive: 0 });
 
   const pct = (n, total) => total ? (n / total * 100).toFixed(1) + '%' : '—';
 
@@ -1288,10 +1296,10 @@ new Chart(document.getElementById('ch-segment-time'), {
     rows.forEach(r => {
       const tr = document.createElement('tr');
       tr.innerHTML = `<td>L${r.level}</td><td class="num">${r.shown}</td>` +
-        `<td class="num">${r.insta} (${pct(r.insta, r.shown)})</td>` +
-        `<td class="num">${r.engagedSkip} (${pct(r.engagedSkip, r.shown)})</td>` +
-        `<td class="num">${r.completed} (${pct(r.completed, r.shown)})</td>` +
-        `<td class="num">${r.inconclusive} (${pct(r.inconclusive, r.shown)})</td>`;
+        `<td class="num">${r.insta} (${pct(r.insta, r.denom)})</td>` +
+        `<td class="num">${r.engagedSkip} (${pct(r.engagedSkip, r.denom)})</td>` +
+        `<td class="num">${r.completed} (${pct(r.completed, r.denom)})</td>` +
+        `<td class="num">${r.inconclusive} (${pct(r.inconclusive, r.denom)})</td>`;
       tbody.appendChild(tr);
     });
     // Total row
@@ -1300,10 +1308,10 @@ new Chart(document.getElementById('ch-segment-time'), {
     trT.style.fontWeight = '700';
     trT.style.background = '#F9FAFB';
     trT.innerHTML = `<td>TOTAL</td><td class="num">${agg.shown}</td>` +
-      `<td class="num">${agg.insta} (${pct(agg.insta, agg.shown)})</td>` +
-      `<td class="num">${agg.engagedSkip} (${pct(agg.engagedSkip, agg.shown)})</td>` +
-      `<td class="num">${agg.completed} (${pct(agg.completed, agg.shown)})</td>` +
-      `<td class="num">${agg.inconclusive} (${pct(agg.inconclusive, agg.shown)})</td>`;
+      `<td class="num">${agg.insta} (${pct(agg.insta, agg.denom)})</td>` +
+      `<td class="num">${agg.engagedSkip} (${pct(agg.engagedSkip, agg.denom)})</td>` +
+      `<td class="num">${agg.completed} (${pct(agg.completed, agg.denom)})</td>` +
+      `<td class="num">${agg.inconclusive} (${pct(agg.inconclusive, agg.denom)})</td>`;
     tbody.appendChild(trT);
   }
 
@@ -1387,20 +1395,25 @@ new Chart(document.getElementById('ch-segment-time'), {
     return 'rgba(' + r + ',' + g + ',' + b + ',' + (0.4 + 0.4 * intensity) + ')';
   }
 
-  // For each cutscene: cumulative rate at index i = sum(buckets[0..i]) / shown × 100.
+  // For each cutscene: cumulative rate at index i = sum(buckets[0..i]) / denom × 100.
+  // Denom = max(shown, sum-of-buckets) so the L40-style anomaly (resolved>shown by 1)
+  // doesn't push the cumulative "+ Completed" column past 100%.
   const perScene = CUTSCENES.map(c => {
     const dist = CS_SKIP_DIST.find(d => d.lv === c.before_level);
     const buckets = dist ? dist.buckets : [0, 0, 0, 0, 0, 0, 0, 0];
+    const bucketSum = buckets.reduce((a, b) => a + b, 0);
+    const denom = Math.max(c.shown, bucketSum);
     let running = 0;
-    const cumRates = buckets.map(b => { running += b; return safeDiv(running, c.shown) * 100; });
-    return { lv: c.before_level, shown: c.shown, buckets, rates: cumRates };
+    const cumRates = buckets.map(b => { running += b; return safeDiv(running, denom) * 100; });
+    return { lv: c.before_level, shown: c.shown, denom, buckets, rates: cumRates };
   });
 
-  // Aggregate cumulative rates: same logic on summed bucket counts.
+  // Aggregate cumulative rates: sum row-level denoms (handles per-scene anomalies cleanly).
   const totalShown = perScene.reduce((a, r) => a + r.shown, 0);
+  const totalDenom = perScene.reduce((a, r) => a + r.denom, 0);
   const aggBuckets = BUCKET_LABELS.map((_, i) => perScene.reduce((a, r) => a + (r.buckets[i] || 0), 0));
   let aggRunning = 0;
-  const aggRates = aggBuckets.map(b => { aggRunning += b; return safeDiv(aggRunning, totalShown) * 100; });
+  const aggRates = aggBuckets.map(b => { aggRunning += b; return safeDiv(aggRunning, totalDenom) * 100; });
 
   // Table rows: 7 scenes + 1 aggregate
   const tbody = document.querySelector('#skip-rate-table tbody');
@@ -1512,7 +1525,10 @@ new Chart(document.getElementById('ch-segment-time'), {
     return pre;
   }
 
-  // Build per-scene rows
+  // Build per-scene rows.
+  // Denom = max(shown, resolved). When the instrumentation produces more terminal
+  // events than shown events (L40 had +1), we expand the denominator so the four
+  // outcome bands sum to 100% rather than overshooting.
   const sceneRows = CUTSCENES.map(c => {
     const T = MAIN_EVENT_SEC[c.before_level];
     if (T == null) return null;
@@ -1521,35 +1537,39 @@ new Chart(document.getElementById('ch-segment-time'), {
     const skipBuckets = buckets.slice(0, 7);
     const completed = buckets[7] || 0;
     const skipTotal = skipBuckets.reduce((a, b) => a + b, 0);
+    const resolved  = skipTotal + completed;
+    const denom     = Math.max(c.shown, resolved);
     const pre  = preThresholdCount(buckets, T, c.length_sec);
     const post = Math.max(0, skipTotal - pre);
-    const inconclusive = Math.max(0, c.shown - skipTotal - completed);
+    const inconclusive = Math.max(0, denom - resolved);
     return {
       lv: c.before_level,
       length: c.length_sec,
       threshold: T,
-      shown: c.shown,
+      shown: c.shown, denom,
       pre, post, completed, inconclusive
     };
   }).filter(Boolean);
 
-  // Aggregate row (sums across scenes, denominator = total shown)
+  // Aggregate row sums row-level denoms (not just shown) so the L40 anomaly
+  // propagates correctly into the totals.
   const agg = sceneRows.reduce((a, r) => ({
     shown:        a.shown        + r.shown,
+    denom:        a.denom        + r.denom,
     pre:          a.pre          + r.pre,
     post:         a.post         + r.post,
     completed:    a.completed    + r.completed,
     inconclusive: a.inconclusive + r.inconclusive
-  }), { shown: 0, pre: 0, post: 0, completed: 0, inconclusive: 0 });
+  }), { shown: 0, denom: 0, pre: 0, post: 0, completed: 0, inconclusive: 0 });
 
   // ── Table render
   const tbody = document.querySelector('#main-event-skip-table tbody');
   if (tbody) {
     function row(r, label, isAgg) {
-      const prePct  = r.shown ? r.pre          / r.shown * 100 : 0;
-      const postPct = r.shown ? r.post         / r.shown * 100 : 0;
-      const compPct = r.shown ? r.completed    / r.shown * 100 : 0;
-      const incPct  = r.shown ? r.inconclusive / r.shown * 100 : 0;
+      const prePct  = r.denom ? r.pre          / r.denom * 100 : 0;
+      const postPct = r.denom ? r.post         / r.denom * 100 : 0;
+      const compPct = r.denom ? r.completed    / r.denom * 100 : 0;
+      const incPct  = r.denom ? r.inconclusive / r.denom * 100 : 0;
       const trAttr = isAgg ? ' style="border-top:2px solid var(--slate); background:#F9FAFB;"' : '';
       const labelHtml = isAgg ? '<b>' + label + '</b>' : label;
       const lenCell  = isAgg ? '—' : (r.length + 's');
@@ -1577,7 +1597,7 @@ new Chart(document.getElementById('ch-segment-time'), {
       'L' + r.lv + ' (' + r.length + 's, main@' + r.threshold + 's, N=' + r.shown + ')'
     );
     function pctData(field) {
-      return sceneRows.map(r => r.shown ? r[field] / r.shown * 100 : 0);
+      return sceneRows.map(r => r.denom ? r[field] / r.denom * 100 : 0);
     }
     const datasets = [
       { label: 'Missed beat (skipped pre-threshold)', data: pctData('pre'),          backgroundColor: '#DC2626', stack: 'outcome' },
