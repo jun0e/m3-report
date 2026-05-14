@@ -287,8 +287,8 @@
     <p class="lede">Each bar is one cutscene. Color bands show how long users watched before skipping. <b>Red zones (0-3s)</b> = insta-skip / "rejected on sight." <b>Green zones (10s+)</b> = engaged-then-skipped.</p>
 
     <div class="chart-card full" style="margin-bottom:14px;">
-      <h3>Skip-time distribution per cutscene — stacked counts</h3>
-      <div class="meta">"How long did skippers watch before hitting skip?" — buckets 0-1s, 1-3s, 3-5s, 5-10s, 10-20s, 20-30s, 30s+</div>
+      <h3>Outcome distribution per cutscene — 8 buckets (skip-time + completed)</h3>
+      <div class="meta">7 skip-time ranges (red → amber → green) + "Completed" (dark green). Each bar sums to the cutscene's resolved-outcome count (skips + completions). Inconclusive shows are excluded from this view.</div>
       <div class="chart-canvas-wrap tall"><canvas id="ch-skip-dist"></canvas></div>
     </div>
 
@@ -367,7 +367,7 @@
   </section>
 
   <footer>
-    Generated <span id="generated">2026-05-14 00:58:18 UTC</span> · raw data: <a href="./ab-cutscene-analysis.json">ab-cutscene-analysis.json</a> · <a href="./full-data.json">full-data.json</a> · <a href="./report.html">main dashboard</a> · <a href="./ab-cutscene-analysis.html">A/B detail view</a>
+    Generated <span id="generated">2026-05-14 02:03:19 UTC</span> · raw data: <a href="./ab-cutscene-analysis.json">ab-cutscene-analysis.json</a> · <a href="./full-data.json">full-data.json</a> · <a href="./report.html">main dashboard</a> · <a href="./ab-cutscene-analysis.html">A/B detail view</a>
   </footer>
 </main>
 
@@ -855,9 +855,10 @@ const CS_SKIP_DIST = [
       1,
       71,
       53,
-      55
+      55,
+      86
     ],
-    "total": 181
+    "total": 267
   },
   {
     "lv": 5,
@@ -868,9 +869,10 @@ const CS_SKIP_DIST = [
       62,
       25,
       9,
-      4
+      4,
+      43
     ],
-    "total": 119
+    "total": 162
   },
   {
     "lv": 10,
@@ -881,9 +883,10 @@ const CS_SKIP_DIST = [
       43,
       17,
       3,
-      0
+      0,
+      30
     ],
-    "total": 105
+    "total": 135
   },
   {
     "lv": 11,
@@ -894,9 +897,10 @@ const CS_SKIP_DIST = [
       58,
       14,
       7,
-      2
+      2,
+      29
     ],
-    "total": 101
+    "total": 130
   },
   {
     "lv": 21,
@@ -907,9 +911,10 @@ const CS_SKIP_DIST = [
       21,
       6,
       3,
-      2
+      2,
+      19
     ],
-    "total": 78
+    "total": 97
   },
   {
     "lv": 31,
@@ -920,9 +925,10 @@ const CS_SKIP_DIST = [
       11,
       2,
       1,
-      0
+      0,
+      12
     ],
-    "total": 41
+    "total": 53
   },
   {
     "lv": 40,
@@ -933,13 +939,16 @@ const CS_SKIP_DIST = [
       7,
       2,
       1,
-      0
+      0,
+      10
     ],
-    "total": 31
+    "total": 41
   }
 ];
-const BUCKET_LABELS = ['0-1s','1-3s','3-5s','5-10s','10-20s','20-30s','30s+'];
-const BUCKET_COLORS = ['#7F1D1D','#DC2626','#F87171','#FBBF24','#86EFAC','#34D399','#10B981'];
+// 8 buckets: 7 skip-time ranges + 1 "Completed" (no-skip outcome).
+// The 8th bucket sits at the green end as the maximally-engaged outcome.
+const BUCKET_LABELS = ['0-1s','1-3s','3-5s','5-10s','10-20s','20-30s','30s+','Completed'];
+const BUCKET_COLORS = ['#7F1D1D','#DC2626','#F87171','#FBBF24','#86EFAC','#34D399','#10B981','#047857'];
 
 // Stacked bar — skip-time distribution per cutscene
 new Chart(document.getElementById('ch-skip-dist'), {
@@ -959,31 +968,36 @@ new Chart(document.getElementById('ch-skip-dist'), {
         afterLabel: ctx => {
           const tot = CS_SKIP_DIST[ctx.dataIndex].total;
           const pct = tot ? (ctx.parsed.y / tot * 100).toFixed(1) : '0';
-          return pct + '% of skips on this scene';
+          return pct + '% of resolved outcomes on this scene';
         },
         footer: items => {
           const idx = items[0].dataIndex;
-          return 'Total skips on L' + CS_SKIP_DIST[idx].lv + ': ' + CS_SKIP_DIST[idx].total;
+          return 'Total resolved outcomes on L' + CS_SKIP_DIST[idx].lv + ': ' + CS_SKIP_DIST[idx].total + ' (skips + completions)';
         }
       } }
     },
     scales: {
       x: { stacked: true, title: { display: true, text: 'Cutscene (before level)' } },
-      y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Skip event count' } }
+      y: { stacked: true, beginAtZero: true, title: { display: true, text: 'cutscene_shown count (resolved)' } }
     }
   }
 });
 
 // Insta-skip share — % of skips happening in ≤3s
+// Insta-share computed against SKIP-only denominator (sum of first 7 buckets),
+// not against the 8-bucket total (which now includes completions). Preserves
+// the original semantic: "of skips, how many were instant?"
+function skipOnlyTotal(c) { return (c.buckets[0]||0)+(c.buckets[1]||0)+(c.buckets[2]||0)+(c.buckets[3]||0)+(c.buckets[4]||0)+(c.buckets[5]||0)+(c.buckets[6]||0); }
 new Chart(document.getElementById('ch-insta-share'), {
   type: 'bar',
   data: {
     labels: CS_SKIP_DIST.map(c => 'L' + c.lv),
     datasets: [{
       label: '% of skips happening within ≤3s',
-      data: CS_SKIP_DIST.map(c => c.total ? +((c.buckets[0] + c.buckets[1]) / c.total * 100).toFixed(1) : 0),
+      data: CS_SKIP_DIST.map(c => { const t = skipOnlyTotal(c); return t ? +((c.buckets[0] + c.buckets[1]) / t * 100).toFixed(1) : 0; }),
       backgroundColor: CS_SKIP_DIST.map(c => {
-        const pct = c.total ? (c.buckets[0] + c.buckets[1]) / c.total * 100 : 0;
+        const t = skipOnlyTotal(c);
+        const pct = t ? (c.buckets[0] + c.buckets[1]) / t * 100 : 0;
         return pct > 30 ? '#DC2626' : pct > 15 ? '#F59E0B' : '#10B981';
       })
     }]
@@ -992,7 +1006,7 @@ new Chart(document.getElementById('ch-insta-share'), {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: ctx => {
       const c = CS_SKIP_DIST[ctx.dataIndex];
-      return (c.buckets[0] + c.buckets[1]) + ' insta-skips of ' + c.total + ' total';
+      return (c.buckets[0] + c.buckets[1]) + ' insta-skips of ' + skipOnlyTotal(c) + ' total skips';
     } } } },
     scales: {
       y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' }, title: { display: true, text: 'Insta-skip share' } },
@@ -1301,20 +1315,23 @@ new Chart(document.getElementById('ch-segment-time'), {
   set('n-per-arm-2', nPerArm);
   set('meth-n-per-arm', nPerArm);
 
-  // Late-game insta-skip share (last two cutscenes) vs early (first one)
+  // Late-game insta-skip share (last two cutscenes) vs early (first one).
+  // Use SKIP-only denominator (buckets 0..6, excluding the 8th "Completed" bucket).
+  function skipTot(d) { return (d.buckets[0]||0)+(d.buckets[1]||0)+(d.buckets[2]||0)+(d.buckets[3]||0)+(d.buckets[4]||0)+(d.buckets[5]||0)+(d.buckets[6]||0); }
   const lateScenes = sorted.slice(-2);
   let lateInstaShare_skips = 0, lateInstaShare_total = 0;
   lateScenes.forEach(c => {
     const dist = CS_SKIP_DIST.find(d => d.lv === c.before_level);
     if (dist) {
-      lateInstaShare_total += dist.total;
+      lateInstaShare_total += skipTot(dist);
       lateInstaShare_skips += dist.buckets[0] + dist.buckets[1];
     }
   });
   const firstDist = CS_SKIP_DIST.find(d => d.lv === first.before_level);
-  const firstInstaPct = firstDist && firstDist.total ? (firstDist.buckets[0] + firstDist.buckets[1]) / firstDist.total * 100 : 0;
+  const firstSkipTotal = firstDist ? skipTot(firstDist) : 0;
+  const firstInstaPct = firstSkipTotal ? (firstDist.buckets[0] + firstDist.buckets[1]) / firstSkipTotal * 100 : 0;
   const latePctVal = lateInstaShare_total ? (lateInstaShare_skips / lateInstaShare_total * 100) : 0;
-  set('early-insta-share', firstInstaPct.toFixed(1) + '% (' + (firstDist ? firstDist.total : 0) + ' skips)');
+  set('early-insta-share', firstInstaPct.toFixed(1) + '% (' + firstSkipTotal + ' skips)');
   set('late-insta-share',  latePctVal.toFixed(1) + '% (' + lateInstaShare_skips + ' of ' + lateInstaShare_total + ' skips)');
 
   // Update the .vd callout text just in case — already handled by generator regex, but be defensive

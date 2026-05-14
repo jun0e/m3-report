@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-14T00:58:53.212Z",
+    "generated_at": "2026-05-14T02:03:13.888Z",
     "date": "2026-05-12",
     "engagement_threshold_sec": 3,
     "classification_rule": "on-arm user is ENGAGED if any cutscene_completed OR any cutscene_skipped with secondsIntoPlayback > 3s; else INSTA-SKIP; on-arm users with no cutscene events seen → on-no-cutscene; off-arm → off; QA-forced → excluded",
@@ -170,7 +170,8 @@
         "5–10s": 4,
         "10–20s": 46,
         "20–30s": 42,
-        "30s+": 31
+        "30s+": 31,
+        "Completed": 53
       },
       "insta_skip_share_pct": 0.8
     },
@@ -198,7 +199,8 @@
         "5–10s": 50,
         "10–20s": 12,
         "20–30s": 3,
-        "30s+": 4
+        "30s+": 4,
+        "Completed": 19
       },
       "insta_skip_share_pct": 0
     },
@@ -226,7 +228,8 @@
         "5–10s": 24,
         "10–20s": 4,
         "20–30s": 2,
-        "30s+": 0
+        "30s+": 0,
+        "Completed": 18
       },
       "insta_skip_share_pct": 2
     },
@@ -254,7 +257,8 @@
         "5–10s": 33,
         "10–20s": 4,
         "20–30s": 3,
-        "30s+": 0
+        "30s+": 0,
+        "Completed": 13
       },
       "insta_skip_share_pct": 0
     },
@@ -282,7 +286,8 @@
         "5–10s": 3,
         "10–20s": 0,
         "20–30s": 1,
-        "30s+": 1
+        "30s+": 1,
+        "Completed": 10
       },
       "insta_skip_share_pct": 32
     },
@@ -310,7 +315,8 @@
         "5–10s": 2,
         "10–20s": 1,
         "20–30s": 0,
-        "30s+": 0
+        "30s+": 0,
+        "Completed": 3
       },
       "insta_skip_share_pct": 33.3
     },
@@ -338,7 +344,8 @@
         "5–10s": 1,
         "10–20s": 1,
         "20–30s": 0,
-        "30s+": 1
+        "30s+": 1,
+        "Completed": 1
       },
       "insta_skip_share_pct": 50
     }
@@ -350,6 +357,7 @@
     "5–10s",
     "10–20s",
     "20–30s",
-    "30s+"
+    "30s+",
+    "Completed"
   ]
 }
