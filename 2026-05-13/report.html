@@ -388,7 +388,7 @@
 <header class="topbar">
   <div>
     <h1 data-vi="🎮 M3 World — Dashboard Quan sát Alpha">🎮 M3 World — Alpha Observability Dashboard</h1>
-    <div class="meta" data-vi='v3.1 prototype <strong style="color:#fcd34d">· panel-edits đã apply (SHIP-WITH-EDITS, 7.8/10)</strong> · Cập nhật lần cuối: 2026-05-11 · Active cohorts: 4 · Total N: 687'>v3.1 prototype <strong style="color:#fcd34d">· panel-edits applied (SHIP-WITH-EDITS, 7.8/10)</strong> · Last refresh: 2026-05-11 · Active cohorts: 4 · Total N: 687</div>
+    <div class="meta" data-vi='Ngày báo cáo: <strong id="hdr-date">—</strong> · A1 (thiết bị đã log): <strong id="hdr-devices">—</strong>'>Report date: <strong id="hdr-date">—</strong> · A1 (devices logged): <strong id="hdr-devices">—</strong></div>
   </div>
   <div class="filters">
     <select><option data-vi="14 ngày gần nhất ▾">Last 14 days ▾</option><option data-vi="7 ngày gần nhất">Last 7 days</option><option data-vi="30 ngày gần nhất">Last 30 days</option></select>
@@ -1776,7 +1776,20 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
     document.documentElement.lang = lang;
     // Re-render Tab 0 tiles + supporting tiles to pick up _vi fields
     if (typeof rerenderTab0Tiles === 'function') rerenderTab0Tiles();
+    // Re-populate header spans — innerHTML rewrite above wiped any populated values.
+    if (typeof window.populateHeader === 'function') window.populateHeader();
   }
+
+  // Re-fills the header date + A1 spans from cached values. Safe to call before
+  // data arrives (no-op if cache is empty) and again after every language toggle.
+  // Exposed on window so applyData() (a different IIFE) can call it too.
+  window.populateHeader = function populateHeader() {
+    const cache = window.__hdrCache || {};
+    const d = document.getElementById('hdr-date');
+    const dev = document.getElementById('hdr-devices');
+    if (d && cache.date != null) d.textContent = cache.date;
+    if (dev && cache.devices != null) dev.textContent = (+cache.devices).toLocaleString();
+  };
 
   // Snapshot original innerHTML as data-en for elements that have data-vi but no data-en yet
   document.querySelectorAll('[data-vi]:not([data-en])').forEach(el => {
@@ -1859,6 +1872,14 @@ window.rerenderTab0Tiles = rerenderTab0Tiles;
     const meta = data.meta || {};
     const g = data.global || {};
     const srcLabel = meta.source_mode === 'local' ? 'LOCAL DUMP' : 'LIVE MCP';
+
+    // ── Header meta line (date + A1 devices). Cache values so they survive
+    // language-toggle re-renders, which overwrite innerHTML from frozen data-en/data-vi.
+    window.__hdrCache = {
+      date:    meta.target_date || '—',
+      devices: g.total_devices != null ? g.total_devices : 0
+    };
+    if (typeof window.populateHeader === 'function') window.populateHeader();
     showBanner(
       '<span style="font-size:14px;">📊 ' + srcLabel + ' DATA</span> · ' +
       'Date: <b>' + (meta.target_date || '—') + '</b> (VN) · ' +
