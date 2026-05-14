@@ -380,7 +380,49 @@
   </section>
 
   <section>
-    <h2><span class="num">10</span> Methodology + scope</h2>
+    <h2><span class="num">10</span> Skip rate by main event — did users see the story beat?</h2>
+    <p class="lede">Each cutscene has a designated <b>main-event timestamp</b> — the narrative beat where the meaningful story actually lands. A skip <b>before</b> that timestamp means the user missed the point; a skip <b>after</b> means they at least saw the beat before bailing. This converts the raw skip rate into a "missed the story" rate, which is closer to what narrative designers actually care about.</p>
+
+    <div class="callout info">
+      <h4>Methodology</h4>
+      <p>Per-cutscene main-event timestamps are provided as authored config (not derived). Skip-time bucket counts are converted to pre / post-threshold counts via <b>linear interpolation</b> within bucket boundaries (skips in [10–20s] split linearly around an in-bucket threshold). The 30s+ bucket is treated as fully post-threshold since all 7 thresholds fall at ≤24s. <b>Inconclusive</b> shows (no terminal event) are reported separately — they didn't yield a measurable outcome.</p>
+    </div>
+
+    <div class="chart-card full" style="margin-bottom: 14px;">
+      <h3>Per-cutscene outcome split, anchored on main event (100%-stacked)</h3>
+      <div class="meta">Red = <b>missed the beat</b> (skipped before threshold) · amber = saw the beat then skipped · green = completed · grey = inconclusive. Stacks sum to 100% of <code>cutscene_shown</code>.</div>
+      <div class="chart-canvas-wrap tall"><canvas id="ch-main-event-skip"></canvas></div>
+    </div>
+
+    <h4 style="margin: 16px 0 6px; font-size: 13px;">Main-event-skip rate per cutscene + aggregate</h4>
+    <p class="lede" style="margin-bottom: 10px;"><b>Missed beat %</b> is the headline metric: of users who saw the cutscene start, what fraction skipped before the story beat. Lower = better narrative reach. The red heatmap intensifies with the "missed" rate so problem cutscenes pop visually.</p>
+    <div style="overflow-x: auto;">
+      <table class="matrix" id="main-event-skip-table" style="font-size: 11px; margin-bottom: 14px;">
+        <thead>
+          <tr>
+            <th>Cutscene</th>
+            <th class="num">Length</th>
+            <th class="num">Main-event @</th>
+            <th class="num">Missed beat (count)</th>
+            <th class="num">Missed beat %</th>
+            <th class="num">Saw beat then skipped %</th>
+            <th class="num">Completed %</th>
+            <th class="num">Inconclusive %</th>
+            <th class="num">Shown N</th>
+          </tr>
+        </thead>
+        <tbody><!-- populated by JS --></tbody>
+      </table>
+    </div>
+
+    <div class="callout warn">
+      <h4 id="main-event-headline">Reading guide</h4>
+      <p id="main-event-prose">Compare the <b>Missed beat %</b> column to the raw skip rate in Section 4. The gap = users who skipped but DID see the main beat — those are not narrative-rejecters, just impatient finishers. A cutscene where missed-beat% ≈ skip% means most skippers cut out before the beat. A cutscene where missed-beat% &lt;&lt; skip% means designers got the beat in early enough that most "skippers" actually consumed the story.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">11</span> Methodology + scope</h2>
     <p class="lede">For audit and reproduction.</p>
 
     <table class="matrix">
@@ -1424,6 +1466,143 @@ new Chart(document.getElementById('ch-segment-time'), {
         scales: {
           x: { title: { display: true, text: 'Cumulative outcome threshold (resolved within …)' } },
           y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' }, title: { display: true, text: 'Cumulative % of cutscene_shown' } }
+        }
+      }
+    });
+  }
+})();
+
+// ──────────────────────────────────────────────────────────────────────────────
+// MAIN-EVENT-ANCHORED SKIP RATE — Section 10.
+// For each cutscene, pre-threshold skips are estimated via linear interpolation
+// within bucket boundaries. The 30s+ bucket is treated as fully post-threshold
+// (all 7 configured thresholds are ≤24s, so no skip in [30s, ∞) is pre-threshold).
+// ──────────────────────────────────────────────────────────────────────────────
+(function renderMainEventSkipRate() {
+  // Authored per-cutscene main-event timestamps (seconds into playback).
+  // Sourced from level-design config, not derived from telemetry.
+  const MAIN_EVENT_SEC = {
+    1: 24, 5: 20, 10: 15, 11: 17, 21: 21, 31: 16, 40: 20
+  };
+  // Skip-time bucket boundaries (matches BUCKETS in analyze-cutscene-segments.js).
+  // 30s+ bucket given a finite upper bound for interpolation correctness, though
+  // we never hit it with the current threshold set.
+  const BUCKET_BOUNDS = [[0,1],[1,3],[3,5],[5,10],[10,20],[20,30],[30,60]];
+
+  function pct1(v) { return v.toFixed(1) + '%'; }
+  // Heatmap red for "missed beat" rate (0..100). Saturate at 60%.
+  function heatMiss(p) {
+    if (p <= 0) return 'transparent';
+    const intensity = Math.min(1, p / 60);
+    return 'rgba(220,38,38,' + (0.12 + 0.45 * intensity) + ')';
+  }
+  // Linear-interpolated count of skips before threshold T.
+  function preThresholdCount(buckets, T, sceneLen) {
+    const bounds = BUCKET_BOUNDS.map((b, i) =>
+      i === 6 ? [30, Math.max(60, sceneLen || 60)] : b
+    );
+    let pre = 0;
+    for (let i = 0; i < 7; i++) {
+      const [a, b] = bounds[i];
+      const n = buckets[i] || 0;
+      if (b <= T)        pre += n;                   // whole bucket pre
+      else if (a < T)    pre += n * (T - a) / (b - a); // partial pre
+      // else a >= T: whole bucket post
+    }
+    return pre;
+  }
+
+  // Build per-scene rows
+  const sceneRows = CUTSCENES.map(c => {
+    const T = MAIN_EVENT_SEC[c.before_level];
+    if (T == null) return null;
+    const dist = CS_SKIP_DIST.find(d => d.lv === c.before_level);
+    const buckets = dist ? dist.buckets : [0,0,0,0,0,0,0,0];
+    const skipBuckets = buckets.slice(0, 7);
+    const completed = buckets[7] || 0;
+    const skipTotal = skipBuckets.reduce((a, b) => a + b, 0);
+    const pre  = preThresholdCount(buckets, T, c.length_sec);
+    const post = Math.max(0, skipTotal - pre);
+    const inconclusive = Math.max(0, c.shown - skipTotal - completed);
+    return {
+      lv: c.before_level,
+      length: c.length_sec,
+      threshold: T,
+      shown: c.shown,
+      pre, post, completed, inconclusive
+    };
+  }).filter(Boolean);
+
+  // Aggregate row (sums across scenes, denominator = total shown)
+  const agg = sceneRows.reduce((a, r) => ({
+    shown:        a.shown        + r.shown,
+    pre:          a.pre          + r.pre,
+    post:         a.post         + r.post,
+    completed:    a.completed    + r.completed,
+    inconclusive: a.inconclusive + r.inconclusive
+  }), { shown: 0, pre: 0, post: 0, completed: 0, inconclusive: 0 });
+
+  // ── Table render
+  const tbody = document.querySelector('#main-event-skip-table tbody');
+  if (tbody) {
+    function row(r, label, isAgg) {
+      const prePct  = r.shown ? r.pre          / r.shown * 100 : 0;
+      const postPct = r.shown ? r.post         / r.shown * 100 : 0;
+      const compPct = r.shown ? r.completed    / r.shown * 100 : 0;
+      const incPct  = r.shown ? r.inconclusive / r.shown * 100 : 0;
+      const trAttr = isAgg ? ' style="border-top:2px solid var(--slate); background:#F9FAFB;"' : '';
+      const labelHtml = isAgg ? '<b>' + label + '</b>' : label;
+      const lenCell  = isAgg ? '—' : (r.length + 's');
+      const thrCell  = isAgg ? '—' : (r.threshold + 's');
+      return '<tr' + trAttr + '>'
+        + '<td>' + labelHtml + '</td>'
+        + '<td class="num">' + lenCell + '</td>'
+        + '<td class="num">' + thrCell + '</td>'
+        + '<td class="num">' + Math.round(r.pre).toLocaleString() + '</td>'
+        + '<td class="num" style="background:' + heatMiss(prePct) + ';"><b>' + pct1(prePct) + '</b></td>'
+        + '<td class="num">' + pct1(postPct) + '</td>'
+        + '<td class="num">' + pct1(compPct) + '</td>'
+        + '<td class="num">' + pct1(incPct)  + '</td>'
+        + '<td class="num">' + r.shown.toLocaleString() + '</td>'
+        + '</tr>';
+    }
+    sceneRows.forEach(r => tbody.insertAdjacentHTML('beforeend', row(r, 'L' + r.lv, false)));
+    tbody.insertAdjacentHTML('beforeend', row(agg, 'All cutscenes (total)', true));
+  }
+
+  // ── 100%-stacked bar chart
+  const ctx = document.getElementById('ch-main-event-skip');
+  if (ctx) {
+    const labels = sceneRows.map(r =>
+      'L' + r.lv + ' (' + r.length + 's, main@' + r.threshold + 's, N=' + r.shown + ')'
+    );
+    function pctData(field) {
+      return sceneRows.map(r => r.shown ? r[field] / r.shown * 100 : 0);
+    }
+    const datasets = [
+      { label: 'Missed beat (skipped pre-threshold)', data: pctData('pre'),          backgroundColor: '#DC2626', stack: 'outcome' },
+      { label: 'Saw beat — skipped after',            data: pctData('post'),         backgroundColor: '#F59E0B', stack: 'outcome' },
+      { label: 'Completed',                           data: pctData('completed'),    backgroundColor: '#10B981', stack: 'outcome' },
+      { label: 'Inconclusive',                        data: pctData('inconclusive'), backgroundColor: '#9CA3AF', stack: 'outcome' }
+    ];
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { callbacks: { label: c => {
+            const r = sceneRows[c.dataIndex];
+            const fieldMap = ['pre', 'post', 'completed', 'inconclusive'];
+            const count = Math.round(r[fieldMap[c.datasetIndex]]);
+            return c.dataset.label + ': ' + c.parsed.y.toFixed(1) + '% (' + count + ' of ' + r.shown + ')';
+          } } }
+        },
+        scales: {
+          x: { stacked: true, title: { display: true, text: 'Cutscene (length, main-event @, shown N)' } },
+          y: { stacked: true, beginAtZero: true, max: 100, ticks: { callback: v => v + '%' }, title: { display: true, text: '% of cutscene_shown' } }
         }
       }
     });
