@@ -293,28 +293,27 @@
     </div>
 
     <div class="chart-card full" style="margin-bottom:14px;">
-      <h3>Skip rate per bucket (normalized to 100% of shown)</h3>
-      <div class="meta">Each cutscene's bar = 100% of <code>cutscene_shown</code>, decomposed into the 8 outcome buckets + Inconclusive (grey). Cells = % of shown ending in that bucket. The first 7 bands sum to the scene's skip rate.</div>
+      <h3>Cumulative skip rate by time threshold (empirical CDF)</h3>
+      <div class="meta">Each line is one cutscene's CDF — % of <code>cutscene_shown</code> resolved by each cumulative time threshold. Steeper early = users bail fast; flatter = users watch longer. Aggregate (black dashed) = portfolio-wide CDF.</div>
       <div class="chart-canvas-wrap tall"><canvas id="ch-skip-rate-stacked"></canvas></div>
     </div>
 
-    <h4 style="margin: 16px 0 6px; font-size: 13px;">Skip rate per bucket — per-cutscene + aggregate (table)</h4>
-    <p class="lede" style="margin-bottom: 10px;">Each cell = bucket count ÷ shown count. Row sum of cols 1-7 = scene's skip rate (matches existing <code>skip_pct</code>). Col 8 = scene's completion rate. Col 9 (Inconclusive) = 100% − resolved%. Final two columns are sanity checks: skip-row-total should match Section 4's reported per-scene skip rate.</p>
+    <h4 style="margin: 16px 0 6px; font-size: 13px;">Cumulative skip rate by time threshold — per-cutscene + aggregate (table)</h4>
+    <p class="lede" style="margin-bottom: 10px;">Each cell = cumulative % of <code>cutscene_shown</code> resolved by that time threshold (running sum, not exact-bucket). Col 7 (<b>Any skip</b>) = scene's total skip rate — should match Section 4's <code>skip_pct</code>. Col 8 (<b>+ Completed</b>) folds in finishers = total resolved rate. Col 9 (<b>Inconclusive</b>) = 100% − col 8 (no telemetry outcome).</p>
     <div style="overflow-x: auto;">
       <table class="matrix" id="skip-rate-table" style="font-size: 11px; margin-bottom: 14px;">
         <thead>
           <tr>
             <th>Cutscene</th>
-            <th class="num">0-1s</th>
-            <th class="num">1-3s</th>
-            <th class="num">3-5s</th>
-            <th class="num">5-10s</th>
-            <th class="num">10-20s</th>
-            <th class="num">20-30s</th>
-            <th class="num">30s+</th>
-            <th class="num">Completed</th>
+            <th class="num">≤1s</th>
+            <th class="num">≤3s</th>
+            <th class="num">≤5s</th>
+            <th class="num">≤10s</th>
+            <th class="num">≤20s</th>
+            <th class="num">≤30s</th>
+            <th class="num">Any skip</th>
+            <th class="num">+ Completed</th>
             <th class="num">Inconclusive</th>
-            <th class="num">Σ skip%</th>
             <th class="num">Shown N</th>
           </tr>
         </thead>
@@ -1329,56 +1328,50 @@ new Chart(document.getElementById('ch-segment-time'), {
 })();
 
 // ──────────────────────────────────────────────────────────────────────────────
-// SKIP RATE PER BUCKET — table + 100%-stacked chart (Section 8 extension).
-// Denominator = cutscene_shown for each scene. Row sums equal resolved-outcome rate;
-// Inconclusive band fills the gap to 100%.
+// CUMULATIVE SKIP RATE BY TIME THRESHOLD — table + stepped-line CDF chart.
+// Each cell / each line-point = running sum of bucket counts up through that
+// threshold, divided by cutscene_shown. Col 7 (Any skip) = total skip rate;
+// Col 8 (+ Completed) = total resolved rate; Inconclusive = 100% − col 8.
 // ──────────────────────────────────────────────────────────────────────────────
 (function renderSkipRatePerBucket() {
   function safeDiv(a, b) { return b ? a / b : 0; }
   function pct1(v) { return v.toFixed(1) + '%'; }
-  // Heatmap color for a percent value (0..100). Light → dark red.
+  // Heatmap color for a cumulative percent (0..100). Saturates at 80% since
+  // cumulative values run much higher than per-bucket exact values.
   function heatColor(p) {
     if (p <= 0) return 'transparent';
-    const intensity = Math.min(1, p / 30);  // saturate at 30% rate
+    const intensity = Math.min(1, p / 80);
     const r = 254, g = Math.round(226 - 158 * intensity), b = Math.round(226 - 198 * intensity);
     return 'rgba(' + r + ',' + g + ',' + b + ',' + (0.4 + 0.4 * intensity) + ')';
   }
 
-  // For each cutscene, derive bucket counts + shown count.
-  // CUTSCENES has shown; CS_SKIP_DIST has the 8 bucket counts (7 skip + Completed).
+  // For each cutscene: cumulative rate at index i = sum(buckets[0..i]) / shown × 100.
   const perScene = CUTSCENES.map(c => {
     const dist = CS_SKIP_DIST.find(d => d.lv === c.before_level);
     const buckets = dist ? dist.buckets : [0, 0, 0, 0, 0, 0, 0, 0];
-    return {
-      lv: c.before_level,
-      shown: c.shown,
-      buckets,
-      // rate per bucket as % of shown
-      rates: buckets.map(b => safeDiv(b, c.shown) * 100)
-    };
+    let running = 0;
+    const cumRates = buckets.map(b => { running += b; return safeDiv(running, c.shown) * 100; });
+    return { lv: c.before_level, shown: c.shown, buckets, rates: cumRates };
   });
 
-  // Aggregate: sum bucket counts across all scenes, divide by total shown
+  // Aggregate cumulative rates: same logic on summed bucket counts.
   const totalShown = perScene.reduce((a, r) => a + r.shown, 0);
   const aggBuckets = BUCKET_LABELS.map((_, i) => perScene.reduce((a, r) => a + (r.buckets[i] || 0), 0));
-  const aggRates = aggBuckets.map(b => safeDiv(b, totalShown) * 100);
+  let aggRunning = 0;
+  const aggRates = aggBuckets.map(b => { aggRunning += b; return safeDiv(aggRunning, totalShown) * 100; });
 
   // Table rows: 7 scenes + 1 aggregate
   const tbody = document.querySelector('#skip-rate-table tbody');
   if (tbody) {
     function rowCells(label, rates, shown, isAggregate) {
-      // First 7 = skip-time bins; 8th = Completed; 9th = Inconclusive (100 - resolved)
-      const resolved = rates.reduce((a, b) => a + b, 0);
+      // rates[7] (last) = total resolved (cumulative through Completed)
+      const resolved = rates[rates.length - 1] || 0;
       const inconclusive = Math.max(0, 100 - resolved);
-      const sumSkipPct = rates.slice(0, 7).reduce((a, b) => a + b, 0);
-      const cells = rates.map(r => {
-        return '<td class="num" style="background:' + heatColor(r) + ';">' + pct1(r) + '</td>';
-      }).join('');
+      const cells = rates.map(r => '<td class="num" style="background:' + heatColor(r) + ';">' + pct1(r) + '</td>').join('');
       const incCell = '<td class="num" style="background:rgba(156,163,175,0.18);">' + pct1(inconclusive) + '</td>';
-      const sumCell = '<td class="num"><b>' + pct1(sumSkipPct) + '</b></td>';
       const shownCell = '<td class="num">' + shown.toLocaleString() + '</td>';
       const labelCell = '<td>' + (isAggregate ? '<b>' + label + '</b>' : label) + '</td>';
-      return '<tr' + (isAggregate ? ' style="border-top:2px solid var(--slate); background:#F9FAFB;"' : '') + '>' + labelCell + cells + incCell + sumCell + shownCell + '</tr>';
+      return '<tr' + (isAggregate ? ' style="border-top:2px solid var(--slate); background:#F9FAFB;"' : '') + '>' + labelCell + cells + incCell + shownCell + '</tr>';
     }
 
     perScene.forEach(s => {
@@ -1387,41 +1380,50 @@ new Chart(document.getElementById('ch-segment-time'), {
     tbody.insertAdjacentHTML('beforeend', rowCells('All cutscenes (total)', aggRates, totalShown, true));
   }
 
-  // 100%-stacked bar chart: same data, visual form
-  const stackedCtx = document.getElementById('ch-skip-rate-stacked');
-  if (stackedCtx) {
-    const inconclusiveBand = perScene.map(s => Math.max(0, 100 - s.rates.reduce((a, b) => a + b, 0)));
-    const datasets = BUCKET_LABELS.map((label, i) => ({
-      label,
-      data: perScene.map(s => s.rates[i] || 0),
-      backgroundColor: BUCKET_COLORS[i],
-      stack: 'outcome'
-    })).concat([{
-      label: 'Inconclusive',
-      data: inconclusiveBand,
-      backgroundColor: '#9CA3AF',
-      stack: 'outcome'
-    }]);
+  // Stepped-line CDF chart: x = cumulative threshold, y = cumulative %
+  const cdfCtx = document.getElementById('ch-skip-rate-stacked');
+  if (cdfCtx) {
+    const sceneColors = ['#DC2626', '#EA580C', '#D97706', '#65A30D', '#0891B2', '#2563EB', '#7C3AED'];
+    const cdfLabels = ['≤1s', '≤3s', '≤5s', '≤10s', '≤20s', '≤30s', 'Any skip', '+ Completed'];
 
-    new Chart(stackedCtx, {
-      type: 'bar',
-      data: { labels: perScene.map(s => 'L' + s.lv + ' (N=' + s.shown + ')'), datasets },
+    const datasets = perScene.map((s, i) => ({
+      label: 'L' + s.lv + ' (N=' + s.shown + ')',
+      data: s.rates,
+      borderColor: sceneColors[i % sceneColors.length],
+      backgroundColor: sceneColors[i % sceneColors.length],
+      fill: false,
+      stepped: true,
+      tension: 0,
+      borderWidth: 2,
+      pointRadius: 3,
+      pointHoverRadius: 5
+    }));
+    datasets.push({
+      label: 'All cutscenes (total)',
+      data: aggRates,
+      borderColor: '#111827',
+      backgroundColor: '#111827',
+      fill: false,
+      stepped: true,
+      tension: 0,
+      borderWidth: 3,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      borderDash: [6, 4]
+    });
+
+    new Chart(cdfCtx, {
+      type: 'line',
+      data: { labels: cdfLabels, datasets },
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
           legend: { position: 'bottom' },
-          tooltip: { callbacks: { label: ctx => {
-            const sceneIdx = ctx.dataIndex;
-            const scene = perScene[sceneIdx];
-            const bucketIdx = ctx.datasetIndex;
-            const isInconclusive = bucketIdx === BUCKET_LABELS.length;
-            const count = isInconclusive ? Math.max(0, scene.shown - scene.buckets.reduce((a, b) => a + b, 0)) : scene.buckets[bucketIdx];
-            return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '% (' + count + ' of ' + scene.shown + ')';
-          } } }
+          tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%' } }
         },
         scales: {
-          x: { stacked: true, title: { display: true, text: 'Cutscene (before level, with shown N)' } },
-          y: { stacked: true, beginAtZero: true, max: 100, ticks: { callback: v => v + '%' }, title: { display: true, text: '% of cutscene_shown' } }
+          x: { title: { display: true, text: 'Cumulative outcome threshold (resolved within …)' } },
+          y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' }, title: { display: true, text: 'Cumulative % of cutscene_shown' } }
         }
       }
     });
