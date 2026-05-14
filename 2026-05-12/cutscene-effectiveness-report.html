@@ -292,6 +292,36 @@
       <div class="chart-canvas-wrap tall"><canvas id="ch-skip-dist"></canvas></div>
     </div>
 
+    <div class="chart-card full" style="margin-bottom:14px;">
+      <h3>Skip rate per bucket (normalized to 100% of shown)</h3>
+      <div class="meta">Each cutscene's bar = 100% of <code>cutscene_shown</code>, decomposed into the 8 outcome buckets + Inconclusive (grey). Cells = % of shown ending in that bucket. The first 7 bands sum to the scene's skip rate.</div>
+      <div class="chart-canvas-wrap tall"><canvas id="ch-skip-rate-stacked"></canvas></div>
+    </div>
+
+    <h4 style="margin: 16px 0 6px; font-size: 13px;">Skip rate per bucket — per-cutscene + aggregate (table)</h4>
+    <p class="lede" style="margin-bottom: 10px;">Each cell = bucket count ÷ shown count. Row sum of cols 1-7 = scene's skip rate (matches existing <code>skip_pct</code>). Col 8 = scene's completion rate. Col 9 (Inconclusive) = 100% − resolved%. Final two columns are sanity checks: skip-row-total should match Section 4's reported per-scene skip rate.</p>
+    <div style="overflow-x: auto;">
+      <table class="matrix" id="skip-rate-table" style="font-size: 11px; margin-bottom: 14px;">
+        <thead>
+          <tr>
+            <th>Cutscene</th>
+            <th class="num">0-1s</th>
+            <th class="num">1-3s</th>
+            <th class="num">3-5s</th>
+            <th class="num">5-10s</th>
+            <th class="num">10-20s</th>
+            <th class="num">20-30s</th>
+            <th class="num">30s+</th>
+            <th class="num">Completed</th>
+            <th class="num">Inconclusive</th>
+            <th class="num">Σ skip%</th>
+            <th class="num">Shown N</th>
+          </tr>
+        </thead>
+        <tbody><!-- populated by JS --></tbody>
+      </table>
+    </div>
+
     <div class="grid2">
       <div class="chart-card">
         <h3>Insta-skip share per cutscene</h3>
@@ -1295,6 +1325,106 @@ new Chart(document.getElementById('ch-segment-time'), {
     lateWarn.innerHTML = '<b>Early-game (L1-L11):</b> ' + earlyInsta + ' of ' + earlyShown + ' shows were insta-rejected (' + pct(earlyInsta, earlyShown) + ').<br>' +
       '<b>Late-game (L21+):</b> ' + lateInsta + ' of ' + lateShown + ' shows were insta-rejected (' + pct(lateInsta, lateShown) + ').<br>' +
       'The cold-open earns near-universal attention; later scenes get pattern-matched as "more story, skip it." Late-game narrative needs either much shorter runtime or a different framing trigger to earn the same patience.';
+  }
+})();
+
+// ──────────────────────────────────────────────────────────────────────────────
+// SKIP RATE PER BUCKET — table + 100%-stacked chart (Section 8 extension).
+// Denominator = cutscene_shown for each scene. Row sums equal resolved-outcome rate;
+// Inconclusive band fills the gap to 100%.
+// ──────────────────────────────────────────────────────────────────────────────
+(function renderSkipRatePerBucket() {
+  function safeDiv(a, b) { return b ? a / b : 0; }
+  function pct1(v) { return v.toFixed(1) + '%'; }
+  // Heatmap color for a percent value (0..100). Light → dark red.
+  function heatColor(p) {
+    if (p <= 0) return 'transparent';
+    const intensity = Math.min(1, p / 30);  // saturate at 30% rate
+    const r = 254, g = Math.round(226 - 158 * intensity), b = Math.round(226 - 198 * intensity);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + (0.4 + 0.4 * intensity) + ')';
+  }
+
+  // For each cutscene, derive bucket counts + shown count.
+  // CUTSCENES has shown; CS_SKIP_DIST has the 8 bucket counts (7 skip + Completed).
+  const perScene = CUTSCENES.map(c => {
+    const dist = CS_SKIP_DIST.find(d => d.lv === c.before_level);
+    const buckets = dist ? dist.buckets : [0, 0, 0, 0, 0, 0, 0, 0];
+    return {
+      lv: c.before_level,
+      shown: c.shown,
+      buckets,
+      // rate per bucket as % of shown
+      rates: buckets.map(b => safeDiv(b, c.shown) * 100)
+    };
+  });
+
+  // Aggregate: sum bucket counts across all scenes, divide by total shown
+  const totalShown = perScene.reduce((a, r) => a + r.shown, 0);
+  const aggBuckets = BUCKET_LABELS.map((_, i) => perScene.reduce((a, r) => a + (r.buckets[i] || 0), 0));
+  const aggRates = aggBuckets.map(b => safeDiv(b, totalShown) * 100);
+
+  // Table rows: 7 scenes + 1 aggregate
+  const tbody = document.querySelector('#skip-rate-table tbody');
+  if (tbody) {
+    function rowCells(label, rates, shown, isAggregate) {
+      // First 7 = skip-time bins; 8th = Completed; 9th = Inconclusive (100 - resolved)
+      const resolved = rates.reduce((a, b) => a + b, 0);
+      const inconclusive = Math.max(0, 100 - resolved);
+      const sumSkipPct = rates.slice(0, 7).reduce((a, b) => a + b, 0);
+      const cells = rates.map(r => {
+        return '<td class="num" style="background:' + heatColor(r) + ';">' + pct1(r) + '</td>';
+      }).join('');
+      const incCell = '<td class="num" style="background:rgba(156,163,175,0.18);">' + pct1(inconclusive) + '</td>';
+      const sumCell = '<td class="num"><b>' + pct1(sumSkipPct) + '</b></td>';
+      const shownCell = '<td class="num">' + shown.toLocaleString() + '</td>';
+      const labelCell = '<td>' + (isAggregate ? '<b>' + label + '</b>' : label) + '</td>';
+      return '<tr' + (isAggregate ? ' style="border-top:2px solid var(--slate); background:#F9FAFB;"' : '') + '>' + labelCell + cells + incCell + sumCell + shownCell + '</tr>';
+    }
+
+    perScene.forEach(s => {
+      tbody.insertAdjacentHTML('beforeend', rowCells('L' + s.lv, s.rates, s.shown, false));
+    });
+    tbody.insertAdjacentHTML('beforeend', rowCells('All cutscenes (total)', aggRates, totalShown, true));
+  }
+
+  // 100%-stacked bar chart: same data, visual form
+  const stackedCtx = document.getElementById('ch-skip-rate-stacked');
+  if (stackedCtx) {
+    const inconclusiveBand = perScene.map(s => Math.max(0, 100 - s.rates.reduce((a, b) => a + b, 0)));
+    const datasets = BUCKET_LABELS.map((label, i) => ({
+      label,
+      data: perScene.map(s => s.rates[i] || 0),
+      backgroundColor: BUCKET_COLORS[i],
+      stack: 'outcome'
+    })).concat([{
+      label: 'Inconclusive',
+      data: inconclusiveBand,
+      backgroundColor: '#9CA3AF',
+      stack: 'outcome'
+    }]);
+
+    new Chart(stackedCtx, {
+      type: 'bar',
+      data: { labels: perScene.map(s => 'L' + s.lv + ' (N=' + s.shown + ')'), datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { callbacks: { label: ctx => {
+            const sceneIdx = ctx.dataIndex;
+            const scene = perScene[sceneIdx];
+            const bucketIdx = ctx.datasetIndex;
+            const isInconclusive = bucketIdx === BUCKET_LABELS.length;
+            const count = isInconclusive ? Math.max(0, scene.shown - scene.buckets.reduce((a, b) => a + b, 0)) : scene.buckets[bucketIdx];
+            return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '% (' + count + ' of ' + scene.shown + ')';
+          } } }
+        },
+        scales: {
+          x: { stacked: true, title: { display: true, text: 'Cutscene (before level, with shown N)' } },
+          y: { stacked: true, beginAtZero: true, max: 100, ticks: { callback: v => v + '%' }, title: { display: true, text: '% of cutscene_shown' } }
+        }
+      }
+    });
   }
 })();
 
