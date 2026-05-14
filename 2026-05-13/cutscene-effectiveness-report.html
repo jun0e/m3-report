@@ -130,34 +130,8 @@
     <h2><span class="num">2</span> The key metric</h2>
     <p class="lede">"Sessions per user" and "median session length" can disagree if the underlying distribution is skewed. "Total session time per user per day" is the right single number for engagement intensity — it captures depth × frequency in one metric.</p>
 
-    <div class="headline-grid">
-      <div class="headline-tile starred">
-        <div class="label">Total session time / user / day</div>
-        <div class="v">+21.5%</div>
-        <div class="sub"><b>27.09 min/user/day</b> (on)<br>vs <b>22.29 min/user/day</b> (off)<br>Delta: +4.80 min/user</div>
-        <span class="verdict">PRO · headline signal</span>
-      </div>
-
-      <div class="headline-tile pro">
-        <div class="label">Sessions / user / day</div>
-        <div class="v">+25.5%</div>
-        <div class="sub">2.07 vs 1.65 sessions/user<br>Cutscene users return more often</div>
-        <span class="verdict">PRO</span>
-      </div>
-
-      <div class="headline-tile neutral">
-        <div class="label">Mean session length</div>
-        <div class="v">+0.7 min</div>
-        <div class="sub">15.0 min (on) vs 14.3 min (off)<br>Essentially equal once retries are averaged</div>
-        <span class="verdict">≈ NEUTRAL</span>
-      </div>
-
-      <div class="headline-tile pro">
-        <div class="label">Boss win rate</div>
-        <div class="v">+3.8pp</div>
-        <div class="sub">93.7% (on) vs 89.9% (off)<br>Engagement correlates with skill OR selection</div>
-        <span class="verdict">PRO · with caveat</span>
-      </div>
+    <div class="headline-grid" id="headline-tiles">
+      <!-- Populated by JS from ON/OFF — never hardcoded per the no-hardcoded-sample-numbers rule -->
     </div>
 
     <div class="callout info" style="margin-top: 18px;">
@@ -283,11 +257,11 @@
     <p class="lede">Splitting the "on" arm by whether users <i>gave cutscenes a chance</i> (≥1 completion OR ≥1 skip after >3s) vs <i>insta-skipped</i> (every skip ≤3s). The engaged segment isolates the actual wedge effect; the insta-skip segment shows what the wedge looks like when narrative is rejected outright.</p>
 
     <div class="callout pass">
-      <h4>✓ Engaged-on segment shows a LARGER wedge effect than the aggregate</h4>
-      <p>Within the "on" arm, the 163 users who engaged with at least one cutscene play <b>+32% more total minutes per user per day</b> (29.39 vs 22.29) than the "off" holdout — significantly above the +21.5% aggregate-"on" effect. The 10 insta-skip users were dragging the average down. <b>This is the cleanest read of the narrative wedge to date.</b></p>
+      <h4 id="seg-headline">✓ Engaged-on segment vs holdout — data-driven verdict</h4>
+      <p id="seg-headline-detail">Within the "on" arm, engaged users (≥1 finish OR skip after &gt;3s) are isolated and compared to the "off" holdout. Numbers below come from inlined segment data.</p>
     </div>
 
-    <table class="matrix" style="margin-bottom:18px;">
+    <table class="matrix" id="segments-table" style="margin-bottom:18px;">
       <thead>
         <tr>
           <th>Segment</th>
@@ -300,54 +274,13 @@
           <th>Reading</th>
         </tr>
       </thead>
-      <tbody>
-        <tr style="background:#ECFEFF;">
-          <td><b>on-engaged</b><br><span style="font-size:11px;color:var(--gray-500);">≥1 finish OR skip after &gt;3s</span></td>
-          <td class="num"><b>163</b></td>
-          <td class="num pro"><b>2.16</b></td>
-          <td class="num pro"><b>29.39 min</b></td>
-          <td class="num">6.1%</td>
-          <td class="num pro">105.8</td>
-          <td class="num">0.091</td>
-          <td><span class="pill pro">+32% engagement vs off — the wedge effect</span></td>
-        </tr>
-        <tr>
-          <td><b>on-insta-skip</b><br><span style="font-size:11px;color:var(--gray-500);">all skips ≤3s</span></td>
-          <td class="num">10</td>
-          <td class="num">1.70</td>
-          <td class="num anti">0.11 min</td>
-          <td class="num">0%</td>
-          <td class="num">0</td>
-          <td class="num">0.000</td>
-          <td><span class="pill anti">Self-select out: barely played at all</span></td>
-        </tr>
-        <tr>
-          <td>on-no-cutscene<br><span style="font-size:11px;color:var(--gray-500);">on-arm but no cutscene seen yet</span></td>
-          <td class="num">6</td>
-          <td class="num">1.67</td>
-          <td class="num">9.53 min</td>
-          <td class="num">0%</td>
-          <td class="num">0</td>
-          <td class="num">0.000</td>
-          <td><span class="pill neutral">Edge case · not enough exposure to classify</span></td>
-        </tr>
-        <tr style="background:#F9FAFB;">
-          <td><b>off (holdout)</b><br><span style="font-size:11px;color:var(--gray-500);">cutscenes disabled — A/B reference</span></td>
-          <td class="num">193</td>
-          <td class="num">1.70</td>
-          <td class="num">22.29 min</td>
-          <td class="num">6.2%</td>
-          <td class="num">100.8</td>
-          <td class="num">0.069</td>
-          <td><span class="pill neutral">Baseline (no narrative exposure)</span></td>
-        </tr>
-      </tbody>
+      <tbody><!-- populated by JS from FULL_SEGMENTS inlined data --></tbody>
     </table>
 
     <div class="callout info">
       <h4>What this means about the BR23 prior</h4>
-      <p>BR23 found that in mobile games, narrative consumption does <i>not</i> correlate with retention/monetization at the population level. Our finding is consistent with that: when you average everyone in the "on" arm (including 10 insta-skippers and 6 no-cutscene users), the effect dilutes to +21.5%. But when you isolate the <i>actual narrative-consumers</i> (the 163 engaged), the effect rises to +32%. The wedge works for the audience that wants it — and that audience self-selects fast (within 3 seconds of the first cutscene).</p>
-      <p style="margin-top:10px;"><b>Strategic implication</b>: don't optimize for forcing the 10 insta-skippers to watch. Optimize for the 91% who already engage. Possibly add a one-time "skip all cutscenes?" toggle after the first insta-skip — segment the cohort by stated preference, not by hashed bucket.</p>
+      <p id="br23-narrative">BR23 found that in mobile games, narrative consumption does <i>not</i> correlate with retention/monetization at the population level. The numbers above are the per-date read against that prior.</p>
+      <p style="margin-top:10px;"><b>Strategic implication</b>: don't optimize for forcing insta-skippers to watch. Optimize for the cohort that already engages — and segment by stated preference, not by hashed bucket.</p>
     </div>
 
     <h3 style="margin-top:24px;">Per-cutscene skip-time distribution (stacked)</h3>
@@ -553,23 +486,212 @@ const CUTSCENES = [
   }
 ];
 
+// Full per-segment data — feeds Section 8 segments table at render time.
+const FULL_SEGMENTS = {
+  "on-engaged": {
+    "label": "on-engaged",
+    "users": 287,
+    "sessions_per_user": 1.96,
+    "total_session_minutes_per_user": 31.87,
+    "l50_reach_pct": 8,
+    "gold_extra_move_per_user": 130.3,
+    "abandon_per_session": 0.053
+  },
+  "on-insta-skip": {
+    "label": "on-insta-skip",
+    "users": 14,
+    "sessions_per_user": 1.43,
+    "total_session_minutes_per_user": 10.51,
+    "l50_reach_pct": 0,
+    "gold_extra_move_per_user": 114.3,
+    "abandon_per_session": 0
+  },
+  "on-no-cutscene": {
+    "label": "on-no-cutscene",
+    "users": 19,
+    "sessions_per_user": 1.26,
+    "total_session_minutes_per_user": 7.77,
+    "l50_reach_pct": 31.6,
+    "gold_extra_move_per_user": 26.3,
+    "abandon_per_session": 0.583
+  },
+  "off": {
+    "label": "off",
+    "users": 343,
+    "sessions_per_user": 1.75,
+    "total_session_minutes_per_user": 28.57,
+    "l50_reach_pct": 12,
+    "gold_extra_move_per_user": 131.5,
+    "abandon_per_session": 0.055
+  }
+};
+
 document.getElementById('generated').textContent = '2026-05-13 UTC · pipeline v2 + ABTest holdout';
+
+// ──────────────────────────────────────────────────────────────────────────────
+// HEADLINE TILES (Section 2) — fully data-driven from ON/OFF, never hardcoded.
+// Per the no-hardcoded-sample-numbers rule: any display number that reflects underlying
+// data must be derived from that data at render time.
+// ──────────────────────────────────────────────────────────────────────────────
+(function renderHeadlineTiles() {
+  function pctDelta(a, b) { return b ? ((a / b - 1) * 100) : null; }
+  function fmtPct(v) { if (v == null || isNaN(v)) return '—'; return (v >= 0 ? '+' : '') + v.toFixed(1) + '%'; }
+  function fmtPp(a, b) { if (a == null || b == null) return '—'; const d = a - b; return (d >= 0 ? '+' : '') + d.toFixed(1) + 'pp'; }
+  function fmtMinDelta(a, b) { if (a == null || b == null) return '—'; const d = a - b; return (d >= 0 ? '+' : '') + d.toFixed(2) + ' min/user'; }
+  function kindForPct(pct) { if (pct == null || isNaN(pct)) return 'neutral'; if (Math.abs(pct) < 2) return 'neutral'; return pct > 0 ? 'pro' : 'anti'; }
+  function kindForPp(d) { if (d == null) return 'neutral'; if (Math.abs(d) < 0.5) return 'neutral'; return d > 0 ? 'pro' : 'anti'; }
+  function verdictLabel(kind, suffix) { const map = { pro: 'PRO', anti: 'ANTI', neutral: '≈ NEUTRAL' }; return (map[kind] || 'NEUTRAL') + (suffix ? ' · ' + suffix : ''); }
+
+  const totalTimeDeltaPct = pctDelta(ON.total_session_minutes_per_user, OFF.total_session_minutes_per_user);
+  const sessionsDeltaPct  = pctDelta(ON.sessions_per_user, OFF.sessions_per_user);
+  const meanLenDelta      = ON.mean_session_len_min - OFF.mean_session_len_min;
+  const meanLenDeltaPct   = pctDelta(ON.mean_session_len_min, OFF.mean_session_len_min);
+  const bossPp            = ON.boss_win_rate_pct - OFF.boss_win_rate_pct;
+
+  const tiles = [
+    {
+      starred: true,
+      label: 'Total session time / user / day',
+      v: fmtPct(totalTimeDeltaPct),
+      sub: '<b>' + (ON.total_session_minutes_per_user || 0).toFixed(2) + ' min/user/day</b> (on)<br>vs <b>' + (OFF.total_session_minutes_per_user || 0).toFixed(2) + ' min/user/day</b> (off)<br>Δ: ' + fmtMinDelta(ON.total_session_minutes_per_user, OFF.total_session_minutes_per_user),
+      kind: kindForPct(totalTimeDeltaPct),
+      verdict: verdictLabel(kindForPct(totalTimeDeltaPct), 'headline signal')
+    },
+    {
+      label: 'Sessions / user / day',
+      v: fmtPct(sessionsDeltaPct),
+      sub: (ON.sessions_per_user || 0).toFixed(2) + ' vs ' + (OFF.sessions_per_user || 0).toFixed(2) + ' sessions/user<br>' + (sessionsDeltaPct > 0 ? 'Cutscene users return more often' : sessionsDeltaPct < 0 ? 'Cutscene users return less often' : 'Return frequency is essentially equal'),
+      kind: kindForPct(sessionsDeltaPct),
+      verdict: verdictLabel(kindForPct(sessionsDeltaPct))
+    },
+    {
+      label: 'Mean session length',
+      v: (meanLenDelta >= 0 ? '+' : '') + meanLenDelta.toFixed(1) + ' min',
+      sub: (ON.mean_session_len_min || 0).toFixed(1) + ' min (on) vs ' + (OFF.mean_session_len_min || 0).toFixed(1) + ' min (off)<br>' + (Math.abs(meanLenDeltaPct) < 5 ? 'Essentially equal once retries are averaged' : meanLenDeltaPct > 0 ? 'Cutscene users have deeper sessions' : 'Cutscene users have shorter sessions'),
+      kind: kindForPct(meanLenDeltaPct),
+      verdict: verdictLabel(kindForPct(meanLenDeltaPct))
+    },
+    {
+      label: 'Boss win rate',
+      v: fmtPp(ON.boss_win_rate_pct, OFF.boss_win_rate_pct),
+      sub: (ON.boss_win_rate_pct || 0) + '% (on) vs ' + (OFF.boss_win_rate_pct || 0) + '% (off)<br>' + (Math.abs(bossPp) < 1 ? 'No skill/selection effect' : bossPp > 0 ? 'Engagement correlates with skill OR selection' : 'Possible inverse selection — investigate'),
+      kind: kindForPp(bossPp),
+      verdict: verdictLabel(kindForPp(bossPp), 'with caveat')
+    }
+  ];
+
+  const grid = document.getElementById('headline-tiles');
+  if (!grid) return;
+  tiles.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'headline-tile' + (t.starred ? ' starred' : '') + ' ' + t.kind;
+    el.innerHTML = `
+      <div class="label">${t.label}</div>
+      <div class="v">${t.v}</div>
+      <div class="sub">${t.sub}</div>
+      <span class="verdict">${t.verdict}</span>
+    `;
+    grid.appendChild(el);
+  });
+})();
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Verdict matrix
 // ──────────────────────────────────────────────────────────────────────────────
+// All delta values computed from inlined ON/OFF data — never hardcoded.
+// Per the no-hardcoded-sample-numbers rule, anything that looks like a "Δ" or "+X%"
+// must be derived at render time from the underlying constants.
+function fmtPctDelta(onv, offv) {
+  if (offv == null || offv === 0 || onv == null) return '—';
+  const d = (onv / offv - 1) * 100;
+  return (d >= 0 ? '+' : '') + d.toFixed(1) + '%';
+}
+function fmtAbsDelta(onv, offv, unit) {
+  if (onv == null || offv == null) return '—';
+  const d = onv - offv;
+  return (d >= 0 ? '+' : '') + d.toFixed(2) + (unit || '');
+}
+function fmtPpDelta(onv, offv) {
+  if (onv == null || offv == null) return '—';
+  const d = onv - offv;
+  return (d >= 0 ? '+' : '') + d.toFixed(1) + 'pp';
+}
+function readingFor(d, anti) {
+  if (Math.abs(d) < 0.5) return 'neutral';
+  if (anti) return d > 0 ? 'anti' : 'pro';
+  return d > 0 ? 'pro' : 'anti';
+}
+
+const csOnSkipPct   = ON.cutscene_shown ? +(ON.cutscene_skipped / ON.cutscene_shown * 100).toFixed(1) : null;
+const csOnFinishPct = ON.cutscene_shown ? +(ON.cutscene_completed / ON.cutscene_shown * 100).toFixed(1) : null;
+
 const matrixRows = [
-  { sig: '⭐ Total session time / user / day', on: ON.total_session_minutes_per_user + ' min', off: OFF.total_session_minutes_per_user + ' min', delta: '+' + (ON.total_session_minutes_per_user - OFF.total_session_minutes_per_user).toFixed(2) + ' min (+21.5%)', reading: 'PRO · headline engagement signal', kind: 'pro' },
-  { sig: 'Sessions per user', on: ON.sessions_per_user, off: OFF.sessions_per_user, delta: '+0.42 (+25.5%)', reading: 'PRO · return frequency', kind: 'pro' },
-  { sig: 'Mean session length', on: ON.mean_session_len_min + ' min', off: OFF.mean_session_len_min + ' min', delta: '+0.7 min', reading: 'NEUTRAL · near-equal once retries averaged', kind: 'neutral' },
-  { sig: 'Median session length', on: ON.median_session_len_min + ' min', off: OFF.median_session_len_min + ' min', delta: '-3.7 min', reading: 'ANTI on its face · but distribution-shape artifact', kind: 'neutral' },
-  { sig: 'Boss win rate', on: ON.boss_win_rate_pct + '%', off: OFF.boss_win_rate_pct + '%', delta: '+3.8pp', reading: 'PRO · or selection effect', kind: 'pro' },
-  { sig: 'Level win rate', on: ON.win_rate_pct + '%', off: OFF.win_rate_pct + '%', delta: '+0.5pp', reading: 'NEUTRAL · no skill confound', kind: 'neutral' },
-  { sig: 'L50 reach', on: ON.l50_reach_pct + '%', off: OFF.l50_reach_pct + '%', delta: '-0.6pp', reading: 'ANTI · within sampling noise at N=10-12', kind: 'anti' },
-  { sig: 'Gold spent on Extra Move / user', on: ON.gold_spent_extra_move_per_user, off: OFF.gold_spent_extra_move_per_user, delta: '-4.4%', reading: 'NEUTRAL · per-user normalized monetization is essentially equal', kind: 'neutral' },
-  { sig: 'Abandon per session', on: ON.lives_lost_abandon_per_session, off: OFF.lives_lost_abandon_per_session, delta: '+25%', reading: 'ANTI · real but small (1 in 12 sessions)', kind: 'anti' },
-  { sig: 'Cutscene skip rate (consumption gate)', on: '71%', off: '—', delta: '—', reading: 'KILL band per v3.1 plan (>60% kill); fix late-game scenes', kind: 'anti' },
-  { sig: 'Cutscene finish rate (consumption gate)', on: '22.9%', off: '—', delta: '—', reading: 'KILL band per v3.1 plan (<40% kill); fix late-game scenes', kind: 'anti' }
+  { sig: '⭐ Total session time / user / day',
+    on:  ON.total_session_minutes_per_user + ' min',
+    off: OFF.total_session_minutes_per_user + ' min',
+    delta: fmtAbsDelta(ON.total_session_minutes_per_user, OFF.total_session_minutes_per_user, ' min') + ' (' + fmtPctDelta(ON.total_session_minutes_per_user, OFF.total_session_minutes_per_user) + ')',
+    reading: 'Headline engagement signal',
+    kind: readingFor(ON.total_session_minutes_per_user - OFF.total_session_minutes_per_user) },
+
+  { sig: 'Sessions per user',
+    on: ON.sessions_per_user, off: OFF.sessions_per_user,
+    delta: fmtAbsDelta(ON.sessions_per_user, OFF.sessions_per_user) + ' (' + fmtPctDelta(ON.sessions_per_user, OFF.sessions_per_user) + ')',
+    reading: 'Return frequency',
+    kind: readingFor(ON.sessions_per_user - OFF.sessions_per_user) },
+
+  { sig: 'Mean session length',
+    on: ON.mean_session_len_min + ' min', off: OFF.mean_session_len_min + ' min',
+    delta: fmtAbsDelta(ON.mean_session_len_min, OFF.mean_session_len_min, ' min'),
+    reading: 'Depth of session',
+    kind: readingFor(ON.mean_session_len_min - OFF.mean_session_len_min) },
+
+  { sig: 'Median session length',
+    on: ON.median_session_len_min + ' min', off: OFF.median_session_len_min + ' min',
+    delta: fmtAbsDelta(ON.median_session_len_min, OFF.median_session_len_min, ' min'),
+    reading: 'Distribution shape · contrast with mean',
+    kind: readingFor(ON.median_session_len_min - OFF.median_session_len_min) },
+
+  { sig: 'Boss win rate',
+    on: ON.boss_win_rate_pct + '%', off: OFF.boss_win_rate_pct + '%',
+    delta: fmtPpDelta(ON.boss_win_rate_pct, OFF.boss_win_rate_pct),
+    reading: 'Skill or selection effect',
+    kind: readingFor(ON.boss_win_rate_pct - OFF.boss_win_rate_pct) },
+
+  { sig: 'Level win rate',
+    on: ON.win_rate_pct + '%', off: OFF.win_rate_pct + '%',
+    delta: fmtPpDelta(ON.win_rate_pct, OFF.win_rate_pct),
+    reading: 'Difficulty/skill check',
+    kind: readingFor(ON.win_rate_pct - OFF.win_rate_pct) },
+
+  { sig: 'L50 reach',
+    on: ON.l50_reach_pct + '%', off: OFF.l50_reach_pct + '%',
+    delta: fmtPpDelta(ON.l50_reach_pct, OFF.l50_reach_pct),
+    reading: 'Funnel reach',
+    kind: readingFor(ON.l50_reach_pct - OFF.l50_reach_pct) },
+
+  { sig: 'Gold spent on Extra Move / user',
+    on: ON.gold_spent_extra_move_per_user, off: OFF.gold_spent_extra_move_per_user,
+    delta: fmtPctDelta(ON.gold_spent_extra_move_per_user, OFF.gold_spent_extra_move_per_user),
+    reading: 'Monetization proxy (Katkoff path)',
+    kind: readingFor(ON.gold_spent_extra_move_per_user - OFF.gold_spent_extra_move_per_user) },
+
+  { sig: 'Abandon per session',
+    on: ON.lives_lost_abandon_per_session, off: OFF.lives_lost_abandon_per_session,
+    delta: fmtPctDelta(ON.lives_lost_abandon_per_session, OFF.lives_lost_abandon_per_session),
+    reading: 'Voluntary mid-level quit',
+    kind: readingFor(ON.lives_lost_abandon_per_session - OFF.lives_lost_abandon_per_session, /*anti=*/true) },
+
+  { sig: 'Cutscene skip rate (consumption gate)',
+    on: (csOnSkipPct !== null ? csOnSkipPct + '%' : '—'), off: '—',
+    delta: '—',
+    reading: csOnSkipPct !== null && csOnSkipPct > 60 ? 'KILL band per v3.1 plan (>60% kill); fix late-game scenes' : 'WARN/PASS — within v3.1 band',
+    kind: csOnSkipPct !== null && csOnSkipPct > 60 ? 'anti' : 'neutral' },
+
+  { sig: 'Cutscene finish rate (consumption gate)',
+    on: (csOnFinishPct !== null ? csOnFinishPct + '%' : '—'), off: '—',
+    delta: '—',
+    reading: csOnFinishPct !== null && csOnFinishPct < 40 ? 'KILL band per v3.1 plan (<40% kill); fix late-game scenes' : 'WARN/PASS — within v3.1 band',
+    kind: csOnFinishPct !== null && csOnFinishPct < 40 ? 'anti' : 'neutral' }
 ];
 const tbody = document.getElementById('matrix-body');
 matrixRows.forEach(r => {
@@ -919,6 +1041,93 @@ new Chart(document.getElementById('ch-segment-time'), {
     scales: { x: { beginAtZero: true, title: { display: true, text: 'minutes per user per day' } } }
   }
 });
+
+// ──────────────────────────────────────────────────────────────────────────────
+// SECTION 8 — Segments table (data-driven from FULL_SEGMENTS)
+// Mirrors what was previously hardcoded HTML rows. Computes derived wedge-lift pill.
+// ──────────────────────────────────────────────────────────────────────────────
+(function renderSegmentsTable() {
+  const tbody = document.querySelector('#segments-table tbody');
+  if (!tbody || typeof FULL_SEGMENTS === 'undefined') return;
+  function pctDelta(a, b) { if (b == null || b === 0 || a == null) return null; return (a / b - 1) * 100; }
+  function fmtPct(v) { if (v == null || isNaN(v)) return '?'; return (v >= 0 ? '+' : '') + v.toFixed(1) + '%'; }
+  function num(v, unit) { if (v == null) return '—'; return (typeof v === 'number' ? v.toFixed(2) : v) + (unit || ''); }
+  function fmtPctVal(v) { if (v == null) return '—'; return v.toFixed(1) + '%'; }
+
+  const off = FULL_SEGMENTS['off'];
+  const eng = FULL_SEGMENTS['on-engaged'];
+  const wedgeLift = pctDelta(eng.total_session_minutes_per_user, off.total_session_minutes_per_user);
+
+  // Update the headline above the table with per-date numbers
+  const head = document.getElementById('seg-headline');
+  const headDetail = document.getElementById('seg-headline-detail');
+  if (head) {
+    const sign = wedgeLift == null ? '?' : wedgeLift > 0 ? '✓' : '⚠';
+    const direction = wedgeLift == null ? 'TBD' : wedgeLift > 0 ? 'engaged-on outperforms off' : 'engaged-on UNDERPERFORMS off';
+    head.textContent = sign + ' Engaged-on vs holdout — ' + direction + ' (Δ ' + fmtPct(wedgeLift) + ')';
+  }
+  if (headDetail) {
+    headDetail.innerHTML = 'Within the "on" arm, the <b>' + eng.users + ' engaged users</b> who watched ≥1 cutscene past 3s (or completed any) are isolated. They average <b>' + num(eng.total_session_minutes_per_user, ' min/user/day') + '</b> vs the holdout\'s <b>' + num(off.total_session_minutes_per_user, ' min/user/day') + '</b> (' + (off.users) + ' users). Delta: <b>' + fmtPct(wedgeLift) + '</b>.';
+  }
+
+  // Update BR23 narrative
+  const br23 = document.getElementById('br23-narrative');
+  if (br23) {
+    const aggLift = pctDelta(ON.total_session_minutes_per_user, OFF.total_session_minutes_per_user);
+    br23.innerHTML = 'BR23 (ScienceDirect 2024) found mobile narrative consumption does <i>not</i> correlate with retention/monetization at the population level. ' +
+      'Today\'s read: aggregate "on" effect = <b>' + fmtPct(aggLift) + '</b>. ' +
+      'Engaged-on-only effect = <b>' + fmtPct(wedgeLift) + '</b>. ' +
+      (wedgeLift != null && wedgeLift > 5 ? 'The wedge survives BR23 at the engaged-segment level — the narrative-consuming audience is differentiated.' :
+       wedgeLift != null && wedgeLift > 0 ? 'Engaged segment shows a small positive lift; below confirmatory threshold at this N.' :
+       'Engaged segment does NOT show a positive lift today — BR23 is consistent.');
+  }
+
+  // Render the four rows
+  const segOrder = [
+    { key: 'on-engaged',     label: '<b>on-engaged</b><br><span style="font-size:11px;color:var(--gray-500);">≥1 finish OR skip after &gt;3s</span>', highlight: '#ECFEFF' },
+    { key: 'on-insta-skip',  label: '<b>on-insta-skip</b><br><span style="font-size:11px;color:var(--gray-500);">all skips ≤3s</span>',                  highlight: null },
+    { key: 'on-no-cutscene', label: 'on-no-cutscene<br><span style="font-size:11px;color:var(--gray-500);">on-arm but no cutscene seen yet</span>',     highlight: null },
+    { key: 'off',            label: '<b>off (holdout)</b><br><span style="font-size:11px;color:var(--gray-500);">cutscenes disabled — A/B reference</span>', highlight: '#F9FAFB' }
+  ];
+
+  segOrder.forEach(({ key, label, highlight }) => {
+    const s = FULL_SEGMENTS[key];
+    if (!s) return;
+    const tr = document.createElement('tr');
+    if (highlight) tr.style.background = highlight;
+
+    // Reading-pill — depends on segment and its delta-vs-off
+    let pillKind = 'neutral', pillText;
+    if (key === 'on-engaged') {
+      pillKind = wedgeLift != null && wedgeLift > 5 ? 'pro' : wedgeLift != null && wedgeLift < -2 ? 'anti' : 'neutral';
+      pillText = wedgeLift != null
+        ? fmtPct(wedgeLift) + ' min/user/day vs off — ' + (wedgeLift > 5 ? 'wedge effect' : wedgeLift > 0 ? 'small positive' : 'underperforms')
+        : 'TBD';
+    } else if (key === 'on-insta-skip') {
+      pillKind = 'anti';
+      pillText = s.total_session_minutes_per_user != null && s.total_session_minutes_per_user < 5
+        ? 'Self-select out: barely played'
+        : 'Reject narrative · still play';
+    } else if (key === 'on-no-cutscene') {
+      pillKind = 'neutral';
+      pillText = 'Edge case · low exposure';
+    } else if (key === 'off') {
+      pillKind = 'neutral';
+      pillText = 'Baseline (no narrative)';
+    }
+
+    tr.innerHTML =
+      `<td>${label}</td>` +
+      `<td class="num"><b>${s.users}</b></td>` +
+      `<td class="num">${s.sessions_per_user != null ? s.sessions_per_user.toFixed(2) : '—'}</td>` +
+      `<td class="num">${s.total_session_minutes_per_user != null ? '<b>' + s.total_session_minutes_per_user.toFixed(2) + ' min</b>' : '—'}</td>` +
+      `<td class="num">${fmtPctVal(s.l50_reach_pct)}</td>` +
+      `<td class="num">${s.gold_extra_move_per_user != null ? s.gold_extra_move_per_user.toFixed(1) : '—'}</td>` +
+      `<td class="num">${s.abandon_per_session != null ? s.abandon_per_session.toFixed(3) : '—'}</td>` +
+      `<td><span class="pill ${pillKind}">${pillText}</span></td>`;
+    tbody.appendChild(tr);
+  });
+})();
 
 // ──────────────────────────────────────────────────────────────────────────────
 // SECTION 9 — Refined skip rate (derived from CUTSCENES + CS_SKIP_DIST at render time)
