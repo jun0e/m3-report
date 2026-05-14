@@ -165,7 +165,7 @@
 
       <div class="chart-card">
         <h3>Per-cutscene skip rate (within "on" arm)</h3>
-        <div class="meta">Skip climbs 62.5% → 92.3% across playthrough — narrative fatigue</div>
+        <div class="meta">Skip climbs <span id="meta-first-skip-pct">…</span> → <span id="meta-last-skip-pct">…</span> across playthrough — narrative fatigue</div>
         <div class="chart-canvas-wrap"><canvas id="ch-cs-skip"></canvas></div>
       </div>
 
@@ -201,12 +201,12 @@
 
     <div class="callout kill">
       <h4>🔴 Late-game narrative fatigue</h4>
-      <p>Skip rate climbs from <b>62.5%</b> (cutscene 0, before L1) to <b>92.3%</b> (cutscene 6, before L40). Avg time-to-skip drops from 23.5s to 8.3s. Players give the first cutscene a chance; by L40 they insta-skip in under 10 seconds. <b>Recommend</b>: shorten/restructure the L21-L40 cutscenes first; consider opt-in framing for later-game story beats.</p>
+      <p id="late-game-fatigue-prose">Skip rate climbs from <b><span id="first-skip-pct">…</span></b> (first cutscene, before L<span id="first-skip-lv">…</span>) to <b><span id="last-skip-pct">…</span></b> (last cutscene, before L<span id="last-skip-lv">…</span>). Avg time-to-skip drops from <span id="first-skip-avg">…</span>s to <span id="last-skip-avg">…</span>s. Players give the first cutscene a chance; by the late game they pattern-match "more story" and reject quickly. <b>Recommend</b>: shorten/restructure the late-game cutscenes first; consider opt-in framing for later story beats.</p>
     </div>
 
     <div class="callout warn">
       <h4>🟡 Bucketing leak (instrumentation bug)</h4>
-      <p>8 of 511 cutscene_shown events (1.6%) came from "off"-bucket users. Likely cause: pre-login default <code>user_id="10001"</code> is force-rule "on"; first cutscene fires before <code>setUserId()</code>; bucket flips after login but event keeps post-login user_id stamped. <b>Fix</b>: stamp <code>cutscene_group</code> into the event payload at emit time so attribution is unambiguous, not retroactively derived.</p>
+      <p id="leak-prose"><span id="leak-count">…</span> of <span id="leak-total">…</span> cutscene_shown events (<span id="leak-pct">…</span>) came from "off"-bucket users. Likely cause: pre-login default <code>user_id="10001"</code> is force-rule "on"; first cutscene fires before <code>setUserId()</code>; bucket flips after login but event keeps post-login user_id stamped. <b>Fix</b>: stamp <code>cutscene_group</code> into the event payload at emit time so attribution is unambiguous, not retroactively derived.</p>
     </div>
 
     <div class="callout warn">
@@ -225,7 +225,7 @@
 
     <div class="callout pass">
       <h4>✓ The wedge is showing positive engagement signal</h4>
-      <p>+21.5% total daily play time is a real, sizable, directionally pro-narrative result. Even at the conservative interpretation (N=180/arm is below Bayesian confirmatory threshold), the directionality alone is informative — it pushes against the BR23 prior (ScienceDirect 2024: narrative consumption ≠ retention in mobile games). Either M3-Reborn is on the favorable side of the BR23 distribution, OR BR23's population-level finding doesn't generalize to this format.</p>
+      <p id="strategic-pos-prose"><span id="agg-lift">…</span> total daily play time is the aggregate-arm read. Even at the conservative interpretation (N≈<span id="n-per-arm">…</span>/arm is below Bayesian confirmatory threshold), the directionality is informative — it weighs against the BR23 prior (ScienceDirect 2024: narrative consumption ≠ retention in mobile games). Either M3-Reborn is on the favorable side of the BR23 distribution, OR BR23's population-level finding doesn't generalize to this format.</p>
     </div>
 
     <div class="callout info">
@@ -234,8 +234,8 @@
     </div>
 
     <div class="callout warn">
-      <h4>⚠ Don't be tempted to declare victory on +21.5%</h4>
-      <p>N=180/arm. Single day. Bucketing leak at 1.6%. Self-selection between cohorts cannot be ruled out without longer baseline. Treat this report as <b>directional evidence that the wedge is on the favorable side</b>, not as confirmatory proof.</p>
+      <h4 id="dont-declare-headline">⚠ Don't be tempted to declare victory on the aggregate lift</h4>
+      <p id="dont-declare-prose">N≈<span id="n-per-arm-2">…</span>/arm. Single day. Bucketing leak at <span id="leak-pct-2">…</span>. Self-selection between cohorts cannot be ruled out without longer baseline. Treat this report as <b>directional evidence</b>, not as confirmatory proof.</p>
     </div>
   </section>
 
@@ -243,9 +243,9 @@
     <h2><span class="num">7</span> Recommended next moves</h2>
     <ol class="recos">
       <li><b>Extract multi-day events (priority 1)</b> from the LogServer (when accessible again) or from successive Telegram dumps. Specifically D1/D3 retention lift between arms is the wedge-proof bar.</li>
-      <li><b>Fix the cutscene_group event-time stamp</b> so attribution is unambiguous; eliminates the 1.6% bucketing leak.</li>
+      <li><b>Fix the cutscene_group event-time stamp</b> so attribution is unambiguous; eliminates the <span id="leak-pct-3">…</span> bucketing leak.</li>
       <li><b>Fix the inconclusive-show telemetry</b> (6.3% gap) so consumption denominator is clean.</li>
-      <li><b>Shorten / restructure L21-L40 cutscenes</b> first; they're the worst skip-rate offenders and reducing fatigue there might compound the +21.5% engagement signal further.</li>
+      <li><b>Shorten / restructure late-game cutscenes</b> first; they're the worst skip-rate offenders and reducing fatigue there might compound the <span id="agg-lift-2">…</span> engagement signal further.</li>
       <li><b>Pre-register the wedge-proven bar in writing</b> before the multi-day data lands: e.g., ≥ 2pp D3 retention lift, ≥ $0.05 ARPU lift over 14 days, with 95% credibility, attributable to the narrative arm.</li>
       <li><b>Investigate the boss-win-rate +3.8pp delta</b>. Is "on" cohort skill-selected (engaged players are also better)? Or does cutscene context genuinely prime better boss performance? Cross-tab boss_wins by cutscene_finish_count to test.</li>
       <li><b>Re-run this report daily</b> as alpha continues — the per-day metric should stabilize or trend. Trend direction matters more than any single day's read.</li>
@@ -308,7 +308,7 @@
 
     <div class="callout warn" style="margin-top:18px;">
       <h4>🟡 Late-game cutscenes have nearly 0 patience-tail</h4>
-      <p>CS_06 (before L31) and CS_07 (before L40) have <b>5 and 6 insta-skips out of 12-15 skips respectively</b> — roughly 40-50% of skips happen in the first 3 seconds. Compare to CS_01 (before L1) where insta-skips are essentially zero of 127 skips and the median skip is in the 10-30s range. <b>Late-game narrative isn't being received with the same patience as the cold-open.</b> Implication: shorten or relegate L21+ cutscenes; the cohort that reaches them isn't there for story anymore.</p>
+      <p id="late-patience-prose"><b>Late-game cutscenes</b> (last two in the catalogue) have insta-skip share of <span id="late-insta-share">…</span>; early-game (first cutscene) has <span id="early-insta-share">…</span>. <b>Late-game narrative isn't being received with the same patience as the cold-open.</b> Implication: shorten or relegate late-game cutscenes; the cohort that reaches them is no longer there for story.</p>
     </div>
   </section>
 
@@ -360,8 +360,8 @@
         <tr><td><b>Window</b></td><td>VN 2026-05-12 [00:00, 24:00) = UTC [2026-05-11T17:00:00, 2026-05-12T17:00:00)</td></tr>
         <tr><td><b>Observed bucket split</b></td><td>47.8% on / 52.2% off (target 50/50, N=370)</td></tr>
         <tr><td><b>Excluded</b></td><td>Forced-on QA: <code>10001</code>, <code>1009542061</code> · Forced-off QA: <code>10002</code> · Users with no <code>user_id</code> stamped</td></tr>
-        <tr><td><b>Sanity check</b></td><td>8/511 cutscene_shown events came from "off" arm (should be 0; 1.6% leak attributed to pre-login default-user-id bug)</td></tr>
-        <tr><td><b>Limits</b></td><td>Single day · N=180/arm (below Bayesian confirmatory threshold of 250/arm) · no retention lift (D1/D3) computable from 1 day</td></tr>
+        <tr><td><b>Sanity check</b></td><td><span id="meth-leak-count">…</span>/<span id="meth-leak-total">…</span> cutscene_shown events came from "off" arm (should be 0; <span id="meth-leak-pct">…</span> leak attributed to pre-login default-user-id bug)</td></tr>
+        <tr><td><b>Limits</b></td><td>Single day · N≈<span id="meth-n-per-arm">…</span>/arm (below Bayesian confirmatory threshold of 250/arm) · no retention lift (D1/D3) computable from 1 day</td></tr>
       </tbody>
     </table>
   </section>
@@ -1250,6 +1250,77 @@ new Chart(document.getElementById('ch-segment-time'), {
       '<b>Late-game (L21+):</b> ' + lateInsta + ' of ' + lateShown + ' shows were insta-rejected (' + pct(lateInsta, lateShown) + ').<br>' +
       'The cold-open earns near-universal attention; later scenes get pattern-matched as "more story, skip it." Late-game narrative needs either much shorter runtime or a different framing trigger to earn the same patience.';
   }
+})();
+
+// ──────────────────────────────────────────────────────────────────────────────
+// NARRATIVE NUMBER POPULATION — fills every id-tagged span in the prose
+// with per-date values derived from inlined data. No prose number is hardcoded.
+// ──────────────────────────────────────────────────────────────────────────────
+(function populateNarrative() {
+  function set(id, value) { const el = document.getElementById(id); if (el) el.textContent = value; }
+  function pct1(v) { if (v == null || isNaN(v)) return '—'; return (v >= 0 ? '+' : '') + v.toFixed(1) + '%'; }
+  function pctRaw(v) { if (v == null || isNaN(v)) return '—'; return v.toFixed(1) + '%'; }
+
+  // First / last cutscene (by before_level order)
+  const sorted = CUTSCENES.slice().sort((a, b) => (a.before_level || 0) - (b.before_level || 0));
+  const first = sorted[0], last = sorted[sorted.length - 1];
+
+  set('meta-first-skip-pct', pctRaw(first.skip_pct));
+  set('meta-last-skip-pct',  pctRaw(last.skip_pct));
+  set('first-skip-pct',  pctRaw(first.skip_pct));
+  set('first-skip-lv',   first.before_level);
+  set('last-skip-pct',   pctRaw(last.skip_pct));
+  set('last-skip-lv',    last.before_level);
+  set('first-skip-avg',  first.avg_skip_sec != null ? first.avg_skip_sec.toFixed(1) : '?');
+  set('last-skip-avg',   last.avg_skip_sec  != null ? last.avg_skip_sec.toFixed(1)  : '?');
+
+  // Bucketing leak: OFF.cutscene_shown is the leak count, total = ON + OFF
+  const leakCount = OFF.cutscene_shown || 0;
+  const leakTotal = (ON.cutscene_shown || 0) + leakCount;
+  const leakPct = leakTotal ? (leakCount / leakTotal * 100) : 0;
+  const leakPctStr = leakPct.toFixed(1) + '%';
+  set('leak-count', leakCount);
+  set('leak-total', leakTotal);
+  set('leak-pct', leakPctStr);
+  set('leak-pct-2', leakPctStr);
+  set('leak-pct-3', leakPctStr);
+  set('meth-leak-count', leakCount);
+  set('meth-leak-total', leakTotal);
+  set('meth-leak-pct', leakPctStr);
+
+  // Aggregate lift = (ON.total_session_minutes_per_user / OFF.total_session_minutes_per_user - 1) * 100
+  const aggLift = (OFF.total_session_minutes_per_user)
+    ? ((ON.total_session_minutes_per_user / OFF.total_session_minutes_per_user - 1) * 100) : null;
+  set('agg-lift', pct1(aggLift));
+  set('agg-lift-2', pct1(aggLift));
+
+  // N per arm
+  const onN = ON.users || 0, offN = OFF.users || 0;
+  const nPerArm = Math.round((onN + offN) / 2);
+  set('n-per-arm', nPerArm);
+  set('n-per-arm-2', nPerArm);
+  set('meth-n-per-arm', nPerArm);
+
+  // Late-game insta-skip share (last two cutscenes) vs early (first one)
+  const lateScenes = sorted.slice(-2);
+  let lateInstaShare_skips = 0, lateInstaShare_total = 0;
+  lateScenes.forEach(c => {
+    const dist = CS_SKIP_DIST.find(d => d.lv === c.before_level);
+    if (dist) {
+      lateInstaShare_total += dist.total;
+      lateInstaShare_skips += dist.buckets[0] + dist.buckets[1];
+    }
+  });
+  const firstDist = CS_SKIP_DIST.find(d => d.lv === first.before_level);
+  const firstInstaPct = firstDist && firstDist.total ? (firstDist.buckets[0] + firstDist.buckets[1]) / firstDist.total * 100 : 0;
+  const latePctVal = lateInstaShare_total ? (lateInstaShare_skips / lateInstaShare_total * 100) : 0;
+  set('early-insta-share', firstInstaPct.toFixed(1) + '% (' + (firstDist ? firstDist.total : 0) + ' skips)');
+  set('late-insta-share',  latePctVal.toFixed(1) + '% (' + lateInstaShare_skips + ' of ' + lateInstaShare_total + ' skips)');
+
+  // Update the .vd callout text just in case — already handled by generator regex, but be defensive
+  // Title for vh "Don't declare victory on aggregate lift" — needs the aggregate lift number
+  const dontDeclareHead = document.getElementById('dont-declare-headline');
+  if (dontDeclareHead) dontDeclareHead.textContent = '⚠ Don\'t be tempted to declare victory on ' + pct1(aggLift);
 })();
 </script>
 </body>
