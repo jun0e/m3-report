@@ -123,7 +123,7 @@
 
   <section>
     <h2><span class="num">1</span> Why this report exists</h2>
-    <p class="lede">The v3.1 dashboard showed catastrophic cutscene engagement (70.9% skip, 23% finish — all in KILL band). The structured debate concluded that proof of the "narrative wedge" requires causal evidence, not just consumption metrics. Then ABTestConfig.json + ABTestMgr.js revealed a <b>GrowthBook 50/50 cutscene-on/off holdout has been live the whole alpha</b>. This report uses that live experiment to ask the actual question: do players who see cutscenes engage / monetize / progress differently from those who don't?</p>
+    <p class="lede">The v3.1 dashboard showed catastrophic cutscene engagement (<span id="dash-skip-pct">…</span> skip, <span id="dash-finish-pct">…</span> finish — all in KILL band). The structured debate concluded that proof of the "narrative wedge" requires causal evidence, not just consumption metrics. Then ABTestConfig.json + ABTestMgr.js revealed a <b>GrowthBook 50/50 cutscene-on/off holdout has been live the whole alpha</b>. This report uses that live experiment to ask the actual question: do players who see cutscenes engage / monetize / progress differently from those who don't?</p>
   </section>
 
   <section>
@@ -136,7 +136,7 @@
 
     <div class="callout info" style="margin-top: 18px;">
       <h4>Why total time / day flips the read vs median session length</h4>
-      <p>Earlier I flagged "median session length: -44% in the 'on' arm" as anti-narrative. That's <b>true but distribution-sensitive</b>: "on" users have many short cutscene-included sessions PLUS some long ones (median 4.8 min, mean 15.0 min — heavy right tail). "off" users have a flatter distribution (median 8.5, mean 14.3). Total time per user per day is the correct unit: <b>"on" users accumulate more minutes per day in total</b>, even if any single session looks shorter. The metric the user flagged is the right metric.</p>
+      <p>Earlier the v3.1 dashboard flagged a median-session-length regression for the "on" arm as anti-narrative. That's <b>true but distribution-sensitive</b>: "on" users in this window have median <span id="med-on">…</span> min / mean <span id="mean-on">…</span> min (heavy right tail — cutscene-included sessions plus long-play sessions), while "off" users sit at median <span id="med-off">…</span> / mean <span id="mean-off">…</span>. Median delta: <span id="med-delta">…</span>. Total time per user per day is the correct unit because it captures depth × frequency in one number, and on that axis <b>"on" users accumulate more minutes per day</b> (see Headline above) even when any single session looks shorter.</p>
     </div>
   </section>
 
@@ -210,13 +210,13 @@
     </div>
 
     <div class="callout warn">
-      <h4>🟡 Inconclusive shows (6.3%)</h4>
-      <p>32 cutscene_shown events have no terminal event (skip / complete). Most likely: app backgrounded mid-cutscene, OR rare crash. Without a final-state event, the denominator on every consumption metric is contaminated. <b>Fix</b>: emit explicit terminal events on quit / background / timeout.</p>
+      <h4 id="inconclusive-headline">🟡 Inconclusive shows (<span id="inc-pct-head">…</span>)</h4>
+      <p id="inconclusive-prose"><span id="inc-count">…</span> cutscene_shown events have no terminal event (skip / complete). Most likely: app backgrounded mid-cutscene, OR rare crash. Without a final-state event, the denominator on every consumption metric is contaminated. <b>Fix</b>: emit explicit terminal events on quit / background / timeout.</p>
     </div>
 
     <div class="callout warn">
-      <h4>🟡 Per-session abandon rate +25%</h4>
-      <p>Lives lost to "abandon" reason: 0.086 per session in "on" arm vs 0.069 in "off". Cutscene-arm users abandon levels mid-attempt 25% more often per session. Could be cutscene-fatigue spillover, OR engagement causing them to attempt levels they wouldn't otherwise reach. Disambiguate by attempting-level distribution.</p>
+      <h4 id="abandon-headline">🟡 Per-session abandon rate <span id="abandon-delta-head">…</span></h4>
+      <p id="abandon-prose">Lives lost to "abandon" reason: <span id="abandon-on">…</span> per session in "on" arm vs <span id="abandon-off">…</span> in "off". Cutscene-arm users abandon levels mid-attempt <span id="abandon-delta-body">…</span> more often per session. Could be cutscene-fatigue spillover, OR engagement causing them to attempt levels they wouldn't otherwise reach. Disambiguate by attempting-level distribution.</p>
     </div>
   </section>
 
@@ -244,10 +244,10 @@
     <ol class="recos">
       <li><b>Extract multi-day events (priority 1)</b> from the LogServer (when accessible again) or from successive Telegram dumps. Specifically D1/D3 retention lift between arms is the wedge-proof bar.</li>
       <li><b>Fix the cutscene_group event-time stamp</b> so attribution is unambiguous; eliminates the <span id="leak-pct-3">…</span> bucketing leak.</li>
-      <li><b>Fix the inconclusive-show telemetry</b> (6.3% gap) so consumption denominator is clean.</li>
+      <li><b>Fix the inconclusive-show telemetry</b> (<span id="inc-pct-rec">…</span> gap) so consumption denominator is clean.</li>
       <li><b>Shorten / restructure late-game cutscenes</b> first; they're the worst skip-rate offenders and reducing fatigue there might compound the <span id="agg-lift-2">…</span> engagement signal further.</li>
       <li><b>Pre-register the wedge-proven bar in writing</b> before the multi-day data lands: e.g., ≥ 2pp D3 retention lift, ≥ $0.05 ARPU lift over 14 days, with 95% credibility, attributable to the narrative arm.</li>
-      <li><b>Investigate the boss-win-rate +3.8pp delta</b>. Is "on" cohort skill-selected (engaged players are also better)? Or does cutscene context genuinely prime better boss performance? Cross-tab boss_wins by cutscene_finish_count to test.</li>
+      <li id="boss-wr-reco"><b>Investigate the boss-win-rate <span id="boss-wr-delta">…</span> delta</b>. Cross-tab boss_wins by cutscene_finish_count to test whether the gap reflects skill-selection of the engaged cohort or a genuine context effect.</li>
       <li><b>Re-run this report daily</b> as alpha continues — the per-day metric should stabilize or trend. Trend direction matters more than any single day's read.</li>
     </ol>
   </section>
@@ -1502,6 +1502,64 @@ new Chart(document.getElementById('ch-segment-time'), {
   // Title for vh "Don't declare victory on aggregate lift" — needs the aggregate lift number
   const dontDeclareHead = document.getElementById('dont-declare-headline');
   if (dontDeclareHead) dontDeclareHead.textContent = '⚠ Don\'t be tempted to declare victory on ' + pct1(aggLift);
+
+  // ── Inconclusive shows: cutscene_shown − (skipped + completed) on the ON arm (where
+  // cutscenes actually fire). Cross-validates the bucket-totals view in Section 8.
+  const incCount = Math.max(0, (ON.cutscene_shown || 0) - (ON.cutscene_skipped || 0) - (ON.cutscene_completed || 0));
+  const incDenom = (ON.cutscene_shown || 0) + (OFF.cutscene_shown || 0);
+  const incPct   = incDenom ? (incCount / incDenom * 100) : 0;
+  const incPctStr = incPct.toFixed(1) + '%';
+  set('inc-count', incCount.toLocaleString());
+  set('inc-pct-head', incPctStr);
+  set('inc-pct-rec',  incPctStr);
+
+  // ── Abandon rate per session — per-arm + relative delta
+  function rate(num, den) { return den ? num / den : 0; }
+  const abandonOn  = rate(ON.lives_lost_abandon  || 0, ON.sessions  || 0);
+  const abandonOff = rate(OFF.lives_lost_abandon || 0, OFF.sessions || 0);
+  const abandonRelPct = abandonOff ? ((abandonOn - abandonOff) / abandonOff * 100) : 0;
+  set('abandon-on',  abandonOn.toFixed(3));
+  set('abandon-off', abandonOff.toFixed(3));
+  const abandonSign = abandonRelPct >= 0 ? '+' : '';
+  const abandonDeltaStr = abandonSign + abandonRelPct.toFixed(0) + '%';
+  set('abandon-delta-head', abandonDeltaStr);
+  set('abandon-delta-body', abandonDeltaStr);
+
+  // ── Boss-win-rate delta: ON − OFF, in pp, with explicit sign so a regression
+  // (ON below OFF) is rendered as a negative — never silently flipped pro-narrative.
+  const bossWrOn  = ON.boss_win_rate_pct  != null ? ON.boss_win_rate_pct  : null;
+  const bossWrOff = OFF.boss_win_rate_pct != null ? OFF.boss_win_rate_pct : null;
+  if (bossWrOn != null && bossWrOff != null) {
+    const bossDelta = bossWrOn - bossWrOff;
+    const sign = bossDelta >= 0 ? '+' : '';
+    set('boss-wr-delta', sign + bossDelta.toFixed(1) + 'pp');
+  } else {
+    set('boss-wr-delta', '—');
+  }
+
+  // ── Dashboard-style skip / finish rate quoted in Section 1 prose.
+  // Sourced from the ON arm where cutscenes actually fire (OFF arm has only the
+  // 2-event bucketing leak, which would skew the headline numbers).
+  const dashSkip = (ON.cutscene_shown)
+    ? ((ON.cutscene_skipped || 0) / ON.cutscene_shown * 100) : null;
+  const dashFinish = (ON.cutscene_shown)
+    ? ((ON.cutscene_completed || 0) / ON.cutscene_shown * 100) : null;
+  set('dash-skip-pct',   dashSkip   != null ? dashSkip.toFixed(1)   + '%' : '—');
+  set('dash-finish-pct', dashFinish != null ? dashFinish.toFixed(1) + '%' : '—');
+
+  // ── Median / mean session length per arm — used in Section 2's "why total/day
+  // flips the read" callout. Median delta as pp-style relative change so it's
+  // directionally readable.
+  set('med-on',   (ON.median_session_len_min  != null) ? ON.median_session_len_min.toFixed(1)  : '—');
+  set('mean-on',  (ON.mean_session_len_min    != null) ? ON.mean_session_len_min.toFixed(1)    : '—');
+  set('med-off',  (OFF.median_session_len_min != null) ? OFF.median_session_len_min.toFixed(1) : '—');
+  set('mean-off', (OFF.mean_session_len_min   != null) ? OFF.mean_session_len_min.toFixed(1)   : '—');
+  if (ON.median_session_len_min != null && OFF.median_session_len_min != null && OFF.median_session_len_min !== 0) {
+    const medRel = (ON.median_session_len_min / OFF.median_session_len_min - 1) * 100;
+    set('med-delta', (medRel >= 0 ? '+' : '') + medRel.toFixed(1) + '%');
+  } else {
+    set('med-delta', '—');
+  }
 })();
 </script>
 </body>
