@@ -114,7 +114,7 @@
     <div class="verdict-card">
       <div class="vt">Headline verdict</div>
       <div class="vh">📈 Cutscenes drive +31.9% play time for the 91% who engage. The 6% who insta-skip self-select out.</div>
-      <div class="vd">Aggregate "on" arm: <b>+21.5%</b> more total minutes/user/day than holdout. But within the "on" arm, the <b>163 engaged users (91%)</b> play <b>+32% more minutes/user/day</b> (29.39 vs 22.29) than the holdout. The 10 insta-skippers (5.6%) barely play at all (0.11 min/day) and dilute the aggregate. <b>The wedge effect is larger than first read</b> once narrative-rejecters are segmented out. <i>Caveat: N still borderline; retention causality requires multi-day extract.</i></div>
+      <div class="vd">Aggregate "on" arm: <b>+21.5%</b> more total minutes/user/day than holdout. Within the "on" arm, the <b>163 engaged users (91%)</b> play <b>+31.9%</b> more minutes/user/day (29.39 vs 22.29) than the holdout. The 10 insta-skippers (5.6%) barely play (0.11 min/day) and dilute the aggregate. <i>Caveat: single-day data; retention causality requires multi-day extract.</i></div>
     </div>
   </div>
 </header>
@@ -386,7 +386,7 @@
     <table class="matrix">
       <tbody>
         <tr><td><b>Source files</b></td><td><code>full-data.json</code> · <code>ab-cutscene-analysis.json</code> · <code>ABTestConfig.json</code> · <code>ABTestMgr.js</code></td></tr>
-        <tr><td><b>Window</b></td><td>VN 2026-05-12 [00:00, 24:00) = UTC [2026-05-11T17:00:00, 2026-05-12T17:00:00) · coverage 1.0</td></tr>
+        <tr><td><b>Window</b></td><td>VN 2026-05-12 [00:00, 24:00) = UTC [2026-05-11T17:00:00, 2026-05-12T17:00:00)</td></tr>
         <tr><td><b>Observed bucket split</b></td><td>47.8% on / 52.2% off (target 50/50, N=370)</td></tr>
         <tr><td><b>Excluded</b></td><td>Forced-on QA: <code>10001</code>, <code>1009542061</code> · Forced-off QA: <code>10002</code> · Users with no <code>user_id</code> stamped</td></tr>
         <tr><td><b>Sanity check</b></td><td>8/511 cutscene_shown events came from "off" arm (should be 0; 1.6% leak attributed to pre-login default-user-id bug)</td></tr>
@@ -396,7 +396,7 @@
   </section>
 
   <footer>
-    Generated <span id="generated">2026-05-14 00:31:05 UTC</span> · raw data: <a href="./ab-cutscene-analysis.json">ab-cutscene-analysis.json</a> · <a href="./full-data.json">full-data.json</a> · <a href="./report.html">main dashboard</a> · <a href="./ab-cutscene-analysis.html">A/B detail view</a>
+    Generated <span id="generated">2026-05-14 00:58:52 UTC</span> · raw data: <a href="./ab-cutscene-analysis.json">ab-cutscene-analysis.json</a> · <a href="./full-data.json">full-data.json</a> · <a href="./report.html">main dashboard</a> · <a href="./ab-cutscene-analysis.html">A/B detail view</a>
   </footer>
 </main>
 

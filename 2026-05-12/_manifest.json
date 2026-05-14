@@ -1,8 +1,8 @@
 {
   "date": "2026-05-12",
-  "generated_at": "2026-05-14T00:31:06.727Z",
-  "elapsed_sec": 3.6,
-  "source_dir": "C:\\Users\\CPU60395-local\\m3-data\\2026-05-12-from-zip",
+  "generated_at": "2026-05-14T00:58:53.226Z",
+  "elapsed_sec": 5.2,
+  "source_dir": "C:\\Users\\CPU60395-local\\m3-data\\2026-05-12",
   "steps": {
     "pipeline_ok": true,
     "ab_ok": true,
@@ -11,7 +11,7 @@
   "artifacts": [
     {
       "file": "data.json",
-      "bytes": 18266
+      "bytes": 18257
     },
     {
       "file": "report.html",

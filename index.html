@@ -82,8 +82,8 @@
     </div>
 
     <div class="date-card recent">
-      <h3>📅 VN 2026-05-13 <span class="badge" style="background:#FEF3C7;color:#92400E;">9.0h coverage</span></h3>
-      <div class="meta">150 users · 206 sessions · 67,748 events · 116 cutscene shows · early-morning window</div>
+      <h3>📅 VN 2026-05-13 <span class="badge">24h full coverage</span></h3>
+      <div class="meta">663 users · 411,610 events · ~1,200 cutscene shows · fetched via /download (new API)</div>
       <div class="links">
         <a href="./2026-05-13/report.html"><span class="icon">📊</span><span>Main dashboard (12 tabs)</span><span class="desc">Same format as VN-12</span></a>
         <a href="./2026-05-13/cutscene-effectiveness-report.html"><span class="icon">🎬</span><span>Cutscene effectiveness report</span><span class="desc">Wedge effect persists</span></a>
@@ -98,15 +98,18 @@
   <div class="lede">Each report includes a strategic synthesis section. Headline finding across both days:</div>
 
   <table>
-    <thead><tr><th>Finding</th><th>VN-12</th><th>VN-13</th></tr></thead>
+    <thead><tr><th>Finding</th><th>VN-12 (15.5h)</th><th>VN-13 (24h full)</th></tr></thead>
     <tbody>
-      <tr><td>Engaged-on vs off lift (min/user/day)</td><td>+32%</td><td>+23%</td></tr>
-      <tr><td>Aggregate on vs off lift</td><td>+21.5%</td><td>+9%</td></tr>
+      <tr><td>Total users (on / off)</td><td>179 / 193</td><td>320 / 343</td></tr>
+      <tr><td>on-engaged users (N) · min/user/day</td><td>163 · 29.39 min</td><td>287 · 31.87 min</td></tr>
+      <tr><td>off (holdout) min/user/day</td><td>22.29 min</td><td>28.57 min</td></tr>
+      <tr><td><b>Engaged-on vs off lift (the wedge)</b></td><td><b>+31.9%</b></td><td><b>+11.6%</b></td></tr>
+      <tr><td>Aggregate on vs off lift</td><td>+21.5%</td><td>+3.3%</td></tr>
       <tr><td>Cutscene skip rate (aggregate)</td><td>70.9% (KILL)</td><td>~70% (KILL)</td></tr>
       <tr><td>Cutscene finish rate (aggregate)</td><td>23.0% (KILL)</td><td>~22% (KILL)</td></tr>
-      <tr><td>Bucketing leak (cutscene_shown in "off")</td><td>1.6%</td><td>~3% (small N)</td></tr>
     </tbody>
   </table>
+  <div style="font-size:12px; color: var(--gray-500); margin-top: 8px;"><i>Note: VN-12 figures are from 15.5h partial coverage (server missing UTC May-11 T17-T23, the early VN-12 hours). VN-13 is the first day with full 24h coverage via the new /download API.</i></div>
 
   <h2>Architecture</h2>
   <div class="lede">How tomorrow's report gets made.</div>

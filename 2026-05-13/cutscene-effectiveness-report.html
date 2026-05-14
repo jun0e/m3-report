@@ -103,18 +103,18 @@
   <div class="cover-inner">
     <div class="eyebrow">Strategic decision report</div>
     <h1>Are the cutscenes working?</h1>
-    <div class="subtitle">Synthesis of VN 2026-05-13 event log + GrowthBook A/B causal holdout · 150 users across both arms</div>
+    <div class="subtitle">Synthesis of VN 2026-05-13 event log + GrowthBook A/B causal holdout · 663 users across both arms</div>
     <div class="badges">
-      <span class="badge">📅 <b>2026-05-13 (VN)</b> · 9.0h coverage</span>
-      <span class="badge">📊 <b>67,748</b> events in window</span>
-      <span class="badge">🅰️ <b>"on" N=75</b> · 🅱️ <b>"off" N=75</b></span>
+      <span class="badge">📅 <b>2026-05-13 (VN)</b> · 24.0h coverage</span>
+      <span class="badge">📊 <b>411,610</b> events in window</span>
+      <span class="badge">🅰️ <b>"on" N=320</b> · 🅱️ <b>"off" N=343</b></span>
       <span class="badge">⚙️ GrowthBook 50/50 holdout · live since alpha launch</span>
     </div>
 
     <div class="verdict-card">
       <div class="vt">Headline verdict</div>
-      <div class="vh">📈 Cutscenes drive +31.9% play time for the 91% who engage. The 6% who insta-skip self-select out.</div>
-      <div class="vd">Aggregate "on" arm: <b>+21.5%</b> more total minutes/user/day than holdout. But within the "on" arm, the <b>163 engaged users (91%)</b> play <b>+32% more minutes/user/day</b> (29.39 vs 22.29) than the holdout. The 10 insta-skippers (5.6%) barely play at all (0.11 min/day) and dilute the aggregate. <b>The wedge effect is larger than first read</b> once narrative-rejecters are segmented out. <i>Caveat: N still borderline; retention causality requires multi-day extract.</i></div>
+      <div class="vh">📈 Cutscenes drive +11.6% play time for the 90% who engage. The 4% who insta-skip self-select out.</div>
+      <div class="vd">Aggregate "on" arm: <b>+3.3%</b> more total minutes/user/day than holdout. Within the "on" arm, the <b>287 engaged users (90%)</b> play <b>+11.6%</b> more minutes/user/day (31.87 vs 28.57) than the holdout. The 14 insta-skippers (4.4%) barely play (10.51 min/day) and dilute the aggregate. <i>Caveat: single-day data; retention causality requires multi-day extract.</i></div>
     </div>
   </div>
 </header>
@@ -386,7 +386,134 @@
     <table class="matrix">
       <tbody>
         <tr><td><b>Source files</b></td><td><code>full-data.json</code> · <code>ab-cutscene-analysis.json</code> · <code>ABTestConfig.json</code> · <code>ABTestMgr.js</code></td></tr>
-        <tr><td><b>Window</b></td><td>VN 2026-05-13 [00:00, 24:00) = UTC [2026-05-12T17:00:00, 2026-05-13T17:00:00);
+        <tr><td><b>Window</b></td><td>VN 2026-05-13 [00:00, 24:00) = UTC [2026-05-12T17:00:00, 2026-05-13T17:00:00)</td></tr>
+        <tr><td><b>Observed bucket split</b></td><td>48.2% on / 51.8% off (target 50/50, N=662)</td></tr>
+        <tr><td><b>Excluded</b></td><td>Forced-on QA: <code>10001</code>, <code>1009542061</code> · Forced-off QA: <code>10002</code> · Users with no <code>user_id</code> stamped</td></tr>
+        <tr><td><b>Sanity check</b></td><td>8/511 cutscene_shown events came from "off" arm (should be 0; 1.6% leak attributed to pre-login default-user-id bug)</td></tr>
+        <tr><td><b>Limits</b></td><td>Single day · N=180/arm (below Bayesian confirmatory threshold of 250/arm) · no retention lift (D1/D3) computable from 1 day</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Generated <span id="generated">2026-05-14 00:58:18 UTC</span> · raw data: <a href="./ab-cutscene-analysis.json">ab-cutscene-analysis.json</a> · <a href="./full-data.json">full-data.json</a> · <a href="./report.html">main dashboard</a> · <a href="./ab-cutscene-analysis.html">A/B detail view</a>
+  </footer>
+</main>
+
+<script>
+// ──────────────────────────────────────────────────────────────────────────────
+// Inlined data (matches ab-cutscene-analysis.json + cutscene per-scene from full-data)
+// ──────────────────────────────────────────────────────────────────────────────
+const ON  = {
+  "users": 320,
+  "sessions": 606,
+  "sessions_per_user": 1.89,
+  "total_session_minutes": 9440.5,
+  "total_session_minutes_per_user": 29.5,
+  "median_session_len_min": 8.4,
+  "mean_session_len_min": 18.3,
+  "win_rate_pct": 83.7,
+  "l50_reach_pct": 9.1,
+  "l50_users": 29,
+  "boss_win_rate_pct": 89.7,
+  "gold_granted": 109532,
+  "gold_spent_extra_move": 39500,
+  "gold_spent_extra_move_per_user": 123.4,
+  "lives_lost_abandon": 44,
+  "lives_lost_abandon_per_session": 0.073,
+  "cutscene_shown": 906,
+  "cutscene_skipped": 654,
+  "cutscene_completed": 229
+};
+
+const OFF = {
+  "users": 343,
+  "sessions": 600,
+  "sessions_per_user": 1.75,
+  "total_session_minutes": 9799,
+  "total_session_minutes_per_user": 28.57,
+  "median_session_len_min": 9.8,
+  "mean_session_len_min": 20.9,
+  "win_rate_pct": 84.3,
+  "l50_reach_pct": 12,
+  "l50_users": 41,
+  "boss_win_rate_pct": 93.3,
+  "gold_granted": 127920,
+  "gold_spent_extra_move": 45100,
+  "gold_spent_extra_move_per_user": 131.5,
+  "lives_lost_abandon": 33,
+  "lives_lost_abandon_per_session": 0.055,
+  "cutscene_shown": 2,
+  "cutscene_skipped": 2,
+  "cutscene_completed": 0
+};
+
+// Per-cutscene (from per-date cutscene-segments.json)
+const CUTSCENES = [
+  {
+    "id": "CS_before_L1",
+    "shown": 283,
+    "skip_pct": 64,
+    "finish_pct": 30.4,
+    "avg_skip_sec": 34.9,
+    "before_level": 1,
+    "length_sec": 49
+  },
+  {
+    "id": "CS_before_L5",
+    "shown": 163,
+    "skip_pct": 73,
+    "finish_pct": 26.4,
+    "avg_skip_sec": 36,
+    "before_level": 5,
+    "length_sec": 35
+  },
+  {
+    "id": "CS_before_L10",
+    "shown": 137,
+    "skip_pct": 76.6,
+    "finish_pct": 21.9,
+    "avg_skip_sec": 7,
+    "before_level": 10,
+    "length_sec": 24
+  },
+  {
+    "id": "CS_before_L11",
+    "shown": 134,
+    "skip_pct": 75.4,
+    "finish_pct": 21.6,
+    "avg_skip_sec": 8.8,
+    "before_level": 11,
+    "length_sec": 31
+  },
+  {
+    "id": "CS_before_L21",
+    "shown": 98,
+    "skip_pct": 79.6,
+    "finish_pct": 19.4,
+    "avg_skip_sec": 6.9,
+    "before_level": 21,
+    "length_sec": 42
+  },
+  {
+    "id": "CS_before_L31",
+    "shown": 53,
+    "skip_pct": 77.4,
+    "finish_pct": 22.6,
+    "avg_skip_sec": 4.8,
+    "before_level": 31,
+    "length_sec": 26
+  },
+  {
+    "id": "CS_before_L40",
+    "shown": 40,
+    "skip_pct": 77.5,
+    "finish_pct": 25,
+    "avg_skip_sec": 4.9,
+    "before_level": 40,
+    "length_sec": 36
+  }
+];
 
 document.getElementById('generated').textContent = '2026-05-13 UTC · pipeline v2 + ABTest holdout';
 
@@ -564,91 +691,91 @@ const CS_SKIP_DIST = [
     "buckets": [
       0,
       0,
-      0,
-      0,
-      14,
-      6,
-      13
+      1,
+      1,
+      71,
+      53,
+      55
     ],
-    "total": 33
+    "total": 181
   },
   {
     "lv": 5,
     "buckets": [
       0,
       0,
-      3,
+      19,
+      62,
+      25,
       9,
-      7,
-      1,
-      0
+      4
     ],
-    "total": 20
+    "total": 119
   },
   {
     "lv": 10,
     "buckets": [
       0,
       0,
-      7,
-      6,
-      5,
-      2,
+      42,
+      43,
+      17,
+      3,
       0
     ],
-    "total": 20
+    "total": 105
   },
   {
     "lv": 11,
     "buckets": [
       0,
       0,
-      4,
-      9,
-      4,
-      2,
-      1
+      20,
+      58,
+      14,
+      7,
+      2
     ],
-    "total": 20
+    "total": 101
   },
   {
     "lv": 21,
     "buckets": [
       0,
-      2,
-      5,
-      7,
-      0,
-      1,
-      1
+      10,
+      36,
+      21,
+      6,
+      3,
+      2
     ],
-    "total": 16
+    "total": 78
   },
   {
     "lv": 31,
     "buckets": [
       0,
-      1,
-      4,
-      1,
+      5,
+      22,
+      11,
       2,
-      0,
+      1,
       0
     ],
-    "total": 8
+    "total": 41
   },
   {
     "lv": 40,
     "buckets": [
       0,
-      1,
-      3,
+      7,
+      14,
+      7,
       2,
-      0,
       1,
       0
     ],
-    "total": 7
+    "total": 31
   }
 ];
 const BUCKET_LABELS = ['0-1s','1-3s','3-5s','5-10s','10-20s','20-30s','30s+'];
@@ -717,23 +844,23 @@ new Chart(document.getElementById('ch-insta-share'), {
 // Segment comparison — min/user/day
 const SEGMENTS = [
   {
-    "name": "on-engaged\\n(61 users)",
-    "value": 27.03,
+    "name": "on-engaged\\n(287 users)",
+    "value": 31.87,
     "color": "#10B981"
   },
   {
-    "name": "off\\n(75 users)",
-    "value": 21.92,
+    "name": "off\\n(343 users)",
+    "value": 28.57,
     "color": "#6B7280"
   },
   {
-    "name": "on-no-cutscene\\n(10 users)",
-    "value": 8.58,
+    "name": "on-no-cutscene\\n(19 users)",
+    "value": 7.77,
     "color": "#94A3B8"
   },
   {
-    "name": "on-insta-skip\\n(4 users)",
-    "value": 6.87,
+    "name": "on-insta-skip\\n(14 users)",
+    "value": 10.51,
     "color": "#DC2626"
   }
 ];

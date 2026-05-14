@@ -1,12 +1,12 @@
 {
   "meta": {
-    "generated_at": "2026-05-14T00:31:05.553Z",
+    "generated_at": "2026-05-14T00:58:52.079Z",
     "date": "2026-05-12",
     "window_utc": {
       "start": "2026-05-11T17:00:00.000Z",
       "end": "2026-05-12T17:00:00.000Z"
     },
-    "scanned_events": 253040,
+    "scanned_events": 265034,
     "kept_in_window": 185292,
     "ab_config_source": "C:\\Users\\CPU60395-local\\Downloads\\Telegram Desktop\\ABTestConfig.json",
     "ab_rule": {

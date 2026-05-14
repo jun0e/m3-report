@@ -1,8 +1,8 @@
 {
   "date": "2026-05-13",
-  "generated_at": "2026-05-14T00:31:18.303Z",
-  "elapsed_sec": 3.1,
-  "source_dir": "C:\\Users\\CPU60395-local\\m3-data\\2026-05-12-from-zip",
+  "generated_at": "2026-05-14T00:58:21.424Z",
+  "elapsed_sec": 10.9,
+  "source_dir": "C:\\Users\\CPU60395-local\\m3-data\\2026-05-13",
   "steps": {
     "pipeline_ok": true,
     "ab_ok": true,
@@ -11,7 +11,7 @@
   "artifacts": [
     {
       "file": "data.json",
-      "bytes": 18167
+      "bytes": 18328
     },
     {
       "file": "report.html",
@@ -19,11 +19,11 @@
     },
     {
       "file": "ab-cutscene-analysis.json",
-      "bytes": 5154
+      "bytes": 5193
     },
     {
       "file": "cutscene-segments.json",
-      "bytes": 9048
+      "bytes": 9143
     }
   ]
 }
