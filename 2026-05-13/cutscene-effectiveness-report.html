@@ -380,7 +380,45 @@
   </section>
 
   <section>
-    <h2><span class="num">9</span> Methodology + scope</h2>
+    <h2><span class="num">9</span> Refined skip rate — what does "skip" actually mean?</h2>
+    <p class="lede">The headline 70% aggregate skip rate lumps together two very different player behaviors. Separating "rejected on sight" (≤3s) from "watched then bailed" (&gt;3s) reveals the design problem is mostly about <i>finish</i>, not <i>start</i>.</p>
+
+    <div class="callout info">
+      <h4>Two layered definitions of "skip"</h4>
+      <p><b>Game-side (binary, no threshold).</b> The game emits <code>cutscene_skipped</code> whenever the player hits the skip button, regardless of timing. The <code>secondsIntoPlayback</code> field records WHEN within the scene runtime. A skip at 0.5s and a skip at 30s of a 35s scene are both "skips" in the raw data.</p>
+      <p><b>Analysis-side (3s threshold, configurable).</b> We split <code>cutscene_skipped</code> events into:</p>
+      <ul style="margin: 6px 0; padding-left: 22px; font-size: 13px;">
+        <li><b>Insta-reject</b> (secondsIntoPlayback &le; 3) — rejected on sight, never engaged with the content</li>
+        <li><b>Engaged-skip</b> (secondsIntoPlayback &gt; 3) — watched at least a few seconds, then bailed before the end</li>
+      </ul>
+      <p>The 3-second threshold is a heuristic (<code>ENGAGEMENT_THRESHOLD_SEC</code> in <code>analyze-cutscene-segments.js</code>). Tune to 2s or 5s and re-run to test sensitivity.</p>
+    </div>
+
+    <h3 style="margin-top:24px; font-size:14px;">Refined skip resolution per cutscene</h3>
+    <div class="chart-card full" style="margin-bottom:14px;">
+      <h3>Each cutscene's outcome split — sums to 100%</h3>
+      <div class="meta">Red = insta-reject (&le;3s) · amber = engaged-skip (&gt;3s) · green = completed · grey = inconclusive (app backgrounded mid-scene)</div>
+      <div class="chart-canvas-wrap tall"><canvas id="ch-refined-skip"></canvas></div>
+    </div>
+
+    <table class="matrix" id="refined-skip-table" style="margin-bottom:14px;">
+      <thead><tr><th>Cutscene</th><th class="num">Shown</th><th class="num">Insta-reject (&le;3s)</th><th class="num">Engaged-skip (&gt;3s)</th><th class="num">Completed</th><th class="num">Inconclusive</th></tr></thead>
+      <tbody><!-- populated at render time --></tbody>
+    </table>
+
+    <div class="callout pass">
+      <h4>The reframe — most "skippers" are NOT rejecting the narrative</h4>
+      <p id="refined-headline">Of all cutscene shows, only a small minority are insta-rejected (skipped in &le;3 seconds). The bulk of "skips" come from players who <b>watched part of the scene before bailing</b>. This shifts the design problem: from <i>"players don't want narrative"</i> (which would imply cutting it) to <i>"players engage but don't finish"</i> (which implies shortening scenes, tightening hooks, or earning watch-through with better pacing).</p>
+    </div>
+
+    <div class="callout warn">
+      <h4>🟡 Late-game scenes have a different problem</h4>
+      <p id="refined-late-warn">Insta-reject share climbs sharply on late-game cutscenes (L21+). The cold-open earns attention; later scenes get pattern-matched as "more story, skip it." Late-game narrative needs either much shorter runtime or a different framing trigger.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">10</span> Methodology + scope</h2>
     <p class="lede">For audit and reproduction.</p>
 
     <table class="matrix">
@@ -881,6 +919,129 @@ new Chart(document.getElementById('ch-segment-time'), {
     scales: { x: { beginAtZero: true, title: { display: true, text: 'minutes per user per day' } } }
   }
 });
+
+// ──────────────────────────────────────────────────────────────────────────────
+// SECTION 9 — Refined skip rate (derived from CUTSCENES + CS_SKIP_DIST at render time)
+// Splits each cutscene_shown event into one of four mutually-exclusive outcomes:
+//   insta-reject (skipped ≤3s) · engaged-skip (skipped >3s) · completed · inconclusive
+// All numbers below come from data already inlined; no external fetch.
+// ──────────────────────────────────────────────────────────────────────────────
+(function refinedSkip() {
+  // Build per-cutscene refined splits
+  // CUTSCENES has: shown, skip_pct, finish_pct, before_level, length_sec
+  // CS_SKIP_DIST has: lv, buckets[7], total (skip count for that cutscene)
+  // Bucket indices: 0=0-1s, 1=1-3s, 2=3-5s, 3=5-10s, 4=10-20s, 5=20-30s, 6=30s+
+  const rows = CUTSCENES.map(c => {
+    const dist = CS_SKIP_DIST.find(d => d.lv === c.before_level);
+    const totalSkips = dist ? dist.total : 0;
+    const insta = dist ? (dist.buckets[0] + dist.buckets[1]) : 0;
+    const engagedSkip = totalSkips - insta;
+    const completed = c.shown * (c.finish_pct || 0) / 100;
+    const completedRounded = Math.round(completed);
+    const inconclusive = Math.max(0, c.shown - totalSkips - completedRounded);
+    return {
+      level: c.before_level, shown: c.shown,
+      insta, engagedSkip, completed: completedRounded, inconclusive
+    };
+  });
+
+  // Aggregate
+  const agg = rows.reduce((a, r) => ({
+    shown: a.shown + r.shown,
+    insta: a.insta + r.insta,
+    engagedSkip: a.engagedSkip + r.engagedSkip,
+    completed: a.completed + r.completed,
+    inconclusive: a.inconclusive + r.inconclusive
+  }), { shown: 0, insta: 0, engagedSkip: 0, completed: 0, inconclusive: 0 });
+
+  const pct = (n, total) => total ? (n / total * 100).toFixed(1) + '%' : '—';
+
+  // ── Populate refined-skip-table
+  const tbody = document.querySelector('#refined-skip-table tbody');
+  if (tbody) {
+    rows.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>L${r.level}</td><td class="num">${r.shown}</td>` +
+        `<td class="num">${r.insta} (${pct(r.insta, r.shown)})</td>` +
+        `<td class="num">${r.engagedSkip} (${pct(r.engagedSkip, r.shown)})</td>` +
+        `<td class="num">${r.completed} (${pct(r.completed, r.shown)})</td>` +
+        `<td class="num">${r.inconclusive} (${pct(r.inconclusive, r.shown)})</td>`;
+      tbody.appendChild(tr);
+    });
+    // Total row
+    const trT = document.createElement('tr');
+    trT.style.borderTop = '2px solid var(--slate)';
+    trT.style.fontWeight = '700';
+    trT.style.background = '#F9FAFB';
+    trT.innerHTML = `<td>TOTAL</td><td class="num">${agg.shown}</td>` +
+      `<td class="num">${agg.insta} (${pct(agg.insta, agg.shown)})</td>` +
+      `<td class="num">${agg.engagedSkip} (${pct(agg.engagedSkip, agg.shown)})</td>` +
+      `<td class="num">${agg.completed} (${pct(agg.completed, agg.shown)})</td>` +
+      `<td class="num">${agg.inconclusive} (${pct(agg.inconclusive, agg.shown)})</td>`;
+    tbody.appendChild(trT);
+  }
+
+  // ── Stacked bar chart per cutscene
+  const ctx = document.getElementById('ch-refined-skip');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: rows.map(r => 'L' + r.level + ' (N=' + r.shown + ')'),
+        datasets: [
+          { label: 'Insta-reject (≤3s)',  data: rows.map(r => r.insta),        backgroundColor: '#DC2626' },
+          { label: 'Engaged-skip (>3s)',  data: rows.map(r => r.engagedSkip),  backgroundColor: '#F59E0B' },
+          { label: 'Completed',           data: rows.map(r => r.completed),    backgroundColor: '#10B981' },
+          { label: 'Inconclusive',        data: rows.map(r => r.inconclusive), backgroundColor: '#9CA3AF' }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { callbacks: {
+            label: ctx => {
+              const r = rows[ctx.dataIndex];
+              const totals = [r.insta, r.engagedSkip, r.completed, r.inconclusive];
+              const total = r.shown;
+              const pctV = total ? (ctx.parsed.y / total * 100).toFixed(1) : 0;
+              return ctx.dataset.label + ': ' + ctx.parsed.y + ' (' + pctV + '%)';
+            }
+          } }
+        },
+        scales: {
+          x: { stacked: true, title: { display: true, text: 'Cutscene' } },
+          y: { stacked: true, beginAtZero: true, title: { display: true, text: 'cutscene_shown count' } }
+        }
+      }
+    });
+  }
+
+  // ── Dynamic headline text — fills in the actual numbers
+  const headline = document.getElementById('refined-headline');
+  if (headline) {
+    headline.innerHTML = 'Of <b>' + agg.shown + '</b> cutscene shows, only <b>' +
+      pct(agg.insta, agg.shown) + ' (' + agg.insta + ')</b> are insta-rejected (skipped in ≤3s). The bulk — <b>' +
+      pct(agg.engagedSkip, agg.shown) + ' (' + agg.engagedSkip + ')</b> — are watched-then-bailed (engaged-skip). <b>' +
+      pct(agg.completed, agg.shown) + ' (' + agg.completed + ')</b> are completed. <b>' +
+      pct(agg.inconclusive, agg.shown) + ' (' + agg.inconclusive + ')</b> are inconclusive (app backgrounded mid-scene). ' +
+      'This shifts the design problem: from <i>"players don\'t want narrative"</i> (which would imply cutting it) to <i>"players engage but don\'t finish"</i> (which implies shortening scenes, tightening hooks, or earning watch-through with better pacing).';
+  }
+
+  // ── Dynamic late-game warning
+  const lateRows = rows.filter(r => r.level >= 21);
+  const lateInsta = lateRows.reduce((a, r) => a + r.insta, 0);
+  const lateShown = lateRows.reduce((a, r) => a + r.shown, 0);
+  const earlyRows = rows.filter(r => r.level < 21);
+  const earlyInsta = earlyRows.reduce((a, r) => a + r.insta, 0);
+  const earlyShown = earlyRows.reduce((a, r) => a + r.shown, 0);
+  const lateWarn = document.getElementById('refined-late-warn');
+  if (lateWarn && lateShown > 0) {
+    lateWarn.innerHTML = '<b>Early-game (L1-L11):</b> ' + earlyInsta + ' of ' + earlyShown + ' shows were insta-rejected (' + pct(earlyInsta, earlyShown) + ').<br>' +
+      '<b>Late-game (L21+):</b> ' + lateInsta + ' of ' + lateShown + ' shows were insta-rejected (' + pct(lateInsta, lateShown) + ').<br>' +
+      'The cold-open earns near-universal attention; later scenes get pattern-matched as "more story, skip it." Late-game narrative needs either much shorter runtime or a different framing trigger to earn the same patience.';
+  }
+})();
 </script>
 </body>
 </html>
