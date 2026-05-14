@@ -2,10 +2,10 @@
   "meta": {
     "pipeline_version": "v2 (event-log)",
     "source_mode": "local",
-    "source": "local-dump: C:\\Users\\CPU60395-local\\Downloads\\Telegram Desktop\\metrics",
+    "source": "local-dump: C:\\Users\\CPU60395-local\\m3-data\\2026-05-12-from-zip",
     "target_date": "2026-05-12",
-    "today_vn": "2026-05-13",
-    "generated_at": "2026-05-13T07:46:28.300Z",
+    "today_vn": "2026-05-14",
+    "generated_at": "2026-05-14T00:31:04.416Z",
     "scope": "Tabs 0-5 (Tab 5 narrative now live) · multi-day retention INSUFFICIENT",
     "insufficient_n_threshold": 1,
     "spark_window_days": 0,

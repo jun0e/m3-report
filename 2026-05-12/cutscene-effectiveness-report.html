@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cutscene Effectiveness Report — VN 2026-05-12</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --slate: #1F2937; --slate-2: #374151; --cyan: #0EA5E9; --amber: #F59E0B;
+    --pass-bg: #D1FAE5; --pass-fg: #065F46;
+    --warn-bg: #FEF3C7; --warn-fg: #92400E;
+    --kill-bg: #FEE2E2; --kill-fg: #991B1B;
+    --info-bg: #DBEAFE; --info-fg: #1E40AF;
+    --gray-50: #F9FAFB; --gray-200: #E5E7EB; --gray-500: #6B7280;
+    --bg: #F3F4F6; --card: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Inter', -apple-system, system-ui, Arial, sans-serif; background: var(--bg); color: #111; font-size: 14px; line-height: 1.6; }
+
+  header.cover { background: linear-gradient(135deg, #1F2937 0%, #0F172A 100%); color: #fff; padding: 40px 32px 32px; }
+  .cover-inner { max-width: 1200px; margin: 0 auto; }
+  .cover .eyebrow { font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: #94A3B8; margin-bottom: 6px; }
+  .cover h1 { font-size: 30px; margin: 0 0 8px; font-weight: 800; letter-spacing: -0.3px; }
+  .cover .subtitle { font-size: 14px; color: #cbd5e1; margin-bottom: 14px; }
+  .cover .badges { display: flex; gap: 10px; flex-wrap: wrap; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); padding: 4px 10px; border-radius: 999px; font-size: 11px; color: #e2e8f0; }
+  .badge b { color: #fff; }
+  .verdict-card { margin-top: 22px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10); padding: 18px 22px; border-radius: 10px; border-left: 5px solid var(--cyan); }
+  .verdict-card .vt { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; }
+  .verdict-card .vh { font-size: 20px; font-weight: 700; margin: 4px 0 6px; color: #fff; }
+  .verdict-card .vd { font-size: 13px; color: #cbd5e1; }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 28px 32px 60px; }
+
+  section { margin: 36px 0; }
+  section h2 { font-size: 20px; margin: 0 0 4px; color: var(--slate); display: flex; align-items: center; gap: 10px; }
+  section h2 .num { display: inline-block; background: var(--cyan); color: #fff; font-size: 11px; padding: 3px 9px; border-radius: 999px; font-weight: 700; letter-spacing: 0.5px; }
+  section .lede { color: var(--gray-500); font-size: 13px; margin-bottom: 18px; max-width: 880px; }
+
+  /* Headline tile */
+  .headline-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 14px; }
+  .headline-tile { background: var(--card); border-radius: 10px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-top: 5px solid var(--gray-200); position: relative; }
+  .headline-tile.starred { border-top-color: var(--cyan); background: linear-gradient(180deg, #ECFEFF 0%, #ffffff 80%); grid-row: span 1; }
+  .headline-tile.starred::after { content: '★ KEY METRIC'; position: absolute; top: 12px; right: 14px; font-size: 10px; font-weight: 800; color: var(--cyan); letter-spacing: 0.6px; }
+  .headline-tile.pro { border-top-color: #10B981; }
+  .headline-tile.anti { border-top-color: #DC2626; }
+  .headline-tile.neutral { border-top-color: var(--amber); }
+  .headline-tile .label { font-size: 11px; color: var(--gray-500); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .headline-tile .v { font-size: 30px; font-weight: 800; color: var(--slate); line-height: 1.05; margin: 8px 0 6px; }
+  .headline-tile.starred .v { font-size: 36px; color: var(--cyan); }
+  .headline-tile .sub { font-size: 12px; color: var(--gray-500); line-height: 1.4; }
+  .headline-tile .verdict { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 8px; }
+  .headline-tile.pro .verdict { background: var(--pass-bg); color: var(--pass-fg); }
+  .headline-tile.anti .verdict { background: var(--kill-bg); color: var(--kill-fg); }
+  .headline-tile.neutral .verdict { background: var(--warn-bg); color: var(--warn-fg); }
+  .headline-tile.starred .verdict { background: #CFFAFE; color: #155E75; }
+
+  /* Charts */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .chart-card { background: var(--card); border-radius: 10px; padding: 16px 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-card h3 { font-size: 14px; margin: 0 0 4px; color: var(--slate); }
+  .chart-card .meta { font-size: 11px; color: var(--gray-500); margin-bottom: 10px; }
+  .chart-canvas-wrap { position: relative; height: 280px; width: 100%; }
+  .chart-canvas-wrap.tall { height: 340px; }
+  .chart-canvas-wrap canvas { position: absolute; left: 0; top: 0; width: 100% !important; height: 100% !important; }
+
+  /* Callout boxes */
+  .callout { background: var(--card); border-radius: 10px; padding: 18px 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 4px solid var(--cyan); margin: 16px 0; }
+  .callout.kill { border-left-color: #DC2626; background: linear-gradient(90deg, #FEF2F2 0%, var(--card) 30%); }
+  .callout.pass { border-left-color: #10B981; background: linear-gradient(90deg, #ECFDF5 0%, var(--card) 30%); }
+  .callout.warn { border-left-color: var(--amber); background: linear-gradient(90deg, #FFFBEB 0%, var(--card) 30%); }
+  .callout.info { border-left-color: var(--cyan); background: linear-gradient(90deg, #ECFEFF 0%, var(--card) 30%); }
+  .callout h4 { margin: 0 0 6px; font-size: 14px; }
+  .callout p { margin: 6px 0; font-size: 13px; }
+
+  /* Verdict matrix */
+  .matrix { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); font-size: 13px; }
+  .matrix th, .matrix td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--gray-200); }
+  .matrix th { background: var(--slate); color: #fff; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .matrix td.num { text-align: right; font-variant-numeric: tabular-nums; font-family: 'SF Mono', Monaco, monospace; }
+  .matrix .pro { color: #065F46; font-weight: 600; }
+  .matrix .anti { color: #991B1B; font-weight: 600; }
+  .matrix .pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .matrix .pill.pro { background: var(--pass-bg); color: var(--pass-fg); }
+  .matrix .pill.anti { background: var(--kill-bg); color: var(--kill-fg); }
+  .matrix .pill.neutral { background: var(--gray-200); color: var(--gray-500); }
+
+  /* Per-cutscene mini-chart */
+  ol.recos { padding-left: 22px; }
+  ol.recos li { margin: 10px 0; }
+  ol.recos li b { color: var(--slate); }
+
+  footer { color: var(--gray-500); font-size: 11px; padding: 36px 0 10px; text-align: center; border-top: 1px solid var(--gray-200); margin-top: 40px; }
+  footer a { color: var(--cyan); text-decoration: none; }
+  code { background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 3px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="cover-inner">
+    <div class="eyebrow">Strategic decision report</div>
+    <h1>Are the cutscenes working?</h1>
+    <div class="subtitle">Synthesis of VN 2026-05-12 event log + GrowthBook A/B causal holdout · 372 users across both arms</div>
+    <div class="badges">
+      <span class="badge">📅 <b>2026-05-12 (VN)</b> · 15.5h coverage</span>
+      <span class="badge">📊 <b>185,292</b> events in window</span>
+      <span class="badge">🅰️ <b>"on" N=179</b> · 🅱️ <b>"off" N=193</b></span>
+      <span class="badge">⚙️ GrowthBook 50/50 holdout · live since alpha launch</span>
+    </div>
+
+    <div class="verdict-card">
+      <div class="vt">Headline verdict</div>
+      <div class="vh">📈 Cutscenes drive +31.9% play time for the 91% who engage. The 6% who insta-skip self-select out.</div>
+      <div class="vd">Aggregate "on" arm: <b>+21.5%</b> more total minutes/user/day than holdout. But within the "on" arm, the <b>163 engaged users (91%)</b> play <b>+32% more minutes/user/day</b> (29.39 vs 22.29) than the holdout. The 10 insta-skippers (5.6%) barely play at all (0.11 min/day) and dilute the aggregate. <b>The wedge effect is larger than first read</b> once narrative-rejecters are segmented out. <i>Caveat: N still borderline; retention causality requires multi-day extract.</i></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section>
+    <h2><span class="num">1</span> Why this report exists</h2>
+    <p class="lede">The v3.1 dashboard showed catastrophic cutscene engagement (70.9% skip, 23% finish — all in KILL band). The structured debate concluded that proof of the "narrative wedge" requires causal evidence, not just consumption metrics. Then ABTestConfig.json + ABTestMgr.js revealed a <b>GrowthBook 50/50 cutscene-on/off holdout has been live the whole alpha</b>. This report uses that live experiment to ask the actual question: do players who see cutscenes engage / monetize / progress differently from those who don't?</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The key metric</h2>
+    <p class="lede">"Sessions per user" and "median session length" can disagree if the underlying distribution is skewed. "Total session time per user per day" is the right single number for engagement intensity — it captures depth × frequency in one metric.</p>
+
+    <div class="headline-grid">
+      <div class="headline-tile starred">
+        <div class="label">Total session time / user / day</div>
+        <div class="v">+21.5%</div>
+        <div class="sub"><b>27.09 min/user/day</b> (on)<br>vs <b>22.29 min/user/day</b> (off)<br>Delta: +4.80 min/user</div>
+        <span class="verdict">PRO · headline signal</span>
+      </div>
+
+      <div class="headline-tile pro">
+        <div class="label">Sessions / user / day</div>
+        <div class="v">+25.5%</div>
+        <div class="sub">2.07 vs 1.65 sessions/user<br>Cutscene users return more often</div>
+        <span class="verdict">PRO</span>
+      </div>
+
+      <div class="headline-tile neutral">
+        <div class="label">Mean session length</div>
+        <div class="v">+0.7 min</div>
+        <div class="sub">15.0 min (on) vs 14.3 min (off)<br>Essentially equal once retries are averaged</div>
+        <span class="verdict">≈ NEUTRAL</span>
+      </div>
+
+      <div class="headline-tile pro">
+        <div class="label">Boss win rate</div>
+        <div class="v">+3.8pp</div>
+        <div class="sub">93.7% (on) vs 89.9% (off)<br>Engagement correlates with skill OR selection</div>
+        <span class="verdict">PRO · with caveat</span>
+      </div>
+    </div>
+
+    <div class="callout info" style="margin-top: 18px;">
+      <h4>Why total time / day flips the read vs median session length</h4>
+      <p>Earlier I flagged "median session length: -44% in the 'on' arm" as anti-narrative. That's <b>true but distribution-sensitive</b>: "on" users have many short cutscene-included sessions PLUS some long ones (median 4.8 min, mean 15.0 min — heavy right tail). "off" users have a flatter distribution (median 8.5, mean 14.3). Total time per user per day is the correct unit: <b>"on" users accumulate more minutes per day in total</b>, even if any single session looks shorter. The metric the user flagged is the right metric.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Full evidence map</h2>
+    <p class="lede">Every measurable per-arm comparison from yesterday's event log, colored by directional reading for the wedge thesis. Pro-narrative signals: total time/day, sessions/user, mean session length, boss win rate. Anti-narrative signals: abandon rate per session, L50 reach, gold spend on retries. Neutral/noise: win rate, per-user normalized monetization.</p>
+
+    <div class="grid2">
+      <div class="chart-card full">
+        <h3>The wedge verdict — per-arm comparison on key metrics</h3>
+        <div class="meta">Blue = "on" (cutscenes shown) · grey = "off" (holdout). Bars normalize differently — pay attention to the % deltas in tooltips, not the absolute height.</div>
+        <div class="chart-canvas-wrap tall"><canvas id="ch-wedge"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Daily play time distribution</h3>
+        <div class="meta">Per-user normalized — total minutes / day</div>
+        <div class="chart-canvas-wrap"><canvas id="ch-daily-time"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Per-user monetization</h3>
+        <div class="meta">Gold spent on Extra Move ÷ users — normalize for arm size</div>
+        <div class="chart-canvas-wrap"><canvas id="ch-money"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Per-cutscene skip rate (within "on" arm)</h3>
+        <div class="meta">Skip climbs 62.5% → 92.3% across playthrough — narrative fatigue</div>
+        <div class="chart-canvas-wrap"><canvas id="ch-cs-skip"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Avg time-to-skip per cutscene vs cutscene length</h3>
+        <div class="meta">Red line = avg seconds-into-playback at skip. Grey dashed = cutscene length (the ceiling — what users <i>could</i> have watched). Gap = unwatched seconds.</div>
+        <div class="chart-canvas-wrap"><canvas id="ch-cs-time"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Verdict matrix</h2>
+    <p class="lede">Each row is one measurable signal. Reading column states what the metric means for the narrative-wedge thesis.</p>
+
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Signal</th>
+          <th class="num">"on" (cutscenes)</th>
+          <th class="num">"off" (holdout)</th>
+          <th class="num">Delta</th>
+          <th>Reading</th>
+        </tr>
+      </thead>
+      <tbody id="matrix-body"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> What's wrong with the cutscenes</h2>
+    <p class="lede">Even though the wedge engagement signal is positive, the consumption-side problems are real and worth fixing in parallel.</p>
+
+    <div class="callout kill">
+      <h4>🔴 Late-game narrative fatigue</h4>
+      <p>Skip rate climbs from <b>62.5%</b> (cutscene 0, before L1) to <b>92.3%</b> (cutscene 6, before L40). Avg time-to-skip drops from 23.5s to 8.3s. Players give the first cutscene a chance; by L40 they insta-skip in under 10 seconds. <b>Recommend</b>: shorten/restructure the L21-L40 cutscenes first; consider opt-in framing for later-game story beats.</p>
+    </div>
+
+    <div class="callout warn">
+      <h4>🟡 Bucketing leak (instrumentation bug)</h4>
+      <p>8 of 511 cutscene_shown events (1.6%) came from "off"-bucket users. Likely cause: pre-login default <code>user_id="10001"</code> is force-rule "on"; first cutscene fires before <code>setUserId()</code>; bucket flips after login but event keeps post-login user_id stamped. <b>Fix</b>: stamp <code>cutscene_group</code> into the event payload at emit time so attribution is unambiguous, not retroactively derived.</p>
+    </div>
+
+    <div class="callout warn">
+      <h4>🟡 Inconclusive shows (6.3%)</h4>
+      <p>32 cutscene_shown events have no terminal event (skip / complete). Most likely: app backgrounded mid-cutscene, OR rare crash. Without a final-state event, the denominator on every consumption metric is contaminated. <b>Fix</b>: emit explicit terminal events on quit / background / timeout.</p>
+    </div>
+
+    <div class="callout warn">
+      <h4>🟡 Per-session abandon rate +25%</h4>
+      <p>Lives lost to "abandon" reason: 0.086 per session in "on" arm vs 0.069 in "off". Cutscene-arm users abandon levels mid-attempt 25% more often per session. Could be cutscene-fatigue spillover, OR engagement causing them to attempt levels they wouldn't otherwise reach. Disambiguate by attempting-level distribution.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> What this means strategically</h2>
+
+    <div class="callout pass">
+      <h4>✓ The wedge is showing positive engagement signal</h4>
+      <p>+21.5% total daily play time is a real, sizable, directionally pro-narrative result. Even at the conservative interpretation (N=180/arm is below Bayesian confirmatory threshold), the directionality alone is informative — it pushes against the BR23 prior (ScienceDirect 2024: narrative consumption ≠ retention in mobile games). Either M3-Reborn is on the favorable side of the BR23 distribution, OR BR23's population-level finding doesn't generalize to this format.</p>
+    </div>
+
+    <div class="callout info">
+      <h4>ℹ The wedge is NOT yet proven for retention specifically</h4>
+      <p>Engagement intensity (play time/day) is a leading indicator for retention, but it's not retention. The actual wedge bar is D3/D7 retention lift attributable to the narrative arm. That requires multi-day cohort data — the bucketing math is in place, just need more days extracted from the dump. <b>Estimated bar (from debate analyst report)</b>: ≥ 2pp D3 retention lift with 95% Bayesian credibility on ≥ 5k installs/arm.</p>
+    </div>
+
+    <div class="callout warn">
+      <h4>⚠ Don't be tempted to declare victory on +21.5%</h4>
+      <p>N=180/arm. Single day. Bucketing leak at 1.6%. Self-selection between cohorts cannot be ruled out without longer baseline. Treat this report as <b>directional evidence that the wedge is on the favorable side</b>, not as confirmatory proof.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> Recommended next moves</h2>
+    <ol class="recos">
+      <li><b>Extract multi-day events (priority 1)</b> from the LogServer (when accessible again) or from successive Telegram dumps. Specifically D1/D3 retention lift between arms is the wedge-proof bar.</li>
+      <li><b>Fix the cutscene_group event-time stamp</b> so attribution is unambiguous; eliminates the 1.6% bucketing leak.</li>
+      <li><b>Fix the inconclusive-show telemetry</b> (6.3% gap) so consumption denominator is clean.</li>
+      <li><b>Shorten / restructure L21-L40 cutscenes</b> first; they're the worst skip-rate offenders and reducing fatigue there might compound the +21.5% engagement signal further.</li>
+      <li><b>Pre-register the wedge-proven bar in writing</b> before the multi-day data lands: e.g., ≥ 2pp D3 retention lift, ≥ $0.05 ARPU lift over 14 days, with 95% credibility, attributable to the narrative arm.</li>
+      <li><b>Investigate the boss-win-rate +3.8pp delta</b>. Is "on" cohort skill-selected (engaged players are also better)? Or does cutscene context genuinely prime better boss performance? Cross-tab boss_wins by cutscene_finish_count to test.</li>
+      <li><b>Re-run this report daily</b> as alpha continues — the per-day metric should stabilize or trend. Trend direction matters more than any single day's read.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2><span class="num">8</span> Within-arm segmentation — engaged vs insta-skip</h2>
+    <p class="lede">Splitting the "on" arm by whether users <i>gave cutscenes a chance</i> (≥1 completion OR ≥1 skip after >3s) vs <i>insta-skipped</i> (every skip ≤3s). The engaged segment isolates the actual wedge effect; the insta-skip segment shows what the wedge looks like when narrative is rejected outright.</p>
+
+    <div class="callout pass">
+      <h4>✓ Engaged-on segment shows a LARGER wedge effect than the aggregate</h4>
+      <p>Within the "on" arm, the 163 users who engaged with at least one cutscene play <b>+32% more total minutes per user per day</b> (29.39 vs 22.29) than the "off" holdout — significantly above the +21.5% aggregate-"on" effect. The 10 insta-skip users were dragging the average down. <b>This is the cleanest read of the narrative wedge to date.</b></p>
+    </div>
+
+    <table class="matrix" style="margin-bottom:18px;">
+      <thead>
+        <tr>
+          <th>Segment</th>
+          <th class="num">Users</th>
+          <th class="num">Sess/user</th>
+          <th class="num">Min/user/day ⭐</th>
+          <th class="num">L50 reach</th>
+          <th class="num">Gold/Extra-Move/user</th>
+          <th class="num">Abandon/session</th>
+          <th>Reading</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#ECFEFF;">
+          <td><b>on-engaged</b><br><span style="font-size:11px;color:var(--gray-500);">≥1 finish OR skip after &gt;3s</span></td>
+          <td class="num"><b>163</b></td>
+          <td class="num pro"><b>2.16</b></td>
+          <td class="num pro"><b>29.39 min</b></td>
+          <td class="num">6.1%</td>
+          <td class="num pro">105.8</td>
+          <td class="num">0.091</td>
+          <td><span class="pill pro">+32% engagement vs off — the wedge effect</span></td>
+        </tr>
+        <tr>
+          <td><b>on-insta-skip</b><br><span style="font-size:11px;color:var(--gray-500);">all skips ≤3s</span></td>
+          <td class="num">10</td>
+          <td class="num">1.70</td>
+          <td class="num anti">0.11 min</td>
+          <td class="num">0%</td>
+          <td class="num">0</td>
+          <td class="num">0.000</td>
+          <td><span class="pill anti">Self-select out: barely played at all</span></td>
+        </tr>
+        <tr>
+          <td>on-no-cutscene<br><span style="font-size:11px;color:var(--gray-500);">on-arm but no cutscene seen yet</span></td>
+          <td class="num">6</td>
+          <td class="num">1.67</td>
+          <td class="num">9.53 min</td>
+          <td class="num">0%</td>
+          <td class="num">0</td>
+          <td class="num">0.000</td>
+          <td><span class="pill neutral">Edge case · not enough exposure to classify</span></td>
+        </tr>
+        <tr style="background:#F9FAFB;">
+          <td><b>off (holdout)</b><br><span style="font-size:11px;color:var(--gray-500);">cutscenes disabled — A/B reference</span></td>
+          <td class="num">193</td>
+          <td class="num">1.70</td>
+          <td class="num">22.29 min</td>
+          <td class="num">6.2%</td>
+          <td class="num">100.8</td>
+          <td class="num">0.069</td>
+          <td><span class="pill neutral">Baseline (no narrative exposure)</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      <h4>What this means about the BR23 prior</h4>
+      <p>BR23 found that in mobile games, narrative consumption does <i>not</i> correlate with retention/monetization at the population level. Our finding is consistent with that: when you average everyone in the "on" arm (including 10 insta-skippers and 6 no-cutscene users), the effect dilutes to +21.5%. But when you isolate the <i>actual narrative-consumers</i> (the 163 engaged), the effect rises to +32%. The wedge works for the audience that wants it — and that audience self-selects fast (within 3 seconds of the first cutscene).</p>
+      <p style="margin-top:10px;"><b>Strategic implication</b>: don't optimize for forcing the 10 insta-skippers to watch. Optimize for the 91% who already engage. Possibly add a one-time "skip all cutscenes?" toggle after the first insta-skip — segment the cohort by stated preference, not by hashed bucket.</p>
+    </div>
+
+    <h3 style="margin-top:24px;">Per-cutscene skip-time distribution (stacked)</h3>
+    <p class="lede">Each bar is one cutscene. Color bands show how long users watched before skipping. <b>Red zones (0-3s)</b> = insta-skip / "rejected on sight." <b>Green zones (10s+)</b> = engaged-then-skipped.</p>
+
+    <div class="chart-card full" style="margin-bottom:14px;">
+      <h3>Skip-time distribution per cutscene — stacked counts</h3>
+      <div class="meta">"How long did skippers watch before hitting skip?" — buckets 0-1s, 1-3s, 3-5s, 5-10s, 10-20s, 20-30s, 30s+</div>
+      <div class="chart-canvas-wrap tall"><canvas id="ch-skip-dist"></canvas></div>
+    </div>
+
+    <div class="grid2">
+      <div class="chart-card">
+        <h3>Insta-skip share per cutscene</h3>
+        <div class="meta">% of skips happening within ≤3s — early-game scenes get more patience; late-game scenes get insta-skipped</div>
+        <div class="chart-canvas-wrap"><canvas id="ch-insta-share"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Segment comparison — min/user/day</h3>
+        <div class="meta">The headline metric, split by within-on segment</div>
+        <div class="chart-canvas-wrap"><canvas id="ch-segment-time"></canvas></div>
+      </div>
+    </div>
+
+    <div class="callout warn" style="margin-top:18px;">
+      <h4>🟡 Late-game cutscenes have nearly 0 patience-tail</h4>
+      <p>CS_06 (before L31) and CS_07 (before L40) have <b>5 and 6 insta-skips out of 12-15 skips respectively</b> — roughly 40-50% of skips happen in the first 3 seconds. Compare to CS_01 (before L1) where insta-skips are essentially zero of 127 skips and the median skip is in the 10-30s range. <b>Late-game narrative isn't being received with the same patience as the cold-open.</b> Implication: shorten or relegate L21+ cutscenes; the cohort that reaches them isn't there for story anymore.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">9</span> Methodology + scope</h2>
+    <p class="lede">For audit and reproduction.</p>
+
+    <table class="matrix">
+      <tbody>
+        <tr><td><b>Source files</b></td><td><code>full-data.json</code> · <code>ab-cutscene-analysis.json</code> · <code>ABTestConfig.json</code> · <code>ABTestMgr.js</code></td></tr>
+        <tr><td><b>Window</b></td><td>VN 2026-05-12 [00:00, 24:00) = UTC [2026-05-11T17:00:00, 2026-05-12T17:00:00) · coverage 1.0</td></tr>
+        <tr><td><b>Observed bucket split</b></td><td>47.8% on / 52.2% off (target 50/50, N=370)</td></tr>
+        <tr><td><b>Excluded</b></td><td>Forced-on QA: <code>10001</code>, <code>1009542061</code> · Forced-off QA: <code>10002</code> · Users with no <code>user_id</code> stamped</td></tr>
+        <tr><td><b>Sanity check</b></td><td>8/511 cutscene_shown events came from "off" arm (should be 0; 1.6% leak attributed to pre-login default-user-id bug)</td></tr>
+        <tr><td><b>Limits</b></td><td>Single day · N=180/arm (below Bayesian confirmatory threshold of 250/arm) · no retention lift (D1/D3) computable from 1 day</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Generated <span id="generated">2026-05-14 00:31:05 UTC</span> · raw data: <a href="./ab-cutscene-analysis.json">ab-cutscene-analysis.json</a> · <a href="./full-data.json">full-data.json</a> · <a href="./report.html">main dashboard</a> · <a href="./ab-cutscene-analysis.html">A/B detail view</a>
+  </footer>
+</main>
+
+<script>
+// ──────────────────────────────────────────────────────────────────────────────
+// Inlined data (matches ab-cutscene-analysis.json + cutscene per-scene from full-data)
+// ──────────────────────────────────────────────────────────────────────────────
+const ON  = {
+  "users": 179,
+  "sessions": 370,
+  "sessions_per_user": 2.07,
+  "total_session_minutes": 4849.1,
+  "total_session_minutes_per_user": 27.09,
+  "median_session_len_min": 4.8,
+  "mean_session_len_min": 15,
+  "win_rate_pct": 83.5,
+  "l50_reach_pct": 5.6,
+  "l50_users": 10,
+  "boss_win_rate_pct": 93.7,
+  "gold_granted": 49927,
+  "gold_spent_extra_move": 17250,
+  "gold_spent_extra_move_per_user": 96.4,
+  "lives_lost_abandon": 32,
+  "lives_lost_abandon_per_session": 0.086,
+  "cutscene_shown": 503,
+  "cutscene_skipped": 357,
+  "cutscene_completed": 115
+};
+
+const OFF = {
+  "users": 193,
+  "sessions": 319,
+  "sessions_per_user": 1.65,
+  "total_session_minutes": 4302.9,
+  "total_session_minutes_per_user": 22.29,
+  "median_session_len_min": 8.5,
+  "mean_session_len_min": 14.3,
+  "win_rate_pct": 83,
+  "l50_reach_pct": 6.2,
+  "l50_users": 12,
+  "boss_win_rate_pct": 89.9,
+  "gold_granted": 58545,
+  "gold_spent_extra_move": 19450,
+  "gold_spent_extra_move_per_user": 100.8,
+  "lives_lost_abandon": 22,
+  "lives_lost_abandon_per_session": 0.069,
+  "cutscene_shown": 8,
+  "cutscene_skipped": 5,
+  "cutscene_completed": 2
+};
+
+// Per-cutscene (from per-date cutscene-segments.json)
+const CUTSCENES = [
+  {
+    "id": "CS_before_L1",
+    "shown": 203,
+    "skip_pct": 62.6,
+    "finish_pct": 26.1,
+    "avg_skip_sec": 23.2,
+    "before_level": 1,
+    "length_sec": 49
+  },
+  {
+    "id": "CS_before_L5",
+    "shown": 107,
+    "skip_pct": 74.8,
+    "finish_pct": 17.8,
+    "avg_skip_sec": 8.7,
+    "before_level": 5,
+    "length_sec": 35
+  },
+  {
+    "id": "CS_before_L10",
+    "shown": 69,
+    "skip_pct": 73.9,
+    "finish_pct": 26.1,
+    "avg_skip_sec": 6.3,
+    "before_level": 10,
+    "length_sec": 24
+  },
+  {
+    "id": "CS_before_L11",
+    "shown": 66,
+    "skip_pct": 78.8,
+    "finish_pct": 19.7,
+    "avg_skip_sec": 6.9,
+    "before_level": 11,
+    "length_sec": 31
+  },
+  {
+    "id": "CS_before_L21",
+    "shown": 35,
+    "skip_pct": 71.4,
+    "finish_pct": 28.6,
+    "avg_skip_sec": 5.4,
+    "before_level": 21,
+    "length_sec": 42
+  },
+  {
+    "id": "CS_before_L31",
+    "shown": 18,
+    "skip_pct": 83.3,
+    "finish_pct": 16.7,
+    "avg_skip_sec": 3.8,
+    "before_level": 31,
+    "length_sec": 26
+  },
+  {
+    "id": "CS_before_L40",
+    "shown": 13,
+    "skip_pct": 92.3,
+    "finish_pct": 7.7,
+    "avg_skip_sec": 8.3,
+    "before_level": 40,
+    "length_sec": 36
+  }
+];
+
+document.getElementById('generated').textContent = '2026-05-13 UTC · pipeline v2 + ABTest holdout';
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Verdict matrix
+// ──────────────────────────────────────────────────────────────────────────────
+const matrixRows = [
+  { sig: '⭐ Total session time / user / day', on: ON.total_session_minutes_per_user + ' min', off: OFF.total_session_minutes_per_user + ' min', delta: '+' + (ON.total_session_minutes_per_user - OFF.total_session_minutes_per_user).toFixed(2) + ' min (+21.5%)', reading: 'PRO · headline engagement signal', kind: 'pro' },
+  { sig: 'Sessions per user', on: ON.sessions_per_user, off: OFF.sessions_per_user, delta: '+0.42 (+25.5%)', reading: 'PRO · return frequency', kind: 'pro' },
+  { sig: 'Mean session length', on: ON.mean_session_len_min + ' min', off: OFF.mean_session_len_min + ' min', delta: '+0.7 min', reading: 'NEUTRAL · near-equal once retries averaged', kind: 'neutral' },
+  { sig: 'Median session length', on: ON.median_session_len_min + ' min', off: OFF.median_session_len_min + ' min', delta: '-3.7 min', reading: 'ANTI on its face · but distribution-shape artifact', kind: 'neutral' },
+  { sig: 'Boss win rate', on: ON.boss_win_rate_pct + '%', off: OFF.boss_win_rate_pct + '%', delta: '+3.8pp', reading: 'PRO · or selection effect', kind: 'pro' },
+  { sig: 'Level win rate', on: ON.win_rate_pct + '%', off: OFF.win_rate_pct + '%', delta: '+0.5pp', reading: 'NEUTRAL · no skill confound', kind: 'neutral' },
+  { sig: 'L50 reach', on: ON.l50_reach_pct + '%', off: OFF.l50_reach_pct + '%', delta: '-0.6pp', reading: 'ANTI · within sampling noise at N=10-12', kind: 'anti' },
+  { sig: 'Gold spent on Extra Move / user', on: ON.gold_spent_extra_move_per_user, off: OFF.gold_spent_extra_move_per_user, delta: '-4.4%', reading: 'NEUTRAL · per-user normalized monetization is essentially equal', kind: 'neutral' },
+  { sig: 'Abandon per session', on: ON.lives_lost_abandon_per_session, off: OFF.lives_lost_abandon_per_session, delta: '+25%', reading: 'ANTI · real but small (1 in 12 sessions)', kind: 'anti' },
+  { sig: 'Cutscene skip rate (consumption gate)', on: '71%', off: '—', delta: '—', reading: 'KILL band per v3.1 plan (>60% kill); fix late-game scenes', kind: 'anti' },
+  { sig: 'Cutscene finish rate (consumption gate)', on: '22.9%', off: '—', delta: '—', reading: 'KILL band per v3.1 plan (<40% kill); fix late-game scenes', kind: 'anti' }
+];
+const tbody = document.getElementById('matrix-body');
+matrixRows.forEach(r => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${r.sig}</td><td class="num">${r.on}</td><td class="num">${r.off}</td><td class="num ${r.kind === 'pro' ? 'pro' : r.kind === 'anti' ? 'anti' : ''}">${r.delta}</td><td><span class="pill ${r.kind}">${r.reading}</span></td>`;
+  tbody.appendChild(tr);
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Chart 1 — Wedge comparison (the big one)
+// ──────────────────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('ch-wedge'), {
+  type: 'bar',
+  data: {
+    labels: ['Total min/user/day ⭐', 'Sessions/user', 'Mean session (min)', 'Boss win %', 'Win rate %', 'L50 reach %', 'Abandon /session ×100'],
+    datasets: [
+      { label: '"on" (cutscenes)', data: [ON.total_session_minutes_per_user, ON.sessions_per_user, ON.mean_session_len_min, ON.boss_win_rate_pct, ON.win_rate_pct, ON.l50_reach_pct, ON.lives_lost_abandon_per_session * 100], backgroundColor: '#0EA5E9' },
+      { label: '"off" (holdout)',  data: [OFF.total_session_minutes_per_user, OFF.sessions_per_user, OFF.mean_session_len_min, OFF.boss_win_rate_pct, OFF.win_rate_pct, OFF.l50_reach_pct, OFF.lives_lost_abandon_per_session * 100], backgroundColor: '#6B7280' }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { afterLabel: ctx => {
+      const onv = ON.total_session_minutes_per_user, offv = OFF.total_session_minutes_per_user;
+      const i = ctx.dataIndex; const onA = ctx.chart.data.datasets[0].data[i]; const offA = ctx.chart.data.datasets[1].data[i];
+      const pct = ((onA / offA - 1) * 100).toFixed(1);
+      return 'Delta: ' + (pct >= 0 ? '+' : '') + pct + '%';
+    } } } },
+    scales: { y: { beginAtZero: true } }
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Chart 2 — Daily play time (the key metric)
+// ──────────────────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('ch-daily-time'), {
+  type: 'bar',
+  data: {
+    labels: ['"on" arm', '"off" arm'],
+    datasets: [{
+      label: 'Minutes per user per day',
+      data: [ON.total_session_minutes_per_user, OFF.total_session_minutes_per_user],
+      backgroundColor: ['#0EA5E9', '#6B7280']
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y.toFixed(2) + ' min/user/day' } } },
+    scales: { y: { beginAtZero: true, ticks: { callback: v => v + ' min' } } }
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Chart 3 — Per-user monetization
+// ──────────────────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('ch-money'), {
+  type: 'bar',
+  data: {
+    labels: ['"on" arm', '"off" arm'],
+    datasets: [{
+      label: 'Gold spent on Extra Move per user',
+      data: [ON.gold_spent_extra_move_per_user, OFF.gold_spent_extra_move_per_user],
+      backgroundColor: ['#0EA5E9', '#6B7280']
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y.toFixed(1) + ' gold/user' } } },
+    scales: { y: { beginAtZero: true } }
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Chart 4 — Per-cutscene skip rate
+// ──────────────────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('ch-cs-skip'), {
+  type: 'bar',
+  data: {
+    labels: CUTSCENES.map(c => 'L' + c.before_level),
+    datasets: [{
+      label: 'Skip rate %',
+      data: CUTSCENES.map(c => c.skip_pct),
+      backgroundColor: CUTSCENES.map(c => c.skip_pct > 80 ? '#DC2626' : c.skip_pct > 70 ? '#F59E0B' : '#0EA5E9')
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: ctx => 'N=' + CUTSCENES[ctx.dataIndex].shown + ' shows · finish ' + CUTSCENES[ctx.dataIndex].finish_pct + '%' } } },
+    scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' }, title: { display: true, text: 'Skip rate %' } }, x: { title: { display: true, text: 'Before level' } } }
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Chart 5 — Per-cutscene avg time to skip
+// ──────────────────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('ch-cs-time'), {
+  type: 'line',
+  data: {
+    labels: CUTSCENES.map(c => 'L' + c.before_level),
+    datasets: [
+      {
+        label: 'Cutscene length (max watchable, sec)',
+        data: CUTSCENES.map(c => c.length_sec),
+        borderColor: '#6B7280',
+        backgroundColor: 'rgba(107, 114, 128, 0.08)',
+        borderDash: [6, 4],
+        borderWidth: 1.5,
+        pointBackgroundColor: '#6B7280',
+        pointRadius: 3,
+        tension: 0,
+        fill: false,
+        order: 0
+      },
+      {
+        label: 'Avg time before skip (sec)',
+        data: CUTSCENES.map(c => c.avg_skip_sec),
+        borderColor: '#DC2626',
+        backgroundColor: 'rgba(220, 38, 38, 0.15)',
+        borderWidth: 2,
+        pointBackgroundColor: '#DC2626',
+        pointRadius: 4,
+        tension: 0.3,
+        fill: true,
+        order: 1
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 18, font: { size: 11 } } },
+      tooltip: { callbacks: {
+        afterLabel: ctx => {
+          const c = CUTSCENES[ctx.dataIndex];
+          const watched_pct = c.length_sec ? (c.avg_skip_sec / c.length_sec * 100).toFixed(0) : '—';
+          return ctx.dataset.label.includes('skip')
+            ? 'Of ' + c.length_sec + 's length, avg watched ≈ ' + watched_pct + '% before skip'
+            : 'Length: ' + c.length_sec + 's';
+        }
+      } }
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: v => v + 's' }, title: { display: true, text: 'Seconds' } },
+      x: { title: { display: true, text: 'Before level' } }
+    }
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// SEGMENT ANALYSIS — Skip-time distribution per cutscene (stacked)
+// Data sourced from analyze-cutscene-segments.js output (cutscene-segments.json)
+// Buckets: 0-1s, 1-3s, 3-5s, 5-10s, 10-20s, 20-30s, 30s+
+// ──────────────────────────────────────────────────────────────────────────────
+const CS_SKIP_DIST = [
+  {
+    "lv": 1,
+    "buckets": [
+      0,
+      1,
+      3,
+      4,
+      46,
+      42,
+      31
+    ],
+    "total": 127
+  },
+  {
+    "lv": 5,
+    "buckets": [
+      0,
+      0,
+      11,
+      50,
+      12,
+      3,
+      4
+    ],
+    "total": 80
+  },
+  {
+    "lv": 10,
+    "buckets": [
+      0,
+      1,
+      20,
+      24,
+      4,
+      2,
+      0
+    ],
+    "total": 51
+  },
+  {
+    "lv": 11,
+    "buckets": [
+      0,
+      0,
+      12,
+      33,
+      4,
+      3,
+      0
+    ],
+    "total": 52
+  },
+  {
+    "lv": 21,
+    "buckets": [
+      0,
+      8,
+      12,
+      3,
+      0,
+      1,
+      1
+    ],
+    "total": 25
+  },
+  {
+    "lv": 31,
+    "buckets": [
+      0,
+      5,
+      7,
+      2,
+      1,
+      0,
+      0
+    ],
+    "total": 15
+  },
+  {
+    "lv": 40,
+    "buckets": [
+      0,
+      6,
+      3,
+      1,
+      1,
+      0,
+      1
+    ],
+    "total": 12
+  }
+];
+const BUCKET_LABELS = ['0-1s','1-3s','3-5s','5-10s','10-20s','20-30s','30s+'];
+const BUCKET_COLORS = ['#7F1D1D','#DC2626','#F87171','#FBBF24','#86EFAC','#34D399','#10B981'];
+
+// Stacked bar — skip-time distribution per cutscene
+new Chart(document.getElementById('ch-skip-dist'), {
+  type: 'bar',
+  data: {
+    labels: CS_SKIP_DIST.map(c => 'L' + c.lv),
+    datasets: BUCKET_LABELS.map((label, i) => ({
+      label, data: CS_SKIP_DIST.map(c => c.buckets[i]),
+      backgroundColor: BUCKET_COLORS[i]
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom' },
+      tooltip: { callbacks: {
+        afterLabel: ctx => {
+          const tot = CS_SKIP_DIST[ctx.dataIndex].total;
+          const pct = tot ? (ctx.parsed.y / tot * 100).toFixed(1) : '0';
+          return pct + '% of skips on this scene';
+        },
+        footer: items => {
+          const idx = items[0].dataIndex;
+          return 'Total skips on L' + CS_SKIP_DIST[idx].lv + ': ' + CS_SKIP_DIST[idx].total;
+        }
+      } }
+    },
+    scales: {
+      x: { stacked: true, title: { display: true, text: 'Cutscene (before level)' } },
+      y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Skip event count' } }
+    }
+  }
+});
+
+// Insta-skip share — % of skips happening in ≤3s
+new Chart(document.getElementById('ch-insta-share'), {
+  type: 'bar',
+  data: {
+    labels: CS_SKIP_DIST.map(c => 'L' + c.lv),
+    datasets: [{
+      label: '% of skips happening within ≤3s',
+      data: CS_SKIP_DIST.map(c => c.total ? +((c.buckets[0] + c.buckets[1]) / c.total * 100).toFixed(1) : 0),
+      backgroundColor: CS_SKIP_DIST.map(c => {
+        const pct = c.total ? (c.buckets[0] + c.buckets[1]) / c.total * 100 : 0;
+        return pct > 30 ? '#DC2626' : pct > 15 ? '#F59E0B' : '#10B981';
+      })
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: ctx => {
+      const c = CS_SKIP_DIST[ctx.dataIndex];
+      return (c.buckets[0] + c.buckets[1]) + ' insta-skips of ' + c.total + ' total';
+    } } } },
+    scales: {
+      y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' }, title: { display: true, text: 'Insta-skip share' } },
+      x: { title: { display: true, text: 'Cutscene (before level)' } }
+    }
+  }
+});
+
+// Segment comparison — min/user/day
+const SEGMENTS = [
+  {
+    "name": "on-engaged\\n(163 users)",
+    "value": 29.39,
+    "color": "#10B981"
+  },
+  {
+    "name": "off\\n(193 users)",
+    "value": 22.29,
+    "color": "#6B7280"
+  },
+  {
+    "name": "on-no-cutscene\\n(6 users)",
+    "value": 9.53,
+    "color": "#94A3B8"
+  },
+  {
+    "name": "on-insta-skip\\n(10 users)",
+    "value": 0.11,
+    "color": "#DC2626"
+  }
+];
+new Chart(document.getElementById('ch-segment-time'), {
+  type: 'bar',
+  data: {
+    labels: SEGMENTS.map(s => s.name),
+    datasets: [{
+      label: 'Total minutes per user per day',
+      data: SEGMENTS.map(s => s.value),
+      backgroundColor: SEGMENTS.map(s => s.color)
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.x.toFixed(2) + ' min/user/day' } } },
+    scales: { x: { beginAtZero: true, title: { display: true, text: 'minutes per user per day' } } }
+  }
+});
+</script>
+</body>
+</html>

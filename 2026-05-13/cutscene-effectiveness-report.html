@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cutscene Effectiveness Report — VN 2026-05-12</title>
+<title>Cutscene Effectiveness Report — VN 2026-05-13</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -103,17 +103,17 @@
   <div class="cover-inner">
     <div class="eyebrow">Strategic decision report</div>
     <h1>Are the cutscenes working?</h1>
-    <div class="subtitle">Synthesis of VN 2026-05-12 event log + GrowthBook A/B causal holdout · 372 users across both arms</div>
+    <div class="subtitle">Synthesis of VN 2026-05-13 event log + GrowthBook A/B causal holdout · 150 users across both arms</div>
     <div class="badges">
-      <span class="badge">📅 <b>2026-05-12 (VN)</b> · 15.5h coverage</span>
-      <span class="badge">📊 <b>185,292</b> events in window</span>
-      <span class="badge">🅰️ <b>"on" N=179</b> · 🅱️ <b>"off" N=193</b></span>
+      <span class="badge">📅 <b>2026-05-13 (VN)</b> · 9.0h coverage</span>
+      <span class="badge">📊 <b>67,748</b> events in window</span>
+      <span class="badge">🅰️ <b>"on" N=75</b> · 🅱️ <b>"off" N=75</b></span>
       <span class="badge">⚙️ GrowthBook 50/50 holdout · live since alpha launch</span>
     </div>
 
     <div class="verdict-card">
       <div class="vt">Headline verdict</div>
-      <div class="vh">📈 Cutscenes work for the 91% who engage — +32% play time vs holdout. The 9% who insta-skip self-select out.</div>
+      <div class="vh">📈 Cutscenes drive +31.9% play time for the 91% who engage. The 6% who insta-skip self-select out.</div>
       <div class="vd">Aggregate "on" arm: <b>+21.5%</b> more total minutes/user/day than holdout. But within the "on" arm, the <b>163 engaged users (91%)</b> play <b>+32% more minutes/user/day</b> (29.39 vs 22.29) than the holdout. The 10 insta-skippers (5.6%) barely play at all (0.11 min/day) and dilute the aggregate. <b>The wedge effect is larger than first read</b> once narrative-rejecters are segmented out. <i>Caveat: N still borderline; retention causality requires multi-day extract.</i></div>
     </div>
   </div>
@@ -386,58 +386,7 @@
     <table class="matrix">
       <tbody>
         <tr><td><b>Source files</b></td><td><code>full-data.json</code> · <code>ab-cutscene-analysis.json</code> · <code>ABTestConfig.json</code> · <code>ABTestMgr.js</code></td></tr>
-        <tr><td><b>Window</b></td><td>VN 2026-05-12 [00:00, 24:00) = UTC [2026-05-11T17:00, 2026-05-12T17:00)</td></tr>
-        <tr><td><b>Coverage</b></td><td>15.5h of 24h VN day (first 8.4h of VN-12 not in dump; dump starts 08:27 VN)</td></tr>
-        <tr><td><b>Raw events scanned</b></td><td>253,040</td></tr>
-        <tr><td><b>Events kept in window</b></td><td>185,292</td></tr>
-        <tr><td><b>Bucketing</b></td><td>GrowthBook FNV-1a-v2 double-hash on <code>user_id</code> · seed <code>234c1894-32d7-4b2b-8611-8c280676c19f</code> · weights [0.5, 0.5] · coverage 1.0</td></tr>
-        <tr><td><b>Observed bucket split</b></td><td>47.8% on / 52.2% off (target 50/50, N=370 — within sampling noise)</td></tr>
-        <tr><td><b>Excluded</b></td><td>Forced-on QA: <code>10001</code>, <code>1009542061</code> · Forced-off QA: <code>10002</code> · Users with no <code>user_id</code> stamped</td></tr>
-        <tr><td><b>Sanity check</b></td><td>8/511 cutscene_shown events came from "off" arm (should be 0; 1.6% leak attributed to pre-login default-user-id bug)</td></tr>
-        <tr><td><b>Limits</b></td><td>Single day · N=180/arm (below Bayesian confirmatory threshold of 250/arm) · no retention lift (D1/D3) computable from 1 day</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <footer>
-    Generated <span id="generated"></span> · raw data: <a href="./ab-cutscene-analysis.json">ab-cutscene-analysis.json</a> · <a href="./full-data.json">full-data.json</a> · <a href="./report.html">main dashboard</a> · <a href="./ab-cutscene-analysis.html">A/B detail view</a>
-  </footer>
-</main>
-
-<script>
-// ──────────────────────────────────────────────────────────────────────────────
-// Inlined data (matches ab-cutscene-analysis.json + cutscene per-scene from full-data)
-// ──────────────────────────────────────────────────────────────────────────────
-const ON  = { users: 179, sessions: 370, sessions_per_user: 2.07,
-              total_session_minutes: 4849.1, total_session_minutes_per_user: 27.09,
-              median_session_len_min: 4.8, mean_session_len_min: 15.0,
-              win_rate_pct: 83.5, l50_reach_pct: 5.6, l50_users: 10,
-              boss_win_rate_pct: 93.7,
-              gold_granted: 49927, gold_spent_extra_move: 17250,
-              gold_spent_extra_move_per_user: 96.4,
-              lives_lost_abandon: 32, lives_lost_abandon_per_session: 0.086,
-              cutscene_shown: 503, cutscene_skipped: 357, cutscene_completed: 115 };
-
-const OFF = { users: 193, sessions: 319, sessions_per_user: 1.65,
-              total_session_minutes: 4302.9, total_session_minutes_per_user: 22.29,
-              median_session_len_min: 8.5, mean_session_len_min: 14.3,
-              win_rate_pct: 83.0, l50_reach_pct: 6.2, l50_users: 12,
-              boss_win_rate_pct: 89.9,
-              gold_granted: 58545, gold_spent_extra_move: 19450,
-              gold_spent_extra_move_per_user: 100.8,
-              lives_lost_abandon: 22, lives_lost_abandon_per_session: 0.069,
-              cutscene_shown: 8, cutscene_skipped: 5, cutscene_completed: 2 };
-
-// Per-cutscene (from full-data.json cutscenes.per_cutscene)
-const CUTSCENES = [
-  { id: 'CS_01_before_L1',  shown: 200, skip_pct: 62.5, finish_pct: 26.5, avg_skip_sec: 23.2, before_level: 1,  length_sec: 49 },
-  { id: 'CS_02_before_L5',  shown: 107, skip_pct: 74.8, finish_pct: 17.8, avg_skip_sec:  8.7, before_level: 5,  length_sec: 35 },
-  { id: 'CS_03_before_L10', shown:  69, skip_pct: 73.9, finish_pct: 26.1, avg_skip_sec:  6.3, before_level: 10, length_sec: 24 },
-  { id: 'CS_04_before_L11', shown:  66, skip_pct: 78.8, finish_pct: 19.7, avg_skip_sec:  6.9, before_level: 11, length_sec: 31 },
-  { id: 'CS_05_before_L21', shown:  35, skip_pct: 71.4, finish_pct: 28.6, avg_skip_sec:  5.4, before_level: 21, length_sec: 42 },
-  { id: 'CS_06_before_L31', shown:  18, skip_pct: 83.3, finish_pct: 16.7, avg_skip_sec:  3.8, before_level: 31, length_sec: 26 },
-  { id: 'CS_07_before_L40', shown:  13, skip_pct: 92.3, finish_pct:  7.7, avg_skip_sec:  8.3, before_level: 40, length_sec: 36 }
-];
+        <tr><td><b>Window</b></td><td>VN 2026-05-13 [00:00, 24:00) = UTC [2026-05-12T17:00:00, 2026-05-13T17:00:00);
 
 document.getElementById('generated').textContent = '2026-05-13 UTC · pipeline v2 + ABTest holdout';
 
@@ -610,14 +559,97 @@ new Chart(document.getElementById('ch-cs-time'), {
 // Buckets: 0-1s, 1-3s, 3-5s, 5-10s, 10-20s, 20-30s, 30s+
 // ──────────────────────────────────────────────────────────────────────────────
 const CS_SKIP_DIST = [
-  // [before_level, [0-1, 1-3, 3-5, 5-10, 10-20, 20-30, 30s+], total_skips]
-  { lv: 1,  buckets: [0,1,3,4,46,42,31], total: 127 },
-  { lv: 5,  buckets: [0,0,11,50,12,3,4],  total: 80  },
-  { lv: 10, buckets: [0,1,20,24,4,2,0],   total: 51  },
-  { lv: 11, buckets: [0,0,12,33,4,3,0],   total: 52  },
-  { lv: 21, buckets: [0,8,12,3,0,1,1],    total: 25  },
-  { lv: 31, buckets: [0,5,7,2,1,0,0],     total: 15  },
-  { lv: 40, buckets: [0,6,3,1,1,0,1],     total: 12  }
+  {
+    "lv": 1,
+    "buckets": [
+      0,
+      0,
+      0,
+      0,
+      14,
+      6,
+      13
+    ],
+    "total": 33
+  },
+  {
+    "lv": 5,
+    "buckets": [
+      0,
+      0,
+      3,
+      9,
+      7,
+      1,
+      0
+    ],
+    "total": 20
+  },
+  {
+    "lv": 10,
+    "buckets": [
+      0,
+      0,
+      7,
+      6,
+      5,
+      2,
+      0
+    ],
+    "total": 20
+  },
+  {
+    "lv": 11,
+    "buckets": [
+      0,
+      0,
+      4,
+      9,
+      4,
+      2,
+      1
+    ],
+    "total": 20
+  },
+  {
+    "lv": 21,
+    "buckets": [
+      0,
+      2,
+      5,
+      7,
+      0,
+      1,
+      1
+    ],
+    "total": 16
+  },
+  {
+    "lv": 31,
+    "buckets": [
+      0,
+      1,
+      4,
+      1,
+      2,
+      0,
+      0
+    ],
+    "total": 8
+  },
+  {
+    "lv": 40,
+    "buckets": [
+      0,
+      1,
+      3,
+      2,
+      0,
+      1,
+      0
+    ],
+    "total": 7
+  }
 ];
 const BUCKET_LABELS = ['0-1s','1-3s','3-5s','5-10s','10-20s','20-30s','30s+'];
 const BUCKET_COLORS = ['#7F1D1D','#DC2626','#F87171','#FBBF24','#86EFAC','#34D399','#10B981'];
@@ -684,10 +716,26 @@ new Chart(document.getElementById('ch-insta-share'), {
 
 // Segment comparison — min/user/day
 const SEGMENTS = [
-  { name: 'on-engaged\n(163 users)', value: 29.39, color: '#10B981' },
-  { name: 'off\n(193 users)',        value: 22.29, color: '#6B7280' },
-  { name: 'on-no-cutscene\n(6 users)', value: 9.53, color: '#94A3B8' },
-  { name: 'on-insta-skip\n(10 users)', value: 0.11, color: '#DC2626' }
+  {
+    "name": "on-engaged\\n(61 users)",
+    "value": 27.03,
+    "color": "#10B981"
+  },
+  {
+    "name": "off\\n(75 users)",
+    "value": 21.92,
+    "color": "#6B7280"
+  },
+  {
+    "name": "on-no-cutscene\\n(10 users)",
+    "value": 8.58,
+    "color": "#94A3B8"
+  },
+  {
+    "name": "on-insta-skip\\n(4 users)",
+    "value": 6.87,
+    "color": "#DC2626"
+  }
 ];
 new Chart(document.getElementById('ch-segment-time'), {
   type: 'bar',

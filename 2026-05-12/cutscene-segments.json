@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-13T10:16:59.023Z",
+    "generated_at": "2026-05-14T00:31:06.712Z",
     "date": "2026-05-12",
     "engagement_threshold_sec": 3,
     "classification_rule": "on-arm user is ENGAGED if any cutscene_completed OR any cutscene_skipped with secondsIntoPlayback > 3s; else INSTA-SKIP; on-arm users with no cutscene events seen → on-no-cutscene; off-arm → off; QA-forced → excluded",

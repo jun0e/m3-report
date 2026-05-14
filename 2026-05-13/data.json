@@ -1,0 +1,912 @@
+{
+  "meta": {
+    "pipeline_version": "v2 (event-log)",
+    "source_mode": "local",
+    "source": "local-dump: C:\\Users\\CPU60395-local\\m3-data\\2026-05-12-from-zip",
+    "target_date": "2026-05-13",
+    "today_vn": "2026-05-14",
+    "generated_at": "2026-05-14T00:31:16.209Z",
+    "scope": "Tabs 0-5 (Tab 5 narrative now live) · multi-day retention INSUFFICIENT",
+    "insufficient_n_threshold": 1,
+    "spark_window_days": 0,
+    "sparklines_disabled": "No multi-day history in local dump",
+    "designed_winrate_source": "v3.1 HTML formula — introLevels=[1,5,9,15,20,25,30,35,40,45,50] → 50%; others → 75%",
+    "funnel_target_source": "03_Funnel sheet of m3_alpha_test_plan_v3.1.xlsx (L10:70% L20:50% L30:35% L40:25% L50:20%)",
+    "event_log_size": 67748,
+    "cache_dir": null,
+    "coverage_note": "First event in window is 2026-05-12T17:00:00.697Z — first 0 min (0.0h) of VN-2026-05-13 missing from dump.",
+    "window_start_utc": "2026-05-12T17:00:00.000Z",
+    "window_end_utc": "2026-05-13T17:00:00.000Z",
+    "first_event_in_window_utc": "2026-05-12T17:00:00.697Z",
+    "last_event_in_window_utc": "2026-05-13T01:59:59.325Z",
+    "raw_events_scanned": 253040
+  },
+  "global": {
+    "total_sessions": 206,
+    "total_devices": 145,
+    "n_levels_with_data": 50,
+    "n_levels_above_N_threshold": 50,
+    "cutscenes_shown": 167,
+    "cutscenes_skipped": 124,
+    "cutscenes_completed": 42,
+    "reached_l50": 10
+  },
+  "tab_0": {
+    "main_tiles": [
+      {
+        "name": "D1 Retention",
+        "status": "insufficient",
+        "reason": "Needs day-N+1 cohort join. Multi-day extract required (re-run with day before)."
+      },
+      {
+        "name": "D3 Retention",
+        "status": "insufficient",
+        "reason": "Needs day-N+3 cohort join. Multi-day extract required."
+      },
+      {
+        "name": "Sessions / Day",
+        "value": "1.42",
+        "status": "kill",
+        "spark": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "n": 145
+      },
+      {
+        "name": "Avg Session Length",
+        "value": "8.6min",
+        "status": "pass",
+        "spark": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "n": 205
+      },
+      {
+        "name": "Cutscene Skip Rate",
+        "value": "74.3%",
+        "status": "kill",
+        "spark": null,
+        "n": 167
+      },
+      {
+        "name": "Cutscene Finish Rate",
+        "value": "25.1%",
+        "status": "kill",
+        "spark": null,
+        "n": 167
+      },
+      {
+        "name": "L50 Reach",
+        "value": "6.9%",
+        "status": "kill",
+        "spark": null,
+        "n": 145
+      },
+      {
+        "name": "Drop @ non-intro levels",
+        "value": "1.7%",
+        "status": "pass",
+        "spark": null,
+        "n": 39
+      },
+      {
+        "name": "Natural Drop Rate",
+        "value": "91.6%",
+        "status": "kill",
+        "spark": null,
+        "n": 178
+      },
+      {
+        "name": "M17a corr (cutscene×D3)",
+        "status": "insufficient",
+        "reason": "Correlation needs per-user cutscene completion × D3-retained flag. Multi-day extract required."
+      },
+      {
+        "name": "AGGREGATE DECISION",
+        "status": "insufficient",
+        "reason": "Derived. Some inputs still INSUFFICIENT (retention)."
+      },
+      {
+        "name": "Decision trend (14d)",
+        "status": "insufficient",
+        "reason": "Needs 14-day extract history."
+      }
+    ],
+    "supporting_tiles": [
+      {
+        "name": "Time to first fail",
+        "value": "4.2min",
+        "status": "pass",
+        "spark": null,
+        "n": 66
+      },
+      {
+        "name": "1st cutscene → Session 2",
+        "status": "insufficient",
+        "reason": "Needs day-N+1 session join. Multi-day extract required."
+      },
+      {
+        "name": "Win rate per level (avg)",
+        "value": "80.1%",
+        "status": "pass",
+        "spark": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "n": 1881
+      },
+      {
+        "name": "Fail rate per level (avg)",
+        "value": "19.9%",
+        "status": "warn",
+        "spark": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "n": 1881
+      },
+      {
+        "name": "Adaptive trigger count",
+        "value": "1.08/sess",
+        "status": "pass",
+        "spark": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "n": 1881
+      },
+      {
+        "name": "Move surplus (avg)",
+        "value": "+1.83",
+        "status": "pass",
+        "spark": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "n": 1881
+      },
+      {
+        "name": "Tutorial popup shown rate",
+        "status": "insufficient",
+        "reason": "tutorial_popup_shown events not instrumented in current build (0 hits in 30k-event scan)."
+      },
+      {
+        "name": "Per-feature first-success",
+        "status": "insufficient",
+        "reason": "Same — tutorial events not instrumented."
+      }
+    ]
+  },
+  "tab_1": {
+    "status": "COVERED_PARTIAL",
+    "note": "ch-retention requires multi-day cohort window — stays INSUFFICIENT. Three other charts now live from event log.",
+    "chart_sessions_day": {
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4+"
+      ],
+      "data": [
+        108,
+        21,
+        11,
+        5
+      ],
+      "title": "Sessions per device (distribution)"
+    },
+    "chart_session_len": {
+      "labels": [
+        "<1",
+        "1-3",
+        "3-5",
+        "5-8",
+        "8-15",
+        "15-30",
+        "30+"
+      ],
+      "data": [
+        28,
+        33,
+        21,
+        17,
+        37,
+        39,
+        30
+      ],
+      "title": "Session length distribution (min)"
+    },
+    "chart_first_fail": {
+      "labels": [
+        "<1",
+        "1-3",
+        "3-5",
+        "5-10",
+        "10-20",
+        "20+",
+        "no-fail"
+      ],
+      "data": [
+        2,
+        24,
+        13,
+        9,
+        7,
+        11,
+        68
+      ],
+      "title": "Time to first fail (min)"
+    },
+    "chart_retention_insufficient": "D1/D3/D7 retention requires day-N+1, N+3, N+7 cohort joins. Re-run pipeline with --multi-day flag (not yet implemented).",
+    "chart_natural_drop_insufficient": "Natural drop trend requires multi-day series. Single-day value is on Tab 0 tile."
+  },
+  "tab_2": {
+    "status": "COVERED",
+    "chart_funnel": {
+      "labels": [
+        "L10",
+        "L20",
+        "L30",
+        "L40",
+        "L50"
+      ],
+      "actual": [
+        53.8,
+        35.2,
+        18.6,
+        13.8,
+        6.9
+      ],
+      "target": [
+        70,
+        50,
+        35,
+        25,
+        20
+      ],
+      "target_source": "03_Funnel sheet of m3_alpha_test_plan_v3.1.xlsx"
+    },
+    "chart_drop_per_level": {
+      "labels": [
+        "L1",
+        "L2",
+        "L3",
+        "L4",
+        "L5",
+        "L6",
+        "L7",
+        "L8",
+        "L9",
+        "L10",
+        "L11",
+        "L12",
+        "L13",
+        "L14",
+        "L15",
+        "L16",
+        "L17",
+        "L18",
+        "L19",
+        "L20",
+        "L21",
+        "L22",
+        "L23",
+        "L24",
+        "L25",
+        "L26",
+        "L27",
+        "L28",
+        "L29",
+        "L30",
+        "L31",
+        "L32",
+        "L33",
+        "L34",
+        "L35",
+        "L36",
+        "L37",
+        "L38",
+        "L39",
+        "L40",
+        "L41",
+        "L42",
+        "L43",
+        "L44",
+        "L45",
+        "L46",
+        "L47",
+        "L48",
+        "L49",
+        "L50"
+      ],
+      "data": [
+        11.1,
+        5.2,
+        2.7,
+        5.7,
+        0,
+        10.5,
+        1.7,
+        3.7,
+        4.1,
+        0,
+        6,
+        0,
+        -2.4,
+        2.4,
+        2.3,
+        2.5,
+        0,
+        0,
+        6.5,
+        -2.7,
+        9.4,
+        2.9,
+        2.9,
+        7.4,
+        0,
+        10,
+        0,
+        -4,
+        0,
+        -11.8,
+        -5.3,
+        0,
+        9.1,
+        -5.3,
+        -15,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4.3,
+        0,
+        6.7,
+        0,
+        -5.6,
+        10,
+        0,
+        7.7,
+        0,
+        3.3
+      ],
+      "n_per_level": [
+        117,
+        115,
+        73,
+        88,
+        65,
+        57,
+        59,
+        54,
+        74,
+        54,
+        50,
+        50,
+        42,
+        42,
+        44,
+        40,
+        42,
+        51,
+        46,
+        37,
+        32,
+        34,
+        34,
+        27,
+        18,
+        20,
+        18,
+        25,
+        27,
+        17,
+        19,
+        20,
+        22,
+        19,
+        20,
+        19,
+        17,
+        23,
+        18,
+        18,
+        23,
+        16,
+        15,
+        10,
+        18,
+        10,
+        8,
+        13,
+        11,
+        30
+      ],
+      "intro_levels": [
+        1,
+        5,
+        9,
+        15,
+        20,
+        25,
+        30,
+        35,
+        40,
+        45,
+        50
+      ]
+    }
+  },
+  "tab_3": {
+    "status": "COVERED",
+    "chart_winrate": {
+      "labels": [
+        "L1",
+        "L2",
+        "L3",
+        "L4",
+        "L5",
+        "L6",
+        "L7",
+        "L8",
+        "L9",
+        "L10",
+        "L11",
+        "L12",
+        "L13",
+        "L14",
+        "L15",
+        "L16",
+        "L17",
+        "L18",
+        "L19",
+        "L20",
+        "L21",
+        "L22",
+        "L23",
+        "L24",
+        "L25",
+        "L26",
+        "L27",
+        "L28",
+        "L29",
+        "L30",
+        "L31",
+        "L32",
+        "L33",
+        "L34",
+        "L35",
+        "L36",
+        "L37",
+        "L38",
+        "L39",
+        "L40",
+        "L41",
+        "L42",
+        "L43",
+        "L44",
+        "L45",
+        "L46",
+        "L47",
+        "L48",
+        "L49",
+        "L50"
+      ],
+      "actual": [
+        87.4,
+        70.5,
+        98.6,
+        71.1,
+        92.4,
+        98.2,
+        82.3,
+        96.3,
+        63.3,
+        89.3,
+        100,
+        78.9,
+        95.5,
+        100,
+        100,
+        97.5,
+        97.6,
+        63.3,
+        74,
+        81,
+        93.5,
+        55.6,
+        48.8,
+        66.7,
+        100,
+        81.8,
+        81,
+        53.6,
+        44.4,
+        85.7,
+        100,
+        95,
+        72,
+        81,
+        81.8,
+        90,
+        94.1,
+        70.8,
+        89.5,
+        94.4,
+        53.8,
+        65,
+        55,
+        100,
+        47.4,
+        61.5,
+        80,
+        75,
+        75,
+        56.3
+      ],
+      "designed": [
+        50,
+        75,
+        75,
+        75,
+        50,
+        75,
+        75,
+        75,
+        50,
+        75,
+        75,
+        75,
+        75,
+        75,
+        50,
+        75,
+        75,
+        75,
+        75,
+        50,
+        75,
+        75,
+        75,
+        75,
+        50,
+        75,
+        75,
+        75,
+        75,
+        50,
+        75,
+        75,
+        75,
+        75,
+        50,
+        75,
+        75,
+        75,
+        75,
+        50,
+        75,
+        75,
+        75,
+        75,
+        50,
+        75,
+        75,
+        75,
+        75,
+        50
+      ],
+      "n_per_level": [
+        103,
+        112,
+        73,
+        83,
+        66,
+        55,
+        62,
+        54,
+        79,
+        56,
+        49,
+        57,
+        44,
+        41,
+        43,
+        40,
+        41,
+        60,
+        50,
+        42,
+        31,
+        45,
+        43,
+        27,
+        18,
+        22,
+        21,
+        28,
+        36,
+        21,
+        19,
+        20,
+        25,
+        21,
+        22,
+        20,
+        17,
+        24,
+        19,
+        18,
+        26,
+        20,
+        20,
+        10,
+        19,
+        13,
+        10,
+        12,
+        12,
+        32
+      ]
+    },
+    "chart_adaptive": {
+      "labels": [
+        "L1-10",
+        "L11-20",
+        "L21-30",
+        "L31-40",
+        "L41-50"
+      ],
+      "boost": [
+        0.48,
+        0.291,
+        1.473,
+        0.439,
+        1.529
+      ],
+      "suppress": [
+        0.371,
+        0.627,
+        0.168,
+        0.488,
+        0.23
+      ],
+      "unit": "switches/session"
+    },
+    "chart_move_surplus": {
+      "labels": [
+        "L1-10",
+        "L11-20",
+        "L21-30",
+        "L31-40",
+        "L41-50"
+      ],
+      "data": [
+        1.51,
+        4.16,
+        -0.87,
+        3.17,
+        -0.17
+      ]
+    },
+    "insights": [
+      {
+        "level": "watch",
+        "text": "Highest fail rate at L29: 55.6% (N=36)."
+      },
+      {
+        "level": "urgent",
+        "text": "Largest design drift: L15 actual 100% vs designed 50% (Δ +50.0pp, too easy, N=43). 28 levels with |Δ|≥15pp."
+      },
+      {
+        "level": "ok",
+        "text": "Adaptive trigger count = 1.08/session — pass band."
+      },
+      {
+        "level": "ok",
+        "text": "Avg move surplus +1.83 — pass band."
+      },
+      {
+        "level": "info",
+        "text": "v2 pipeline now feeds Tabs 0/1/2 via /query event log. Multi-day retention + Tab 4 tutorial still INSUFFICIENT."
+      }
+    ]
+  },
+  "tab_4": {
+    "status": "INSUFFICIENT",
+    "reason": "Tutorial popup events (tutorial_popup_shown/dismissed) not instrumented in current build — 0 hits in a 30,500-event scan. Tab 4 cannot be populated until events are wired."
+  },
+  "tab_5": {
+    "status": "COVERED",
+    "chart_cutscene_skip": {
+      "labels": [
+        "L1 · 0.mp4",
+        "L5 · 1.mp4",
+        "L10 · 2.mp4",
+        "L11 · 3.mp4",
+        "L21 · 4.mp4",
+        "L31 · 5.mp4",
+        "L40 · 6.mp4"
+      ],
+      "data": [
+        61.1,
+        69,
+        76.9,
+        76.9,
+        94.1,
+        100,
+        100
+      ],
+      "tooltip_extra": [
+        {
+          "N": 54,
+          "len": 49,
+          "avg_skip_sec": 77.1,
+          "before_level": 1
+        },
+        {
+          "N": 29,
+          "len": 35,
+          "avg_skip_sec": 9.3,
+          "before_level": 5
+        },
+        {
+          "N": 26,
+          "len": 24,
+          "avg_skip_sec": 9.2,
+          "before_level": 10
+        },
+        {
+          "N": 26,
+          "len": 31,
+          "avg_skip_sec": 11.6,
+          "before_level": 11
+        },
+        {
+          "N": 17,
+          "len": 42,
+          "avg_skip_sec": 7.6,
+          "before_level": 21
+        },
+        {
+          "N": 8,
+          "len": 26,
+          "avg_skip_sec": 5.9,
+          "before_level": 31
+        },
+        {
+          "N": 7,
+          "len": 36,
+          "avg_skip_sec": 6.6,
+          "before_level": 40
+        }
+      ]
+    },
+    "chart_cutscene_complete": {
+      "labels": [
+        "L1 · 0.mp4",
+        "L5 · 1.mp4",
+        "L10 · 2.mp4",
+        "L11 · 3.mp4",
+        "L21 · 4.mp4",
+        "L31 · 5.mp4",
+        "L40 · 6.mp4"
+      ],
+      "data": [
+        35.2,
+        34.5,
+        23.1,
+        23.1,
+        5.9,
+        0,
+        0
+      ],
+      "tooltip_extra": [
+        {
+          "N": 54,
+          "len": 49,
+          "before_level": 1
+        },
+        {
+          "N": 29,
+          "len": 35,
+          "before_level": 5
+        },
+        {
+          "N": 26,
+          "len": 24,
+          "before_level": 10
+        },
+        {
+          "N": 26,
+          "len": 31,
+          "before_level": 11
+        },
+        {
+          "N": 17,
+          "len": 42,
+          "before_level": 21
+        },
+        {
+          "N": 8,
+          "len": 26,
+          "before_level": 31
+        },
+        {
+          "N": 7,
+          "len": 36,
+          "before_level": 40
+        }
+      ]
+    },
+    "chart_m17a_status": "INSUFFICIENT — per-user cutscene-finish-rate × D3-retained correlation requires multi-day cohort extract.",
+    "totals": {
+      "shown": 167,
+      "skipped": 124,
+      "completed": 42,
+      "unique_cutscenes": 7,
+      "agg_skip_pct": 74.3,
+      "agg_finish_pct": 25.1
+    },
+    "insights": [
+      {
+        "level": "urgent",
+        "text": "Aggregate cutscene finish rate 25.1% — below 40% KILL threshold. Narrative bet (BR23 in v3.1 plan) is in serious trouble: of 167 cutscene shows, only 42 reached completion."
+      },
+      {
+        "level": "urgent",
+        "text": "Highest-skip cutscene: 5.mp4 (before L31) at 100% skip rate — above 60% kill threshold. N=8 shows."
+      },
+      {
+        "level": "watch",
+        "text": "Finish rate trends DOWN across playthrough: first cutscene (before L1) = 35.2% → last (before L40) = 0%. Narrative fatigue signal across the saga."
+      },
+      {
+        "level": "watch",
+        "text": "Avg time-to-skip decreases over playthrough: first cutscene = 77.1s → last = 6.6s. Later scenes get insta-skipped — players are not even giving them a chance."
+      },
+      {
+        "level": "info",
+        "text": "BR23 critical flag (v3.1 plan): the ScienceDirect 2024 study found narrative consumption ≠ retention in mobile games. With current finish-rate numbers (25.1%), the M17a correlation that would counter-prove this is structurally hard to compute — but the prior odds of the cutscene-narrative wedge holding are low until aggregate finish rate climbs ≥40%."
+      },
+      {
+        "level": "info",
+        "text": "M17a correlation (cutscene_finish × D3_retention) needs multi-day cohort data — currently INSUFFICIENT. Re-run with multi-day extract before evaluating BR23 verdict."
+      }
+    ],
+    "alert_text": "Aggregate cutscene finish rate 25.1% across 7 cutscenes is BELOW the v3.1 KILL threshold (40%). All 7 cutscenes individually breach skip>60% kill band. M17a correlation is INSUFFICIENT (multi-day data required) — but the prior on BR23 (narrative ≠ retention) suggests the cutscene wedge needs counter-evidence to hold."
+  }
+}
