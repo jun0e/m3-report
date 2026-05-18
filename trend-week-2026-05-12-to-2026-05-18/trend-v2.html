@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>M3 weekly trend v2 — top-down (2026-05-12 → 2026-05-18)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root { --slate:#1F2937; --slate-2:#374151; --cyan:#0EA5E9; --amber:#F59E0B;
+    --pass:#10B981; --warn:#F59E0B; --kill:#DC2626; --info:#6B7280;
+    --pass-bg:#D1FAE5; --pass-fg:#065F46;
+    --warn-bg:#FEF3C7; --warn-fg:#92400E;
+    --kill-bg:#FEE2E2; --kill-fg:#991B1B;
+    --insuf-bg:#F3F4F6; --insuf-fg:#9CA3AF;
+    --gray-50:#F9FAFB; --gray-200:#E5E7EB; --gray-500:#6B7280;
+    --bg:#F3F4F6; --card:#FFFFFF; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Inter',-apple-system,system-ui,Arial,sans-serif; background:var(--bg); color:#111; font-size:14px; line-height:1.5; }
+  header { background:linear-gradient(135deg,#1F2937 0%,#0F172A 100%); color:#fff; padding:30px 32px; }
+  header .inner { max-width:1320px; margin:0 auto; }
+  header .eyebrow { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:#94A3B8; }
+  header h1 { font-size:24px; margin:4px 0 6px; font-weight:800; }
+  header .sub { font-size:13px; color:#cbd5e1; }
+  header .day-strip { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
+  .day-pill { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.16); padding:5px 11px; border-radius:8px; font-size:11px; color:#e2e8f0; min-width:130px; }
+  .day-pill b { color:#fff; display:block; font-size:13px; margin-bottom:2px; }
+  .day-pill.partial { background:rgba(245,158,11,0.16); border-color:rgba(245,158,11,0.45); color:#fef3c7; }
+  .day-pill.partial b::after { content:' *'; color:var(--amber); }
+
+  main { max-width:1320px; margin:0 auto; padding:22px 32px 90px; }
+  section { margin:22px 0; }
+  section h2 { font-size:17px; margin:0 0 4px; color:var(--slate); border-left:4px solid var(--cyan); padding-left:10px; display:flex; align-items:baseline; gap:10px; }
+  section h2 .num-badge { font-size:11px; background:var(--cyan); color:#fff; padding:2px 8px; border-radius:999px; font-weight:700; }
+  section .lede { color:var(--gray-500); font-size:12px; margin-bottom:12px; max-width:980px; }
+
+  /* Sparkline tiles */
+  .tile-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+  .tile-grid.big { grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+  .stile { background:var(--card); border-radius:8px; padding:12px 14px; box-shadow:0 1px 2px rgba(0,0,0,0.05); border-left:4px solid var(--info); display:flex; flex-direction:column; min-height:106px; }
+  .stile.pass { border-left-color:var(--pass); }
+  .stile.warn { border-left-color:var(--warn); }
+  .stile.kill { border-left-color:var(--kill); }
+  .stile.insufficient { border-left-color:var(--insuf-fg); opacity:0.65; }
+  .stile .top { display:flex; justify-content:space-between; align-items:flex-start; gap:6px; }
+  .stile .name { font-size:11px; color:var(--gray-500); font-weight:600; line-height:1.3; flex:1; }
+  .stile .pill { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; padding:2px 7px; border-radius:10px; white-space:nowrap; }
+  .stile.pass .pill { background:var(--pass-bg); color:var(--pass-fg); }
+  .stile.warn .pill { background:var(--warn-bg); color:var(--warn-fg); }
+  .stile.kill .pill { background:var(--kill-bg); color:var(--kill-fg); }
+  .stile.insufficient .pill { background:var(--insuf-bg); color:var(--insuf-fg); }
+  .stile .v { font-size:22px; font-weight:800; color:var(--slate); margin:4px 0 2px; line-height:1.1; }
+  .stile.insufficient .v { color:var(--insuf-fg); }
+  .stile .delta { font-size:11px; font-weight:600; }
+  .stile .delta.pos { color:var(--pass-fg); }
+  .stile .delta.neg { color:var(--kill-fg); }
+  .stile .delta.neu { color:var(--gray-500); }
+  .stile .spark { margin-top:auto; padding-top:4px; height:34px; position:relative; }
+  .stile .spark canvas { width:100% !important; height:100% !important; }
+  .stile .reason { font-size:10px; color:var(--insuf-fg); margin-top:6px; font-style:italic; line-height:1.3; }
+
+  /* Big charts */
+  .chart-card { background:var(--card); border-radius:10px; padding:14px 18px 16px; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:12px; }
+  .chart-card h3 { font-size:13px; margin:0 0 4px; color:var(--slate); }
+  .chart-card .meta { font-size:11px; color:var(--gray-500); margin-bottom:8px; }
+  .chart-canvas-wrap { position:relative; height:260px; width:100%; }
+  .chart-canvas-wrap.tall { height:340px; }
+  .chart-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(440px,1fr)); gap:14px; }
+
+  /* Heatmap */
+  .heatmap { background:var(--card); border-radius:10px; padding:12px 18px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .heatmap table { border-collapse:collapse; font-size:11px; width:100%; }
+  .heatmap th, .heatmap td { padding:6px 8px; text-align:center; border:1px solid #FFFFFF; font-variant-numeric:tabular-nums; }
+  .heatmap th { background:var(--slate); color:#fff; font-weight:700; font-size:10px; text-transform:uppercase; }
+  .heatmap td:first-child, .heatmap th:first-child { text-align:left; background:var(--gray-50); color:var(--slate); font-weight:600; }
+  .heatmap td.null { background:#F9FAFB; color:#CBD5E1; }
+
+  /* Numeric table */
+  table.matrix { width:100%; border-collapse:collapse; background:var(--card); border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.06); font-size:11px; }
+  .matrix th, .matrix td { padding:6px 9px; text-align:left; border-bottom:1px solid var(--gray-200); }
+  .matrix th { background:var(--slate); color:#fff; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.4px; position:sticky; top:0; }
+  .matrix th.num, .matrix td.num { text-align:right; font-variant-numeric:tabular-nums; font-family:'SF Mono',Monaco,monospace; }
+  .matrix tr.partial { background:#FFFBEB; }
+  .matrix tr.partial td:first-child::after { content:' *'; color:var(--amber); font-weight:700; }
+
+  .footnote { font-size:11px; color:var(--gray-500); margin-top:10px; padding:8px 12px; background:#FFFBEB; border-left:3px solid var(--amber); border-radius:4px; }
+</style></head>
+<body>
+<header>
+  <div class="inner">
+    <div class="eyebrow">Top-down trend · v3.1 daily report mirror</div>
+    <h1>M3 alpha trend — 2026-05-12 → 2026-05-18</h1>
+    <div class="sub">All v3.1 daily-report fields, one sparkline per tile, 5-day trend window. Partial-coverage days (marked *) are NULL in lines.</div>
+    <div class="day-strip">
+      <div class="day-pill partial"><b>2026-05-12</b>349 dev · 614 sess · 15.5h</div><div class="day-pill"><b>2026-05-13</b>653 dev · 1,119 sess · 24h</div><div class="day-pill"><b>2026-05-14</b>868 dev · 1,562 sess · 24h</div><div class="day-pill"><b>2026-05-15</b>982 dev · 1,719 sess · 24h</div><div class="day-pill"><b>2026-05-16</b>1,126 dev · 2,144 sess · 24h</div><div class="day-pill"><b>2026-05-17</b>1,206 dev · 2,511 sess · 24h</div><div class="day-pill partial"><b>2026-05-18</b>297 dev · 446 sess · 8.4h</div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <h2><span class="num-badge">1</span> Headline volume</h2>
+  <div class="lede">Daily cohort sizes. These accumulate with window length so partial days are NULL.</div>
+  <div class="tile-grid big" id="volume-tiles"></div>
+</section>
+
+<section>
+  <h2><span class="num-badge">2</span> Tab 0 — Main tiles (12)</h2>
+  <div class="lede">Mirror of the daily report's main verdict tiles. INSUFFICIENT items rendered muted with the pipeline's reason.</div>
+  <div class="tile-grid" id="main-tiles"></div>
+</section>
+
+<section>
+  <h2><span class="num-badge">3</span> Tab 0 — Supporting tiles (8)</h2>
+  <div class="lede">Pri-1 metrics that didn't make the kill verdict cut but inform interpretation.</div>
+  <div class="tile-grid" id="supp-tiles"></div>
+</section>
+
+<section>
+  <h2><span class="num-badge">4</span> Funnel reach over time</h2>
+  <div class="lede">5 lines, one per milestone. Each shows the % of cohort that reached that level on each day. L10 highest (top), L50 lowest (bottom).</div>
+  <div class="chart-card"><div class="chart-canvas-wrap tall"><canvas id="ch-funnel"></canvas></div></div>
+</section>
+
+<section>
+  <h2><span class="num-badge">5</span> A/B wedge signals over time</h2>
+  <div class="lede"><span style="color:#2563EB;font-weight:600">ON</span> = cutscene-enabled · <span style="color:#F59E0B;font-weight:600">OFF</span> = holdout. The wedge is positive when ON's line sits above OFF's.</div>
+  <div class="chart-row">
+    <div class="chart-card"><h3>Total min/user/day</h3><div class="chart-canvas-wrap"><canvas id="ch-ab-min"></canvas></div></div>
+    <div class="chart-card"><h3>Sessions per user</h3><div class="chart-canvas-wrap"><canvas id="ch-ab-spu"></canvas></div></div>
+    <div class="chart-card"><h3>Win rate %</h3><div class="chart-canvas-wrap"><canvas id="ch-ab-wr"></canvas></div></div>
+    <div class="chart-card"><h3>L50 reach %</h3><div class="chart-canvas-wrap"><canvas id="ch-ab-l50"></canvas></div></div>
+    <div class="chart-card"><h3>Boss win rate %</h3><div class="chart-canvas-wrap"><canvas id="ch-ab-boss"></canvas></div></div>
+    <div class="chart-card"><h3>Bucketing leak (off arm cutscene_shown count)</h3><div class="meta">Should be 0 in a clean A/B. Growing = pre-login user_id flow leaking events.</div><div class="chart-canvas-wrap"><canvas id="ch-ab-leak"></canvas></div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num-badge">6</span> Cutscene-specific trends</h2>
+  <div class="lede">Per-scene skip rate as a heatmap (red = high skip, green = low) + aggregate outcome shares (insta-reject vs engaged-skip vs completed vs inconclusive) over time.</div>
+  <div class="chart-row">
+    <div class="heatmap">
+      <h3 style="font-size:13px;margin:0 0 8px;color:var(--slate);">Per-cutscene skip rate (%)</h3>
+      <table id="cs-heatmap"></table>
+    </div>
+    <div class="chart-card"><h3>Aggregate outcome shares</h3><div class="meta">100% of cutscene_shown, decomposed by outcome category.</div><div class="chart-canvas-wrap"><canvas id="ch-cs-share"></canvas></div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num-badge">7</span> Level difficulty over time</h2>
+  <div class="lede">5 hardest levels (lowest avg WR across the trend window, min 30 attempts on the latest day) and L50's mean attempts/user.</div>
+  <div class="chart-row">
+    <div class="chart-card"><h3>5 hardest levels — win rate %</h3><div class="chart-canvas-wrap"><canvas id="ch-hardest"></canvas></div></div>
+    <div class="chart-card"><h3>L50 mean attempts/user</h3><div class="meta">King's churn-risk band: > 5 attempts/user.</div><div class="chart-canvas-wrap"><canvas id="ch-l50-mean"></canvas></div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num-badge">8</span> Full numeric table</h2>
+  <div class="lede">Every metric × every day. Partial-coverage rows shaded amber.</div>
+  <div style="overflow-x:auto;max-height:520px;">
+    <table class="matrix" id="num-table"></table>
+  </div>
+  <div class="footnote"><b>* Partial coverage</b> — that day's first-to-last event span was less than 22 hours. VN-12 (Telegram zip with 15.5h) and VN-18 (mid-day cutoff with 8.4h) are partial. They appear in tile sparklines and the numeric table but are excluded from line charts so trends aren't distorted.</div>
+</section>
+
+</main>
+
+<script>
+const DAYS = [{"date":"2026-05-12","partial":true,"evH":15.5},{"date":"2026-05-13","partial":false,"evH":24},{"date":"2026-05-14","partial":false,"evH":24},{"date":"2026-05-15","partial":false,"evH":24},{"date":"2026-05-16","partial":false,"evH":24},{"date":"2026-05-17","partial":false,"evH":24},{"date":"2026-05-18","partial":true,"evH":8.4}];
+const MAIN  = [{"name":"D1 Retention","status":"insufficient","latestNumeric":null,"series":[null,null,null,null,null,null,null],"delta":null,"deltaSuffix":"","reason":"Needs day-N+1 cohort join. Multi-day extract required (re-run with day before).","source":"main"},{"name":"D3 Retention","status":"insufficient","latestNumeric":null,"series":[null,null,null,null,null,null,null],"delta":null,"deltaSuffix":"","reason":"Needs day-N+3 cohort join. Multi-day extract required.","source":"main"},{"name":"Sessions / Day","status":"warn","latestVal":"2.08","latestNumeric":2.08,"series":[null,1.71,1.8,1.75,1.9,2.08,null],"delta":21.6,"deltaSuffix":"%","reason":null,"source":"main"},{"name":"Avg Session Length","status":"pass","latestVal":"8.1min","latestNumeric":8.1,"series":[null,9.6,8,9,8.5,8.1,null],"delta":-15.6,"deltaSuffix":"%","reason":null,"source":"main"},{"name":"Cutscene Skip Rate","status":"kill","latestVal":"72.2%","latestNumeric":72.2,"series":[null,72.3,68,72.2,71.2,72.2,null],"delta":-0.1,"deltaSuffix":"pp","reason":null,"source":"main"},{"name":"Cutscene Finish Rate","status":"kill","latestVal":"21.5%","latestNumeric":21.5,"series":[null,25.2,28.4,24.1,23.2,21.5,null],"delta":-3.7,"deltaSuffix":"pp","reason":null,"source":"main"},{"name":"L50 Reach","status":"warn","latestVal":"13.9%","latestNumeric":13.9,"series":[null,10.7,13.6,14,10.8,13.9,null],"delta":3.2,"deltaSuffix":"pp","reason":null,"source":"main"},{"name":"Drop @ non-intro levels","status":"pass","latestVal":"1.9%","latestNumeric":1.9,"series":[null,1.9,1.9,2.4,2.6,1.9,null],"delta":0,"deltaSuffix":"pp","reason":null,"source":"main"},{"name":"Natural Drop Rate","status":"kill","latestVal":"70.3%","latestNumeric":70.3,"series":[null,89,83.9,79.2,73.3,70.3,null],"delta":-18.7,"deltaSuffix":"pp","reason":null,"source":"main"},{"name":"M17a corr (cutscene×D3)","status":"insufficient","latestNumeric":null,"series":[null,null,null,null,null,null,null],"delta":null,"deltaSuffix":"","reason":"Correlation needs per-user cutscene completion × D3-retained flag. Multi-day extract required.","source":"main"},{"name":"AGGREGATE DECISION","status":"insufficient","latestNumeric":null,"series":[null,null,null,null,null,null,null],"delta":null,"deltaSuffix":"","reason":"Derived. Some inputs still INSUFFICIENT (retention).","source":"main"},{"name":"Decision trend (14d)","status":"insufficient","latestNumeric":null,"series":[null,null,null,null,null,null,null],"delta":null,"deltaSuffix":"","reason":"Needs 14-day extract history.","source":"main"}];
+const SUPP  = [{"name":"Time to first fail","status":"pass","latestVal":"5.1min","latestNumeric":5.1,"series":[null,5.1,4.2,4.8,6.2,5.1,null],"delta":0,"deltaSuffix":"%","reason":null,"source":"supporting"},{"name":"1st cutscene → Session 2","status":"insufficient","latestNumeric":null,"series":[null,null,null,null,null,null,null],"delta":null,"deltaSuffix":"","reason":"Needs day-N+1 session join. Multi-day extract required.","source":"supporting"},{"name":"Win rate per level (avg)","status":"warn","latestVal":"59.6%","latestNumeric":59.6,"series":[null,78.5,73.2,69.2,62.3,59.6,null],"delta":-18.9,"deltaSuffix":"pp","reason":null,"source":"supporting"},{"name":"Fail rate per level (avg)","status":"kill","latestVal":"40.4%","latestNumeric":40.4,"series":[null,21.5,26.8,30.8,37.7,40.4,null],"delta":18.9,"deltaSuffix":"pp","reason":null,"source":"supporting"},{"name":"Adaptive trigger count","status":"pass","latestVal":"1.45/sess","latestNumeric":1.45,"series":[null,1.12,1.18,1.27,1.37,1.45,null],"delta":29.5,"deltaSuffix":"%","reason":null,"source":"supporting"},{"name":"Move surplus (avg)","status":"pass","latestVal":"+0.84","latestNumeric":0.84,"series":[null,1.86,1.47,1.2,0.89,0.84,null],"delta":-54.8,"deltaSuffix":"%","reason":null,"source":"supporting"},{"name":"Tutorial popup shown rate","status":"insufficient","latestNumeric":null,"series":[null,null,null,null,null,null,null],"delta":null,"deltaSuffix":"","reason":"tutorial_popup_shown events not instrumented in current build (0 hits in 30k-event scan).","source":"supporting"},{"name":"Per-feature first-success","status":"insufficient","latestNumeric":null,"series":[null,null,null,null,null,null,null],"delta":null,"deltaSuffix":"","reason":"Same — tutorial events not instrumented.","source":"supporting"}];
+const VOL   = {"devices":[null,653,868,982,1126,1206,null],"sessions":[null,1119,1562,1719,2144,2511,null],"spd":[null,1.71,1.8,1.75,1.9,2.08,null]};
+const FUN   = {"labels":["L10","L20","L30","L40","L50"],"series":[{"label":"L10","data":[null,54.5,53,53.8,56.4,59.5,null]},{"label":"L20","data":[null,37.2,36.5,38.9,37,42.5,null]},{"label":"L30","data":[null,22.5,24.3,27.1,26.1,30.7,null]},{"label":"L40","data":[null,17.2,18.2,19.8,18.5,23.1,null]},{"label":"L50","data":[null,10.7,13.6,14,10.8,13.9,null]}]};
+const AB    = {"minPerUser":{"on":[null,29.5,29.48,27.23,26.04,25.5,null],"off":[null,28.57,25.36,27.11,30.02,31.65,null]},"sessPerUser":{"on":[null,1.89,1.98,1.77,1.91,2.03,null],"off":[null,1.75,1.73,1.74,1.88,2.12,null]},"winRate":{"on":[null,83.7,78.6,74.3,67.5,65.9,null],"off":[null,84.3,79.9,76.7,70,65.6,null]},"l50Reach":{"on":[null,9.1,14.1,15.4,10.8,12.6,null],"off":[null,12,13.6,12.3,10.8,15.2,null]},"bossWR":{"on":[null,89.7,90.2,77.6,44,35.5,null],"off":[null,93.3,86.6,78.5,41,41.3,null]},"bucketLeak":[null,2,25,47,0,0,null],"onUsers":[null,320,440,460,564,613,null]};
+const CS_HM = [{"lv":1,"data":[null,64,61.8,65,63.2,58.9,null]},{"lv":5,"data":[null,73,75.1,72.7,73.1,75.1,null]},{"lv":10,"data":[null,76.6,69.4,71.2,75.3,76.6,null]},{"lv":11,"data":[null,75.4,69.9,76.5,74.4,78.9,null]},{"lv":21,"data":[null,79.6,68.5,80,84.6,78.5,null]},{"lv":31,"data":[null,77.4,70.7,76.7,71.4,82.4,null]},{"lv":40,"data":[null,77.5,75.4,83.1,76.7,84.7,null]}];
+const CS_SH = [null,{"insta_pct":2.4,"engaged_pct":69.8,"completed_pct":25.2,"inc_pct":2.6},{"insta_pct":3.5,"engaged_pct":64.8,"completed_pct":28.2,"inc_pct":3.5},{"insta_pct":3.4,"engaged_pct":68.8,"completed_pct":24.1,"inc_pct":3.7},{"insta_pct":2.2,"engaged_pct":69,"completed_pct":23.2,"inc_pct":5.5},{"insta_pct":3.2,"engaged_pct":69,"completed_pct":21.5,"inc_pct":6.3},null];
+const HARD5 = [{"lvId":"0","avgWR":0,"series":[null,0,0,0,0,0,null],"latestAtts":92},{"lvId":"50","avgWR":45.059999999999995,"series":[null,59.5,57.8,43.3,33.1,31.6,null],"latestAtts":1211},{"lvId":"43","avgWR":54.279999999999994,"series":[null,60.3,59.1,64.6,42.2,45.2,null],"latestAtts":241},{"lvId":"29","avgWR":57.239999999999995,"series":[null,64.8,56.3,53.5,56.7,54.9,null],"latestAtts":304},{"lvId":"45","avgWR":58.2,"series":[null,68.8,69.2,62.1,42.5,48.4,null],"latestAtts":213}];
+const L50_MA = [null,3.26,3.24,4.58,6.04,7.38,null];
+
+const dates = DAYS.map(d => d.date);
+
+// ── Sparkline tile renderer ────────────────────────────────────────────────
+function renderTile(tile, parent) {
+  const el = document.createElement('div');
+  el.className = 'stile ' + tile.status;
+  const isInsuf = tile.status === 'insufficient';
+  const pill = tile.status === 'insufficient' ? 'INSUFFICIENT' : tile.status.toUpperCase();
+  const value = tile.latestVal != null ? tile.latestVal : '—';
+  const deltaTxt = (tile.delta != null && !isInsuf)
+    ? ((tile.delta >= 0 ? '+' : '') + tile.delta + tile.deltaSuffix + ' since first reading')
+    : '';
+  const deltaClass = (tile.delta == null || isInsuf) ? 'neu' : (Math.abs(tile.delta) < 0.5 ? 'neu' : tile.delta > 0 ? 'pos' : 'neg');
+  el.innerHTML =
+    '<div class="top"><div class="name">' + tile.name + '</div><span class="pill">' + pill + '</span></div>' +
+    '<div class="v">' + value + '</div>' +
+    (deltaTxt ? '<div class="delta ' + deltaClass + '">' + deltaTxt + '</div>' : '') +
+    (isInsuf && tile.reason ? '<div class="reason">' + tile.reason + '</div>' : '') +
+    (isInsuf ? '' : '<div class="spark"><canvas></canvas></div>');
+  parent.appendChild(el);
+  // Render sparkline
+  if (!isInsuf) {
+    const canvas = el.querySelector('canvas');
+    const color = tile.status === 'pass' ? '#10B981' : tile.status === 'warn' ? '#F59E0B' : tile.status === 'kill' ? '#DC2626' : '#6B7280';
+    new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [{
+          data: tile.series,
+          borderColor: color,
+          backgroundColor: color + '22',
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          tension: 0.25,
+          fill: true,
+          spanGaps: false
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: items => items[0].label, label: ctx => ctx.parsed.y } } },
+        scales: { x: { display: false }, y: { display: false } },
+        animation: false
+      }
+    });
+  }
+}
+
+// Volume tiles — derived directly (not from main_tiles)
+const volTiles = [
+  { name: 'Active devices/day',  series: VOL.devices,  unit: ''  },
+  { name: 'Sessions/day',         series: VOL.sessions, unit: ''  },
+  { name: 'Sessions per device',  series: VOL.spd,      unit: ''  }
+];
+const volGrid = document.getElementById('volume-tiles');
+volTiles.forEach(t => {
+  const last = [...t.series].reverse().find(v => v != null);
+  const first = t.series.find(v => v != null);
+  const delta = (last != null && first != null && first !== 0) ? +((last/first - 1) * 100).toFixed(1) : null;
+  const tile = { name: t.name, status: 'pass', latestVal: last != null ? last.toLocaleString() : '—', latestNumeric: last,
+    series: t.series, delta, deltaSuffix: '%', reason: null };
+  renderTile(tile, volGrid);
+});
+
+const mainGrid = document.getElementById('main-tiles');
+MAIN.forEach(t => renderTile(t, mainGrid));
+
+const suppGrid = document.getElementById('supp-tiles');
+SUPP.forEach(t => renderTile(t, suppGrid));
+
+// ── Big charts ─────────────────────────────────────────────────────────────
+function lineDataset(label, data, color, opts) {
+  opts = opts || {};
+  return {
+    label,
+    data,
+    borderColor: color,
+    backgroundColor: color + '20',
+    borderWidth: opts.bw || 2,
+    pointRadius: 3,
+    pointHoverRadius: 5,
+    tension: 0.25,
+    fill: !!opts.fill,
+    spanGaps: false
+  };
+}
+function lineChart(canvasId, datasets, opts) {
+  opts = opts || {};
+  new Chart(document.getElementById(canvasId), {
+    type:'line', data:{ labels: dates, datasets },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom', display: datasets.length > 1} },
+      interaction:{mode:'index', intersect:false},
+      scales:{ y:{ beginAtZero: opts.beginAtZero !== false, max: opts.yMax, ticks: opts.yticks, title: opts.ytitle ? {display:true,text:opts.ytitle} : undefined } }
+    }
+  });
+}
+
+// Funnel
+const FUN_COLORS = ['#1E40AF','#2563EB','#7C3AED','#DC2626','#F59E0B'];
+lineChart('ch-funnel',
+  FUN.series.map((s, i) => lineDataset(s.label + ' reach', s.data, FUN_COLORS[i])),
+  { yMax: 100, yticks: { callback: v => v + '%' }, ytitle: 'reach %' });
+
+// A/B charts
+lineChart('ch-ab-min',  [ lineDataset('ON', AB.minPerUser.on, '#2563EB'),  lineDataset('OFF', AB.minPerUser.off, '#F59E0B') ], { ytitle:'min/user/day' });
+lineChart('ch-ab-spu',  [ lineDataset('ON', AB.sessPerUser.on, '#2563EB'), lineDataset('OFF', AB.sessPerUser.off, '#F59E0B') ], { ytitle:'sessions/user' });
+lineChart('ch-ab-wr',   [ lineDataset('ON', AB.winRate.on, '#2563EB'),     lineDataset('OFF', AB.winRate.off, '#F59E0B') ], { ytitle:'%', yticks:{callback:v=>v+'%'} });
+lineChart('ch-ab-l50',  [ lineDataset('ON', AB.l50Reach.on, '#2563EB'),    lineDataset('OFF', AB.l50Reach.off, '#F59E0B') ], { ytitle:'%', yticks:{callback:v=>v+'%'} });
+lineChart('ch-ab-boss', [ lineDataset('ON', AB.bossWR.on, '#2563EB'),      lineDataset('OFF', AB.bossWR.off, '#F59E0B') ], { ytitle:'%', yticks:{callback:v=>v+'%'} });
+lineChart('ch-ab-leak', [ lineDataset('Off-arm cutscene_shown', AB.bucketLeak, '#DC2626') ], { ytitle:'count' });
+
+// Cutscene heatmap
+(function() {
+  const table = document.getElementById('cs-heatmap');
+  const thead = '<tr><th>Cutscene</th>' + dates.map((d, i) => '<th>' + d.slice(5) + (DAYS[i].partial ? '*' : '') + '</th>').join('') + '</tr>';
+  function heatColor(v) {
+    if (v == null) return null;
+    // Red gradient: green at 30%, amber at 60%, red at 90%
+    const intensity = Math.max(0, Math.min(1, (v - 30) / 60));
+    const r = Math.round(16 + (220-16) * intensity);
+    const g = Math.round(185 + (38-185) * intensity);
+    const b = Math.round(129 + (38-129) * intensity);
+    return 'rgba(' + r + ',' + g + ',' + b + ',0.75)';
+  }
+  const rows = CS_HM.map(row => {
+    return '<tr><td><b>L' + row.lv + '</b></td>' +
+      row.data.map(v => {
+        if (v == null) return '<td class="null">—</td>';
+        return '<td style="background:' + heatColor(v) + ';color:#111;font-weight:600;">' + v.toFixed(1) + '%</td>';
+      }).join('') + '</tr>';
+  }).join('');
+  table.innerHTML = thead + rows;
+})();
+
+// Cutscene outcome shares (4 lines)
+lineChart('ch-cs-share', [
+  lineDataset('Insta-reject (≤3s)', CS_SH.map(s => s ? s.insta_pct : null),     '#DC2626'),
+  lineDataset('Engaged-skip (>3s)',  CS_SH.map(s => s ? s.engaged_pct : null),   '#F59E0B'),
+  lineDataset('Completed',           CS_SH.map(s => s ? s.completed_pct : null), '#10B981'),
+  lineDataset('Inconclusive',        CS_SH.map(s => s ? s.inc_pct : null),       '#9CA3AF')
+], { yMax: 100, yticks:{callback:v=>v+'%'}, ytitle:'% of cutscene_shown' });
+
+// Hardest 5 levels
+const HARD_COLORS = ['#DC2626','#EA580C','#D97706','#65A30D','#0891B2'];
+lineChart('ch-hardest',
+  HARD5.map((l, i) => lineDataset('L' + l.lvId + ' (avg ' + l.avgWR.toFixed(1) + '%)', l.series, HARD_COLORS[i % HARD_COLORS.length])),
+  { yMax: 100, yticks:{callback:v=>v+'%'}, ytitle:'win rate %' });
+
+// L50 mean attempts
+lineChart('ch-l50-mean', [ lineDataset('L50 mean atts/user', L50_MA, '#7C3AED') ], { ytitle:'attempts/user' });
+
+// Numeric table
+(function() {
+  const table = document.getElementById('num-table');
+  const allMetrics = [
+    // [section_label, name, values_array, format]
+    ['Volume', 'Active devices',  VOL.devices,  'int'],
+    ['Volume', 'Sessions',        VOL.sessions, 'int'],
+    ['Volume', 'Sessions/device', VOL.spd,      '.2'],
+  ];
+  MAIN.forEach(t => allMetrics.push(['Main tile (Tab 0)', t.name, t.series, 'auto']));
+  SUPP.forEach(t => allMetrics.push(['Supporting tile',   t.name, t.series, 'auto']));
+  FUN.series.forEach(s => allMetrics.push(['Funnel reach', s.label + ' reach', s.data, '.1%']));
+  allMetrics.push(['A/B wedge', 'ON · min/user/day',  AB.minPerUser.on,  '.2']);
+  allMetrics.push(['A/B wedge', 'OFF · min/user/day', AB.minPerUser.off, '.2']);
+  allMetrics.push(['A/B wedge', 'ON · win rate %',    AB.winRate.on,     '.1%']);
+  allMetrics.push(['A/B wedge', 'OFF · win rate %',   AB.winRate.off,    '.1%']);
+  allMetrics.push(['A/B wedge', 'ON · L50 reach %',   AB.l50Reach.on,    '.1%']);
+  allMetrics.push(['A/B wedge', 'OFF · L50 reach %',  AB.l50Reach.off,   '.1%']);
+  allMetrics.push(['A/B wedge', 'ON · boss WR %',     AB.bossWR.on,      '.1%']);
+  allMetrics.push(['A/B wedge', 'OFF · boss WR %',    AB.bossWR.off,     '.1%']);
+  allMetrics.push(['A/B wedge', 'Bucketing leak count', AB.bucketLeak,   'int']);
+  allMetrics.push(['Cutscene',  'Insta-reject share %',    CS_SH.map(s=>s?s.insta_pct:null),     '.1%']);
+  allMetrics.push(['Cutscene',  'Engaged-skip share %',    CS_SH.map(s=>s?s.engaged_pct:null),   '.1%']);
+  allMetrics.push(['Cutscene',  'Completed share %',       CS_SH.map(s=>s?s.completed_pct:null), '.1%']);
+  allMetrics.push(['Cutscene',  'Inconclusive share %',    CS_SH.map(s=>s?s.inc_pct:null),       '.1%']);
+  CS_HM.forEach(r => allMetrics.push(['Cutscene scene WR', 'L' + r.lv + ' skip %', r.data, '.1%']));
+  HARD5.forEach((l) => allMetrics.push(['Hardest 5', 'L' + l.lvId + ' WR %', l.series, '.1%']));
+  allMetrics.push(['Level diff', 'L50 mean atts/user', L50_MA, '.2']);
+
+  function fmt(v, mode) {
+    if (v == null || (typeof v === 'number' && isNaN(v))) return '—';
+    if (typeof v === 'object' && v.value != null) v = parseFloat((v.value || '').match(/-?[\d.]+/) || 0);
+    if (typeof v === 'string') {
+      const m = v.match(/-?[\d.]+/); v = m ? +m[0] : null;
+      if (v == null) return '—';
+    }
+    if (mode === 'int') return v.toLocaleString();
+    if (mode === '.2')  return v.toFixed(2);
+    if (mode === '.1%') return v.toFixed(1) + '%';
+    if (mode === 'auto') {
+      if (Number.isInteger(v)) return v.toLocaleString();
+      return v.toFixed(2);
+    }
+    return v;
+  }
+  let html = '<thead><tr><th>Section</th><th>Metric</th>' + dates.map((d,i) => '<th class="num">' + d.slice(5) + (DAYS[i].partial ? '*' : '') + '</th>').join('') + '</tr></thead><tbody>';
+  let lastSection = '';
+  allMetrics.forEach(m => {
+    const [section, name, vals, mode] = m;
+    const tr = '<tr><td>' + (section !== lastSection ? section : '') + '</td><td><b>' + name + '</b></td>' +
+      vals.map((v, i) => '<td class="num">' + fmt(v, mode) + '</td>').join('') + '</tr>';
+    html += tr;
+    lastSection = section;
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+})();
+</script>
+</body></html>

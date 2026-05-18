@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comparison: VN-16 (full day · 1126 users · 24h) vs VN-17 (full day · 1206 users · 24h)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root { --slate:#1F2937; --slate-2:#374151; --cyan:#0EA5E9; --amber:#F59E0B;
+    --pass:#10B981; --warn:#F59E0B; --kill:#DC2626;
+    --pass-bg:#D1FAE5; --pass-fg:#065F46; --warn-bg:#FEF3C7; --warn-fg:#92400E; --kill-bg:#FEE2E2; --kill-fg:#991B1B;
+    --gray-50:#F9FAFB; --gray-200:#E5E7EB; --gray-500:#6B7280;
+    --bg:#F3F4F6; --card:#FFFFFF;
+    --a-color:#2563EB; --b-color:#F59E0B; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Inter',-apple-system,system-ui,Arial,sans-serif; background:var(--bg); color:#111; font-size:14px; line-height:1.55; }
+  header { background:linear-gradient(135deg,#1F2937 0%,#0F172A 100%); color:#fff; padding:34px 32px; }
+  header .inner { max-width:1320px; margin:0 auto; }
+  header .eyebrow { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:#94A3B8; margin-bottom:6px; }
+  header h1 { font-size:26px; margin:0 0 6px; font-weight:800; }
+  header .vsline { display:flex; gap:14px; align-items:center; margin-top:8px; flex-wrap:wrap; }
+  .pillA, .pillB { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:600; }
+  .pillA { background:rgba(37,99,235,0.18); border:1px solid rgba(37,99,235,0.5); color:#dbeafe; }
+  .pillB { background:rgba(245,158,11,0.18); border:1px solid rgba(245,158,11,0.5); color:#fef3c7; }
+  .vs    { color:#94A3B8; font-size:12px; }
+  main { max-width:1320px; margin:0 auto; padding:24px 32px 80px; }
+  section { margin:24px 0; }
+  section h2 { font-size:18px; margin:0 0 6px; color:var(--slate); border-left:4px solid var(--cyan); padding-left:10px; }
+  section .lede { color:var(--gray-500); font-size:12px; margin-bottom:14px; max-width:980px; }
+
+  .cmp-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+  .cmp-tile { background:var(--card); border-radius:10px; padding:14px 16px; box-shadow:0 1px 3px rgba(0,0,0,0.06); border-left:4px solid var(--gray-200); }
+  .cmp-tile .label { font-size:10.5px; color:var(--gray-500); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+  .cmp-tile .pair  { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; }
+  .cmp-tile .v     { font-size:18px; font-weight:800; line-height:1.1; }
+  .cmp-tile .v.a   { color:var(--a-color); }
+  .cmp-tile .v.b   { color:var(--b-color); }
+  .cmp-tile .sub   { font-size:10.5px; color:var(--gray-500); margin-top:2px; }
+  .cmp-tile .delta { margin-top:8px; font-size:12px; font-weight:700; padding:3px 8px; border-radius:6px; display:inline-block; }
+  .delta.pass { background:var(--pass-bg); color:var(--pass-fg); }
+  .delta.warn { background:var(--warn-bg); color:var(--warn-fg); }
+  .delta.kill { background:var(--kill-bg); color:var(--kill-fg); }
+  .delta.neutral { background:#E5E7EB; color:#6B7280; }
+
+  .chart-card { background:var(--card); border-radius:10px; padding:14px 18px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:14px; }
+  .chart-card h3 { font-size:14px; margin:0 0 4px; color:var(--slate); }
+  .chart-card .meta { font-size:11px; color:var(--gray-500); margin-bottom:10px; }
+  .chart-canvas-wrap { position:relative; height:300px; width:100%; }
+  .chart-canvas-wrap.tall { height:380px; }
+
+  table.matrix { width:100%; border-collapse:collapse; background:var(--card); border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.06); font-size:12px; }
+  .matrix th, .matrix td { padding:8px 10px; text-align:left; border-bottom:1px solid var(--gray-200); }
+  .matrix th { background:var(--slate); color:#fff; font-weight:700; font-size:10.5px; text-transform:uppercase; letter-spacing:0.4px; position:sticky; top:0; cursor:pointer; user-select:none; }
+  .matrix th.num { text-align:right; }
+  .matrix th:hover { background:#374151; }
+  .matrix td.num { text-align:right; font-variant-numeric:tabular-nums; font-family:'SF Mono',Monaco,monospace; }
+  .matrix tr:hover { background:#F9FAFB; }
+  .matrix td.a { color:var(--a-color); font-weight:600; }
+  .matrix td.b { color:var(--b-color); font-weight:600; }
+  /* Highlighted rows: |Δ atts %| > 30 — overrides hover with the same amber */
+  .matrix tr.hot { background:rgba(245,158,11,0.16); }
+  .matrix tr.hot:hover { background:rgba(245,158,11,0.24); }
+  .matrix tr.hot td:first-child { border-left:4px solid var(--amber); padding-left:8px; }
+  .pill { display:inline-block; padding:1px 7px; border-radius:10px; font-size:10.5px; font-weight:700; }
+  .pill.pro { background:var(--pass-bg); color:var(--pass-fg); }
+  .pill.anti { background:var(--kill-bg); color:var(--kill-fg); }
+  .pill.neutral { background:#E5E7EB; color:#6B7280; }
+  .table-scroll { overflow:auto; max-height:720px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <div class="eyebrow">Window-vs-window comparison</div>
+    <h1>VN-16 (full day · 1126 users · 24h) <span style="color:#94A3B8;font-weight:400;">vs</span> VN-17 (full day · 1206 users · 24h)</h1>
+    <div class="vsline">
+      <span class="pillA">A · VN-16 (full day · 1126 users · 24h) · 1,126 devices · 2,144 sessions</span>
+      <span class="vs">vs</span>
+      <span class="pillB">B · VN-17 (full day · 1206 users · 24h) · 1,206 devices · 2,511 sessions</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <h2>Sessions & users — vital stats</h2>
+  <div class="lede">Top-line cohort and session-volume comparison. Δ values are B − A (positive = improvement for engagement direction). Δ% computed off A as the baseline.</div>
+  <div class="cmp-grid" id="vital-tiles"></div>
+</section>
+
+<section>
+  <h2>Funnel reach (L10 → L50) + per-stage drop rate</h2>
+  <div class="lede">Bars (left y-axis) = % of users who reached each milestone. Dashed lines (right y-axis) = stage-to-stage <b>drop rate</b> — at L20 the line shows the % of L10-cohort that didn't reach L20, etc. <span style="color:#2563EB;font-weight:600">A</span> = baseline window, <span style="color:#F59E0B;font-weight:600">B</span> = current window. Higher drop-rate spikes = funnel chokepoints.</div>
+  <div class="chart-card"><div class="chart-canvas-wrap tall"><canvas id="ch-funnel"></canvas></div></div>
+</section>
+
+<section>
+  <h2>Level difficulty — win rate per level</h2>
+  <div class="lede"><span style="color:#2563EB">A</span> vs <span style="color:#F59E0B">B</span> per-level win rate. Higher = easier. Look for systematic drift (whole bar set shifts up/down) and outliers (single level moves dramatically).</div>
+  <div class="chart-card"><div class="chart-canvas-wrap tall"><canvas id="ch-winrate"></canvas></div></div>
+</section>
+
+<section>
+  <h2>Level difficulty — mean attempts per user</h2>
+  <div class="lede">Same levels, mean retry burden. The mean exposes the long-tail (highly retried levels) that the median hides.</div>
+  <div class="chart-card"><div class="chart-canvas-wrap tall"><canvas id="ch-meanatt"></canvas></div></div>
+</section>
+
+<section>
+  <h2>Per-level comparison table</h2>
+  <div class="lede">All levels present in either window. Click headers to sort. Levels missing from one side show "—" in that side's cells. <b>Rows highlighted in amber have |Δ atts %| &gt; 30%</b> — the attempt count moved more than the baseline window-length effect would predict (B's 17h window expects roughly -29% on attempts purely from being shorter than A's 24h). Amber rows = real attention/popularity shift, not just clock-time.</div>
+  <div class="table-scroll">
+    <table class="matrix" id="lvl-table">
+      <thead><tr>
+        <th data-k="level_id">Level</th>
+        <th class="num" data-k="a_attempts">A atts</th>
+        <th class="num" data-k="b_attempts">B atts</th>
+        <th class="num" data-k="delta_atts_pct">Δ atts %</th>
+        <th class="num" data-k="a_users">A users</th>
+        <th class="num" data-k="b_users">B users</th>
+        <th class="num" data-k="a_win_rate_pct">A WR%</th>
+        <th class="num" data-k="b_win_rate_pct">B WR%</th>
+        <th class="num" data-k="delta_win_rate_pp">Δ WR (pp)</th>
+        <th class="num" data-k="a_mean_atts">A mean atts</th>
+        <th class="num" data-k="b_mean_atts">B mean atts</th>
+        <th class="num" data-k="delta_mean_atts_pct">Δ mean atts %</th>
+        <th class="num" data-k="a_obj_rem">A obj rem (F)</th>
+        <th class="num" data-k="b_obj_rem">B obj rem (F)</th>
+      </tr></thead>
+      <tbody id="lvl-tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<script>
+const A = {"devices":1126,"sessions":2144,"sessions_per_device":1.9,"avg_session_len":"8.5min","time_to_first_fail":"6.2min","win_rate_avg":"62.3%","cutscene_skip":"71.2%","cutscene_finish":"23.2%","l50_reach":"10.8%","natural_drop":"73.3%","ab_on_total_min":26.04,"ab_off_total_min":30.02,"ab_on_med_min":8.6,"ab_off_med_min":8.5,"ab_on_users":564,"ab_off_users":567,"funnel":{"labels":["L10","L20","L30","L40","L50"],"actual":[56.4,37,26.1,18.5,10.8],"target":[70,50,35,25,20]},"coverage_note":"First event in window is 2026-05-15T17:00:00.350Z — first 0 min (0.0h) of VN-2026-05-16 missing from dump.","window_start":"2026-05-15T17:00:00.000Z","window_end":"2026-05-16T17:00:00.000Z","events_kept":620260,"target_date":"2026-05-16"};
+const B = {"devices":1206,"sessions":2511,"sessions_per_device":2.08,"avg_session_len":"8.1min","time_to_first_fail":"5.1min","win_rate_avg":"59.6%","cutscene_skip":"72.2%","cutscene_finish":"21.5%","l50_reach":"13.9%","natural_drop":"70.3%","ab_on_total_min":25.5,"ab_off_total_min":31.65,"ab_on_med_min":8,"ab_off_med_min":8.4,"ab_on_users":613,"ab_off_users":597,"funnel":{"labels":["L10","L20","L30","L40","L50"],"actual":[59.5,42.5,30.7,23.1,13.9],"target":[70,50,35,25,20]},"coverage_note":"First event in window is 2026-05-16T17:00:00.305Z — first 0 min (0.0h) of VN-2026-05-17 missing from dump.","window_start":"2026-05-16T17:00:00.000Z","window_end":"2026-05-17T17:00:00.000Z","events_kept":704562,"target_date":"2026-05-17"};
+const A_LABEL = "VN-16 (full day · 1126 users · 24h)";
+const B_LABEL = "VN-17 (full day · 1206 users · 24h)";
+const LEVELS = [{"level_id":0,"a_attempts":90,"b_attempts":92,"a_win_rate_pct":0,"b_win_rate_pct":0,"a_mean_atts":1.27,"b_mean_atts":1.35,"a_users":71,"b_users":68,"a_obj_rem":0,"b_obj_rem":0,"delta_win_rate_pp":0,"delta_mean_atts_pct":6.3,"delta_obj_rem":0,"delta_atts_pct":2.2},{"level_id":1,"a_attempts":623,"b_attempts":598,"a_win_rate_pct":97.9,"b_win_rate_pct":97.7,"a_mean_atts":1.04,"b_mean_atts":1.04,"a_users":600,"b_users":573,"a_obj_rem":1.15,"b_obj_rem":2.07,"delta_win_rate_pp":-0.2,"delta_mean_atts_pct":0,"delta_obj_rem":0.92,"delta_atts_pct":-4},{"level_id":2,"a_attempts":610,"b_attempts":600,"a_win_rate_pct":89.7,"b_win_rate_pct":84.3,"a_mean_atts":1.12,"b_mean_atts":1.17,"a_users":545,"b_users":511,"a_obj_rem":4.06,"b_obj_rem":4.52,"delta_win_rate_pp":-5.4,"delta_mean_atts_pct":4.5,"delta_obj_rem":0.46,"delta_atts_pct":-1.6},{"level_id":3,"a_attempts":543,"b_attempts":520,"a_win_rate_pct":95.4,"b_win_rate_pct":95.4,"a_mean_atts":1.11,"b_mean_atts":1.12,"a_users":490,"b_users":466,"a_obj_rem":1.4,"b_obj_rem":1.38,"delta_win_rate_pp":0,"delta_mean_atts_pct":0.9,"delta_obj_rem":-0.02,"delta_atts_pct":-4.2},{"level_id":4,"a_attempts":549,"b_attempts":494,"a_win_rate_pct":86.7,"b_win_rate_pct":87.7,"a_mean_atts":1.18,"b_mean_atts":1.13,"a_users":467,"b_users":437,"a_obj_rem":4.32,"b_obj_rem":4.66,"delta_win_rate_pp":1,"delta_mean_atts_pct":-4.2,"delta_obj_rem":0.34,"delta_atts_pct":-10},{"level_id":5,"a_attempts":526,"b_attempts":493,"a_win_rate_pct":82.9,"b_win_rate_pct":83.2,"a_mean_atts":1.23,"b_mean_atts":1.2,"a_users":429,"b_users":411,"a_obj_rem":6.12,"b_obj_rem":5.66,"delta_win_rate_pp":0.3,"delta_mean_atts_pct":-2.4,"delta_obj_rem":-0.46,"delta_atts_pct":-6.3},{"level_id":6,"a_attempts":477,"b_attempts":434,"a_win_rate_pct":82,"b_win_rate_pct":87.1,"a_mean_atts":1.2,"b_mean_atts":1.14,"a_users":397,"b_users":380,"a_obj_rem":4.09,"b_obj_rem":3.64,"delta_win_rate_pp":5.1,"delta_mean_atts_pct":-5,"delta_obj_rem":-0.45,"delta_atts_pct":-9},{"level_id":7,"a_attempts":465,"b_attempts":457,"a_win_rate_pct":79.6,"b_win_rate_pct":76.1,"a_mean_atts":1.24,"b_mean_atts":1.29,"a_users":375,"b_users":355,"a_obj_rem":4.96,"b_obj_rem":4.94,"delta_win_rate_pp":-3.5,"delta_mean_atts_pct":4,"delta_obj_rem":-0.02,"delta_atts_pct":-1.7},{"level_id":8,"a_attempts":484,"b_attempts":435,"a_win_rate_pct":69.6,"b_win_rate_pct":75.2,"a_mean_atts":1.38,"b_mean_atts":1.29,"a_users":350,"b_users":338,"a_obj_rem":1.59,"b_obj_rem":1.6,"delta_win_rate_pp":5.6,"delta_mean_atts_pct":-6.5,"delta_obj_rem":0.01,"delta_atts_pct":-10.1},{"level_id":9,"a_attempts":363,"b_attempts":350,"a_win_rate_pct":96.4,"b_win_rate_pct":97.1,"a_mean_atts":1.08,"b_mean_atts":1.09,"a_users":336,"b_users":321,"a_obj_rem":2.92,"b_obj_rem":1.6,"delta_win_rate_pp":0.7,"delta_mean_atts_pct":0.9,"delta_obj_rem":-1.32,"delta_atts_pct":-3.6},{"level_id":10,"a_attempts":545,"b_attempts":481,"a_win_rate_pct":59.6,"b_win_rate_pct":68.2,"a_mean_atts":1.63,"b_mean_atts":1.47,"a_users":334,"b_users":327,"a_obj_rem":1,"b_obj_rem":0.98,"delta_win_rate_pp":8.6,"delta_mean_atts_pct":-9.8,"delta_obj_rem":-0.02,"delta_atts_pct":-11.7},{"level_id":11,"a_attempts":320,"b_attempts":325,"a_win_rate_pct":99.7,"b_win_rate_pct":100,"a_mean_atts":1.04,"b_mean_atts":1.05,"a_users":308,"b_users":311,"a_obj_rem":1,"b_obj_rem":null,"delta_win_rate_pp":0.3,"delta_mean_atts_pct":1,"delta_obj_rem":null,"delta_atts_pct":1.6},{"level_id":12,"a_attempts":451,"b_attempts":452,"a_win_rate_pct":65.2,"b_win_rate_pct":65.9,"a_mean_atts":1.48,"b_mean_atts":1.45,"a_users":305,"b_users":311,"a_obj_rem":8.54,"b_obj_rem":7.71,"delta_win_rate_pp":0.7,"delta_mean_atts_pct":-2,"delta_obj_rem":-0.83,"delta_atts_pct":0.2},{"level_id":13,"a_attempts":343,"b_attempts":365,"a_win_rate_pct":79.3,"b_win_rate_pct":78.6,"a_mean_atts":1.24,"b_mean_atts":1.26,"a_users":277,"b_users":289,"a_obj_rem":4.93,"b_obj_rem":4.55,"delta_win_rate_pp":-0.7,"delta_mean_atts_pct":1.6,"delta_obj_rem":-0.38,"delta_atts_pct":6.4},{"level_id":14,"a_attempts":578,"b_attempts":589,"a_win_rate_pct":42.2,"b_win_rate_pct":44.8,"a_mean_atts":2.15,"b_mean_atts":2.01,"a_users":269,"b_users":293,"a_obj_rem":1.65,"b_obj_rem":1.62,"delta_win_rate_pp":2.6,"delta_mean_atts_pct":-6.5,"delta_obj_rem":-0.03,"delta_atts_pct":1.9},{"level_id":15,"a_attempts":279,"b_attempts":319,"a_win_rate_pct":99.6,"b_win_rate_pct":99.7,"a_mean_atts":1.21,"b_mean_atts":1.21,"a_users":230,"b_users":264,"a_obj_rem":1,"b_obj_rem":1,"delta_win_rate_pp":0.1,"delta_mean_atts_pct":0,"delta_obj_rem":0,"delta_atts_pct":14.3},{"level_id":16,"a_attempts":246,"b_attempts":266,"a_win_rate_pct":94.3,"b_win_rate_pct":94.7,"a_mean_atts":1.09,"b_mean_atts":1.07,"a_users":225,"b_users":249,"a_obj_rem":3.21,"b_obj_rem":2.79,"delta_win_rate_pp":0.4,"delta_mean_atts_pct":-1.8,"delta_obj_rem":-0.42,"delta_atts_pct":8.1},{"level_id":17,"a_attempts":249,"b_attempts":262,"a_win_rate_pct":92.8,"b_win_rate_pct":92.4,"a_mean_atts":1.13,"b_mean_atts":1.1,"a_users":221,"b_users":238,"a_obj_rem":6.78,"b_obj_rem":5.7,"delta_win_rate_pp":-0.4,"delta_mean_atts_pct":-2.7,"delta_obj_rem":-1.08,"delta_atts_pct":5.2},{"level_id":18,"a_attempts":312,"b_attempts":376,"a_win_rate_pct":70.2,"b_win_rate_pct":67,"a_mean_atts":1.4,"b_mean_atts":1.52,"a_users":223,"b_users":247,"a_obj_rem":4.14,"b_obj_rem":4.81,"delta_win_rate_pp":-3.2,"delta_mean_atts_pct":8.6,"delta_obj_rem":0.67,"delta_atts_pct":20.5},{"level_id":19,"a_attempts":427,"b_attempts":496,"a_win_rate_pct":46.8,"b_win_rate_pct":46.2,"a_mean_atts":1.91,"b_mean_atts":1.97,"a_users":224,"b_users":252,"a_obj_rem":9.83,"b_obj_rem":10.02,"delta_win_rate_pp":-0.6,"delta_mean_atts_pct":3.1,"delta_obj_rem":0.19,"delta_atts_pct":16.2},{"level_id":20,"a_attempts":472,"b_attempts":650,"a_win_rate_pct":37.3,"b_win_rate_pct":30,"a_mean_atts":2.26,"b_mean_atts":2.73,"a_users":209,"b_users":238,"a_obj_rem":1,"b_obj_rem":1,"delta_win_rate_pp":-7.3,"delta_mean_atts_pct":20.8,"delta_obj_rem":0,"delta_atts_pct":37.7},{"level_id":21,"a_attempts":182,"b_attempts":195,"a_win_rate_pct":98.4,"b_win_rate_pct":97.4,"a_mean_atts":1.03,"b_mean_atts":1.04,"a_users":177,"b_users":188,"a_obj_rem":2,"b_obj_rem":1.8,"delta_win_rate_pp":-1,"delta_mean_atts_pct":1,"delta_obj_rem":-0.2,"delta_atts_pct":7.1},{"level_id":22,"a_attempts":237,"b_attempts":259,"a_win_rate_pct":72.2,"b_win_rate_pct":70.3,"a_mean_atts":1.35,"b_mean_atts":1.38,"a_users":175,"b_users":188,"a_obj_rem":6.08,"b_obj_rem":6.01,"delta_win_rate_pp":-1.9,"delta_mean_atts_pct":2.2,"delta_obj_rem":-0.07,"delta_atts_pct":9.3},{"level_id":23,"a_attempts":219,"b_attempts":273,"a_win_rate_pct":74.9,"b_win_rate_pct":65.2,"a_mean_atts":1.29,"b_mean_atts":1.52,"a_users":170,"b_users":180,"a_obj_rem":11.69,"b_obj_rem":8.73,"delta_win_rate_pp":-9.7,"delta_mean_atts_pct":17.8,"delta_obj_rem":-2.96,"delta_atts_pct":24.7},{"level_id":24,"a_attempts":244,"b_attempts":246,"a_win_rate_pct":70.5,"b_win_rate_pct":71.5,"a_mean_atts":1.43,"b_mean_atts":1.38,"a_users":171,"b_users":178,"a_obj_rem":5.63,"b_obj_rem":4.73,"delta_win_rate_pp":1,"delta_mean_atts_pct":-3.5,"delta_obj_rem":-0.9,"delta_atts_pct":0.8},{"level_id":25,"a_attempts":182,"b_attempts":184,"a_win_rate_pct":95.6,"b_win_rate_pct":95.1,"a_mean_atts":1.08,"b_mean_atts":1.08,"a_users":169,"b_users":170,"a_obj_rem":1.5,"b_obj_rem":4.22,"delta_win_rate_pp":-0.5,"delta_mean_atts_pct":0,"delta_obj_rem":2.72,"delta_atts_pct":1.1},{"level_id":26,"a_attempts":271,"b_attempts":292,"a_win_rate_pct":59.4,"b_win_rate_pct":60.6,"a_mean_atts":1.62,"b_mean_atts":1.63,"a_users":167,"b_users":179,"a_obj_rem":3.45,"b_obj_rem":3.85,"delta_win_rate_pp":1.2,"delta_mean_atts_pct":0.6,"delta_obj_rem":0.4,"delta_atts_pct":7.7},{"level_id":27,"a_attempts":272,"b_attempts":318,"a_win_rate_pct":55.1,"b_win_rate_pct":56,"a_mean_atts":1.69,"b_mean_atts":1.74,"a_users":161,"b_users":183,"a_obj_rem":1.37,"b_obj_rem":1.4,"delta_win_rate_pp":0.9,"delta_mean_atts_pct":3,"delta_obj_rem":0.03,"delta_atts_pct":16.9},{"level_id":28,"a_attempts":228,"b_attempts":262,"a_win_rate_pct":68.4,"b_win_rate_pct":69.5,"a_mean_atts":1.46,"b_mean_atts":1.48,"a_users":156,"b_users":177,"a_obj_rem":6.81,"b_obj_rem":6.64,"delta_win_rate_pp":1.1,"delta_mean_atts_pct":1.4,"delta_obj_rem":-0.17,"delta_atts_pct":14.9},{"level_id":29,"a_attempts":261,"b_attempts":304,"a_win_rate_pct":56.7,"b_win_rate_pct":54.9,"a_mean_atts":1.71,"b_mean_atts":1.77,"a_users":153,"b_users":172,"a_obj_rem":7.93,"b_obj_rem":7.5,"delta_win_rate_pp":-1.8,"delta_mean_atts_pct":3.5,"delta_obj_rem":-0.43,"delta_atts_pct":16.5},{"level_id":30,"a_attempts":455,"b_attempts":502,"a_win_rate_pct":28.6,"b_win_rate_pct":29.7,"a_mean_atts":2.97,"b_mean_atts":2.9,"a_users":153,"b_users":173,"a_obj_rem":13.87,"b_obj_rem":14.83,"delta_win_rate_pp":1.1,"delta_mean_atts_pct":-2.4,"delta_obj_rem":0.96,"delta_atts_pct":10.3},{"level_id":31,"a_attempts":142,"b_attempts":158,"a_win_rate_pct":92.3,"b_win_rate_pct":93.7,"a_mean_atts":1.08,"b_mean_atts":1.11,"a_users":131,"b_users":142,"a_obj_rem":1.64,"b_obj_rem":1.6,"delta_win_rate_pp":1.4,"delta_mean_atts_pct":2.8,"delta_obj_rem":-0.04,"delta_atts_pct":11.3},{"level_id":32,"a_attempts":219,"b_attempts":236,"a_win_rate_pct":58.4,"b_win_rate_pct":61.9,"a_mean_atts":1.63,"b_mean_atts":1.57,"a_users":134,"b_users":150,"a_obj_rem":4.9,"b_obj_rem":4.71,"delta_win_rate_pp":3.5,"delta_mean_atts_pct":-3.7,"delta_obj_rem":-0.19,"delta_atts_pct":7.8},{"level_id":33,"a_attempts":150,"b_attempts":204,"a_win_rate_pct":83.3,"b_win_rate_pct":71.6,"a_mean_atts":1.16,"b_mean_atts":1.38,"a_users":129,"b_users":148,"a_obj_rem":4.16,"b_obj_rem":4.21,"delta_win_rate_pp":-11.7,"delta_mean_atts_pct":19,"delta_obj_rem":0.05,"delta_atts_pct":36},{"level_id":34,"a_attempts":147,"b_attempts":201,"a_win_rate_pct":87.1,"b_win_rate_pct":71.1,"a_mean_atts":1.16,"b_mean_atts":1.41,"a_users":127,"b_users":143,"a_obj_rem":3.84,"b_obj_rem":3.53,"delta_win_rate_pp":-16,"delta_mean_atts_pct":21.6,"delta_obj_rem":-0.31,"delta_atts_pct":36.7},{"level_id":35,"a_attempts":152,"b_attempts":174,"a_win_rate_pct":84.2,"b_win_rate_pct":78.7,"a_mean_atts":1.23,"b_mean_atts":1.25,"a_users":124,"b_users":139,"a_obj_rem":4.21,"b_obj_rem":4.62,"delta_win_rate_pp":-5.5,"delta_mean_atts_pct":1.6,"delta_obj_rem":0.41,"delta_atts_pct":14.5},{"level_id":36,"a_attempts":221,"b_attempts":282,"a_win_rate_pct":52,"b_win_rate_pct":48.2,"a_mean_atts":1.8,"b_mean_atts":1.96,"a_users":123,"b_users":144,"a_obj_rem":9.4,"b_obj_rem":9.21,"delta_win_rate_pp":-3.8,"delta_mean_atts_pct":8.9,"delta_obj_rem":-0.19,"delta_atts_pct":27.6},{"level_id":37,"a_attempts":153,"b_attempts":209,"a_win_rate_pct":75.2,"b_win_rate_pct":66,"a_mean_atts":1.31,"b_mean_atts":1.5,"a_users":117,"b_users":139,"a_obj_rem":6.87,"b_obj_rem":7.66,"delta_win_rate_pp":-9.2,"delta_mean_atts_pct":14.5,"delta_obj_rem":0.79,"delta_atts_pct":36.6},{"level_id":38,"a_attempts":182,"b_attempts":212,"a_win_rate_pct":62.1,"b_win_rate_pct":61.3,"a_mean_atts":1.58,"b_mean_atts":1.54,"a_users":115,"b_users":138,"a_obj_rem":4.03,"b_obj_rem":3.48,"delta_win_rate_pp":-0.8,"delta_mean_atts_pct":-2.5,"delta_obj_rem":-0.55,"delta_atts_pct":16.5},{"level_id":39,"a_attempts":166,"b_attempts":182,"a_win_rate_pct":67.5,"b_win_rate_pct":74.2,"a_mean_atts":1.54,"b_mean_atts":1.36,"a_users":108,"b_users":134,"a_obj_rem":9.7,"b_obj_rem":7.64,"delta_win_rate_pp":6.7,"delta_mean_atts_pct":-11.7,"delta_obj_rem":-2.06,"delta_atts_pct":9.6},{"level_id":40,"a_attempts":340,"b_attempts":558,"a_win_rate_pct":21.8,"b_win_rate_pct":22.2,"a_mean_atts":3.01,"b_mean_atts":3.58,"a_users":113,"b_users":156,"a_obj_rem":0.99,"b_obj_rem":1,"delta_win_rate_pp":0.4,"delta_mean_atts_pct":18.9,"delta_obj_rem":0.01,"delta_atts_pct":64.1},{"level_id":41,"a_attempts":103,"b_attempts":164,"a_win_rate_pct":79.6,"b_win_rate_pct":74.4,"a_mean_atts":1.27,"b_mean_atts":1.31,"a_users":81,"b_users":125,"a_obj_rem":5.81,"b_obj_rem":6.48,"delta_win_rate_pp":-5.2,"delta_mean_atts_pct":3.1,"delta_obj_rem":0.67,"delta_atts_pct":59.2},{"level_id":42,"a_attempts":108,"b_attempts":138,"a_win_rate_pct":75,"b_win_rate_pct":86.2,"a_mean_atts":1.33,"b_mean_atts":1.15,"a_users":81,"b_users":120,"a_obj_rem":3.74,"b_obj_rem":4.37,"delta_win_rate_pp":11.2,"delta_mean_atts_pct":-13.5,"delta_obj_rem":0.63,"delta_atts_pct":27.8},{"level_id":43,"a_attempts":192,"b_attempts":241,"a_win_rate_pct":42.2,"b_win_rate_pct":45.2,"a_mean_atts":2.29,"b_mean_atts":2.04,"a_users":84,"b_users":118,"a_obj_rem":7.2,"b_obj_rem":8.4,"delta_win_rate_pp":3,"delta_mean_atts_pct":-10.9,"delta_obj_rem":1.2,"delta_atts_pct":25.5},{"level_id":44,"a_attempts":83,"b_attempts":113,"a_win_rate_pct":97.6,"b_win_rate_pct":97.3,"a_mean_atts":1.04,"b_mean_atts":1.05,"a_users":80,"b_users":108,"a_obj_rem":1,"b_obj_rem":4,"delta_win_rate_pp":-0.3,"delta_mean_atts_pct":1,"delta_obj_rem":3,"delta_atts_pct":36.1},{"level_id":45,"a_attempts":186,"b_attempts":213,"a_win_rate_pct":42.5,"b_win_rate_pct":48.4,"a_mean_atts":2.16,"b_mean_atts":1.87,"a_users":86,"b_users":114,"a_obj_rem":3.92,"b_obj_rem":4.1,"delta_win_rate_pp":5.9,"delta_mean_atts_pct":-13.4,"delta_obj_rem":0.18,"delta_atts_pct":14.5},{"level_id":46,"a_attempts":126,"b_attempts":217,"a_win_rate_pct":63.5,"b_win_rate_pct":51.2,"a_mean_atts":1.57,"b_mean_atts":1.89,"a_users":80,"b_users":115,"a_obj_rem":10.15,"b_obj_rem":11.45,"delta_win_rate_pp":-12.3,"delta_mean_atts_pct":20.4,"delta_obj_rem":1.3,"delta_atts_pct":72.2},{"level_id":47,"a_attempts":146,"b_attempts":174,"a_win_rate_pct":72.6,"b_win_rate_pct":62.6,"a_mean_atts":1.87,"b_mean_atts":1.6,"a_users":78,"b_users":109,"a_obj_rem":4.9,"b_obj_rem":4.88,"delta_win_rate_pp":-10,"delta_mean_atts_pct":-14.4,"delta_obj_rem":-0.02,"delta_atts_pct":19.2},{"level_id":48,"a_attempts":192,"b_attempts":235,"a_win_rate_pct":33.9,"b_win_rate_pct":39.1,"a_mean_atts":2.49,"b_mean_atts":2.18,"a_users":77,"b_users":108,"a_obj_rem":1.94,"b_obj_rem":2.06,"delta_win_rate_pp":5.2,"delta_mean_atts_pct":-12.4,"delta_obj_rem":0.12,"delta_atts_pct":22.4},{"level_id":49,"a_attempts":117,"b_attempts":165,"a_win_rate_pct":59.8,"b_win_rate_pct":52.1,"a_mean_atts":1.72,"b_mean_atts":1.72,"a_users":68,"b_users":96,"a_obj_rem":8.21,"b_obj_rem":7.47,"delta_win_rate_pp":-7.7,"delta_mean_atts_pct":0,"delta_obj_rem":-0.74,"delta_atts_pct":41},{"level_id":50,"a_attempts":725,"b_attempts":1211,"a_win_rate_pct":33.1,"b_win_rate_pct":31.6,"a_mean_atts":6.04,"b_mean_atts":7.38,"a_users":120,"b_users":164,"a_obj_rem":2.14,"b_obj_rem":2.12,"delta_win_rate_pp":-1.5,"delta_mean_atts_pct":22.2,"delta_obj_rem":-0.02,"delta_atts_pct":67},{"level_id":"cr_1_0","a_attempts":0,"b_attempts":0,"a_win_rate_pct":null,"b_win_rate_pct":null,"a_mean_atts":null,"b_mean_atts":null,"a_users":0,"b_users":0,"a_obj_rem":null,"b_obj_rem":null,"delta_win_rate_pp":null,"delta_mean_atts_pct":null,"delta_obj_rem":null,"delta_atts_pct":null},{"level_id":"cr_2_0","a_attempts":0,"b_attempts":0,"a_win_rate_pct":null,"b_win_rate_pct":null,"a_mean_atts":null,"b_mean_atts":null,"a_users":0,"b_users":0,"a_obj_rem":null,"b_obj_rem":null,"delta_win_rate_pp":null,"delta_mean_atts_pct":null,"delta_obj_rem":null,"delta_atts_pct":null},{"level_id":"cr_3_0","a_attempts":0,"b_attempts":0,"a_win_rate_pct":null,"b_win_rate_pct":null,"a_mean_atts":null,"b_mean_atts":null,"a_users":0,"b_users":0,"a_obj_rem":null,"b_obj_rem":null,"delta_win_rate_pp":null,"delta_mean_atts_pct":null,"delta_obj_rem":null,"delta_atts_pct":null}];
+
+// ── Vital-stats tiles ───────────────────────────────────────────────────────
+function deltaPp(b, a) { if (a == null || b == null) return null; return +(b - a).toFixed(1); }
+function deltaPct(b, a) { if (a == null || a === 0 || b == null) return null; return +((b/a - 1) * 100).toFixed(1); }
+function parsePct(s) { if (s == null) return null; const m = String(s).match(/-?[\d.]+/); return m ? +m[0] : null; }
+function parseMin(s) { if (s == null) return null; const m = String(s).match(/-?[\d.]+/); return m ? +m[0] : null; }
+
+function tile(label, valA, valB, fmt, kind) {
+  const dPct = (valA != null && valB != null) ? deltaPct(valB, valA) : null;
+  return { label, valA, valB, fmt, kind, dPct };
+}
+function classify(name, valA, valB, deltaPct) {
+  if (deltaPct == null) return 'neutral';
+  // Engagement metrics where higher=better
+  const ENG = ['Total devices','Total sessions','Sessions/device','Avg session length','Time to first fail','Win rate avg','Total min/user/day (on)','Total min/user/day (off)','L50 reach'];
+  // Difficulty/skip metrics where lower=better
+  const NEG = ['Cutscene skip rate','Natural drop rate'];
+  if (ENG.includes(name)) return Math.abs(deltaPct) < 2 ? 'neutral' : deltaPct > 0 ? 'pass' : 'kill';
+  if (NEG.includes(name)) return Math.abs(deltaPct) < 2 ? 'neutral' : deltaPct < 0 ? 'pass' : 'kill';
+  return 'neutral';
+}
+
+const grid = document.getElementById('vital-tiles');
+const tiles = [
+  ['Total devices',         A.devices,                       B.devices,                       'int'],
+  ['Total sessions',        A.sessions,                      B.sessions,                      'int'],
+  ['Sessions / device',     A.sessions_per_device,           B.sessions_per_device,           'num2'],
+  ['Avg session length',    parseMin(A.avg_session_len),     parseMin(B.avg_session_len),     'min'],
+  ['Time to first fail',    parseMin(A.time_to_first_fail),  parseMin(B.time_to_first_fail),  'min'],
+  ['Win rate avg',          parsePct(A.win_rate_avg),        parsePct(B.win_rate_avg),        'pct'],
+  ['L50 reach',             parsePct(A.l50_reach),           parsePct(B.l50_reach),           'pct'],
+  ['Cutscene skip rate',    parsePct(A.cutscene_skip),       parsePct(B.cutscene_skip),       'pct'],
+  ['Cutscene finish rate',  parsePct(A.cutscene_finish),     parsePct(B.cutscene_finish),     'pct'],
+  ['Natural drop rate',     parsePct(A.natural_drop),        parsePct(B.natural_drop),        'pct'],
+  ['Total min/user/day (on)',  A.ab_on_total_min,            B.ab_on_total_min,               'num2'],
+  ['Total min/user/day (off)', A.ab_off_total_min,           B.ab_off_total_min,              'num2']
+];
+function fmt(v, kind) {
+  if (v == null || isNaN(v)) return '—';
+  if (kind === 'int')  return v.toLocaleString();
+  if (kind === 'num2') return v.toFixed(2);
+  if (kind === 'min')  return v.toFixed(1) + ' min';
+  if (kind === 'pct')  return v.toFixed(1) + '%';
+  return v;
+}
+tiles.forEach(([name, va, vb, kind]) => {
+  const dPct = deltaPct(vb, va);
+  const kk = classify(name, va, vb, dPct);
+  const el = document.createElement('div');
+  el.className = 'cmp-tile';
+  el.innerHTML = '<div class="label">' + name + '</div>' +
+    '<div class="pair">' +
+      '<div><div class="v a">' + fmt(va, kind) + '</div><div class="sub">A · ' + A_LABEL.split('·')[0].trim() + '</div></div>' +
+      '<div><div class="v b">' + fmt(vb, kind) + '</div><div class="sub">B · ' + B_LABEL.split('·')[0].trim() + '</div></div>' +
+    '</div>' +
+    (dPct != null ? '<span class="delta ' + kk + '">Δ ' + (dPct >= 0 ? '+' : '') + dPct.toFixed(1) + '%</span>' : '<span class="delta neutral">Δ —</span>');
+  grid.appendChild(el);
+});
+
+// ── Funnel chart with per-stage drop-rate overlays ────────────────────────
+function drawFunnel() {
+  const ctx = document.getElementById('ch-funnel');
+  if (!ctx) return;
+  const labels = (A.funnel && A.funnel.labels) || (B.funnel && B.funnel.labels) || ['L10','L20','L30','L40','L50'];
+  const aData = (A.funnel && A.funnel.actual) || labels.map(() => null);
+  const bData = (B.funnel && B.funnel.actual) || labels.map(() => null);
+  // Per-stage drop rate at position i = (reach[i-1] - reach[i]) / reach[i-1] * 100.
+  // First milestone (i=0) has no prior → null. We plot the drop AT THE DESTINATION
+  // (i.e., the milestone you're arriving at), which reads as "% of prior cohort
+  // that didn't reach here." Lines run from L20 onward.
+  function dropSeries(reach) {
+    return reach.map((v, i) => {
+      if (i === 0 || v == null || reach[i-1] == null || reach[i-1] === 0) return null;
+      return +((reach[i-1] - v) / reach[i-1] * 100).toFixed(1);
+    });
+  }
+  const aDrop = dropSeries(aData);
+  const bDrop = dropSeries(bData);
+  new Chart(ctx, {
+    data: {
+      labels,
+      datasets: [
+        { type:'bar',  label:'A reach · ' + A_LABEL.split('·')[0].trim(), data:aData, backgroundColor:'#2563EB', yAxisID:'y', order:3 },
+        { type:'bar',  label:'B reach · ' + B_LABEL.split('·')[0].trim(), data:bData, backgroundColor:'#F59E0B', yAxisID:'y', order:3 },
+        { type:'line', label:'A drop-rate stage→stage',
+          data:aDrop, borderColor:'#2563EB', backgroundColor:'#2563EB', borderDash:[6,4],
+          borderWidth:2, pointRadius:5, pointHoverRadius:7, pointBackgroundColor:'#2563EB',
+          fill:false, tension:0.15, yAxisID:'y2', order:1, spanGaps:true },
+        { type:'line', label:'B drop-rate stage→stage',
+          data:bDrop, borderColor:'#F59E0B', backgroundColor:'#F59E0B', borderDash:[6,4],
+          borderWidth:2, pointRadius:5, pointHoverRadius:7, pointBackgroundColor:'#F59E0B',
+          fill:false, tension:0.15, yAxisID:'y2', order:1, spanGaps:true }
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:'bottom' },
+        tooltip:{ mode:'index', intersect:false }
+      },
+      interaction:{ mode:'index', intersect:false },
+      scales:{
+        y:  { beginAtZero:true, max:100, position:'left',
+              ticks:{ callback:v=>v+'%' },
+              title:{display:true,text:'reach % (bars)'} },
+        y2: { beginAtZero:true, max:100, position:'right', grid:{ drawOnChartArea:false },
+              ticks:{ callback:v=>v+'%' },
+              title:{display:true,text:'drop rate % (lines)'} }
+      }
+    }
+  });
+}
+drawFunnel();
+
+// ── Win rate + mean atts charts ─────────────────────────────────────────────
+const labels = LEVELS.map(r => 'L' + r.level_id);
+new Chart(document.getElementById('ch-winrate'), {
+  type:'line',
+  data:{ labels, datasets:[
+    {
+      label:'A · '+A_LABEL.split('·')[0].trim(),
+      data:LEVELS.map(r=>r.a_win_rate_pct),
+      borderColor:'#2563EB',
+      backgroundColor:'rgba(37,99,235,0.10)',
+      borderWidth:2,
+      pointRadius:3,
+      pointHoverRadius:5,
+      tension:0.25,
+      fill:false,
+      spanGaps:true
+    },
+    {
+      label:'B · '+B_LABEL.split('·')[0].trim(),
+      data:LEVELS.map(r=>r.b_win_rate_pct),
+      borderColor:'#F59E0B',
+      backgroundColor:'rgba(245,158,11,0.10)',
+      borderWidth:2,
+      pointRadius:3,
+      pointHoverRadius:5,
+      tension:0.25,
+      fill:false,
+      spanGaps:true
+    }
+  ]},
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'bottom'},
+      tooltip:{ mode:'index', intersect:false, callbacks:{ afterLabel:ctx=>{
+        const r = LEVELS[ctx.dataIndex];
+        if (ctx.datasetIndex === 0) return 'A atts: ' + (r.a_attempts||0) + ' · users: ' + (r.a_users||0);
+        return 'B atts: ' + (r.b_attempts||0) + ' · users: ' + (r.b_users||0);
+      }}}
+    },
+    interaction:{ mode:'index', intersect:false },
+    scales:{
+      y:{ beginAtZero:true, max:100, ticks:{ callback:v=>v+'%' }, title:{display:true,text:'win rate'} },
+      x:{ title:{display:true,text:'level'} }
+    }
+  }
+});
+new Chart(document.getElementById('ch-meanatt'), {
+  type:'line',
+  data:{ labels, datasets:[
+    {
+      label:'A · '+A_LABEL.split('·')[0].trim(),
+      data:LEVELS.map(r=>r.a_mean_atts),
+      borderColor:'#2563EB',
+      backgroundColor:'rgba(37,99,235,0.10)',
+      borderWidth:2,
+      pointRadius:3,
+      pointHoverRadius:5,
+      tension:0.25,
+      fill:false,
+      spanGaps:true
+    },
+    {
+      label:'B · '+B_LABEL.split('·')[0].trim(),
+      data:LEVELS.map(r=>r.b_mean_atts),
+      borderColor:'#F59E0B',
+      backgroundColor:'rgba(245,158,11,0.10)',
+      borderWidth:2,
+      pointRadius:3,
+      pointHoverRadius:5,
+      tension:0.25,
+      fill:false,
+      spanGaps:true
+    }
+  ]},
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'bottom'},
+      tooltip:{ mode:'index', intersect:false, callbacks:{ afterLabel:ctx=>{
+        const r = LEVELS[ctx.dataIndex];
+        if (ctx.datasetIndex === 0) return 'A atts: ' + (r.a_attempts||0) + ' · users: ' + (r.a_users||0);
+        return 'B atts: ' + (r.b_attempts||0) + ' · users: ' + (r.b_users||0);
+      }}}
+    },
+    interaction:{ mode:'index', intersect:false },
+    scales:{
+      y:{ beginAtZero:true, title:{display:true,text:'mean attempts/user'} },
+      x:{ title:{display:true,text:'level'} }
+    }
+  }
+});
+
+// ── Per-level table ─────────────────────────────────────────────────────────
+const tbody = document.getElementById('lvl-tbody');
+function fmtNum(v) { return v == null || isNaN(v) ? '—' : (typeof v === 'number' ? v.toLocaleString() : v); }
+function fmtPct(v) { return v == null || isNaN(v) ? '—' : v.toFixed(1) + '%'; }
+function fmtNum2(v) { return v == null || isNaN(v) ? '—' : v.toFixed(2); }
+function deltaPill(v, suffix, invertDir) {
+  if (v == null || isNaN(v)) return '<span class="pill neutral">—</span>';
+  const sign = v >= 0 ? '+' : '';
+  let k = Math.abs(v) < 0.5 ? 'neutral' : v > 0 ? 'pro' : 'anti';
+  if (invertDir) k = (k === 'pro') ? 'anti' : (k === 'anti') ? 'pro' : 'neutral';
+  return '<span class="pill ' + k + '">' + sign + v.toFixed(1) + suffix + '</span>';
+}
+function renderRows(rows) {
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    // Highlight if |Δ atts %| > 30 (significant attempt-count movement)
+    if (r.delta_atts_pct != null && Math.abs(r.delta_atts_pct) > 30) tr.className = 'hot';
+    tr.innerHTML =
+      '<td><b>L' + r.level_id + '</b></td>' +
+      '<td class="num">' + fmtNum(r.a_attempts) + '</td>' +
+      '<td class="num">' + fmtNum(r.b_attempts) + '</td>' +
+      '<td class="num">' + deltaPill(r.delta_atts_pct, '%', false) + '</td>' +
+      '<td class="num">' + fmtNum(r.a_users) + '</td>' +
+      '<td class="num">' + fmtNum(r.b_users) + '</td>' +
+      '<td class="num a">' + fmtPct(r.a_win_rate_pct) + '</td>' +
+      '<td class="num b">' + fmtPct(r.b_win_rate_pct) + '</td>' +
+      '<td class="num">' + deltaPill(r.delta_win_rate_pp, 'pp', false) + '</td>' +
+      '<td class="num a">' + fmtNum2(r.a_mean_atts) + '</td>' +
+      '<td class="num b">' + fmtNum2(r.b_mean_atts) + '</td>' +
+      '<td class="num">' + deltaPill(r.delta_mean_atts_pct, '%', true) + '</td>' +
+      '<td class="num">' + fmtNum2(r.a_obj_rem) + '</td>' +
+      '<td class="num">' + fmtNum2(r.b_obj_rem) + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+let cs = { key: 'level_id', dir: 1 };
+function sortBy(key) {
+  if (cs.key === key) cs.dir *= -1;
+  else { cs = { key, dir: key === 'level_id' ? 1 : -1 }; }
+  const rows = LEVELS.slice().sort((a, b) => {
+    const av = a[key], bv = b[key];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * cs.dir;
+    return String(av).localeCompare(String(bv)) * cs.dir;
+  });
+  renderRows(rows);
+}
+document.querySelectorAll('#lvl-table th[data-k]').forEach(th => th.addEventListener('click', () => sortBy(th.dataset.k)));
+renderRows(LEVELS);
+</script>
+</body></html>
