@@ -2,10 +2,10 @@
   "meta": {
     "pipeline_version": "v2 (event-log)",
     "source_mode": "local",
-    "source": "local-dump: C:\\Users\\CPU60395-local\\m3-data\\2026-05-17-and-prev",
+    "source": "local-dump: C:/Users/CPU60395-local/m3-data/2026-05-17-staging",
     "target_date": "2026-05-17",
-    "today_vn": "2026-05-18",
-    "generated_at": "2026-05-18T02:32:51.753Z",
+    "today_vn": "2026-05-20",
+    "generated_at": "2026-05-20T07:09:52.917Z",
     "scope": "Tabs 0-5 (Tab 5 narrative now live) · multi-day retention INSUFFICIENT",
     "insufficient_n_threshold": 1,
     "spark_window_days": 0,

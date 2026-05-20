@@ -2,34 +2,34 @@
   "meta": {
     "pipeline_version": "v2 (event-log)",
     "source_mode": "local",
-    "source": "local-dump: C:/Users/CPU60395-local/m3-data/2026-05-18-staging",
-    "target_date": "2026-05-18",
+    "source": "local-dump: C:/Users/CPU60395-local/m3-data/2026-05-19-staging",
+    "target_date": "2026-05-19",
     "today_vn": "2026-05-20",
-    "generated_at": "2026-05-20T07:10:18.649Z",
+    "generated_at": "2026-05-20T07:10:44.561Z",
     "scope": "Tabs 0-5 (Tab 5 narrative now live) · multi-day retention INSUFFICIENT",
     "insufficient_n_threshold": 1,
     "spark_window_days": 0,
     "sparklines_disabled": "No multi-day history in local dump",
     "designed_winrate_source": "v3.1 HTML formula — introLevels=[1,5,9,15,20,25,30,35,40,45,50] → 50%; others → 75%",
     "funnel_target_source": "03_Funnel sheet of m3_alpha_test_plan_v3.1.xlsx (L10:70% L20:50% L30:35% L40:25% L50:20%)",
-    "event_log_size": 748120,
+    "event_log_size": 796788,
     "cache_dir": null,
-    "coverage_note": "First event in window is 2026-05-17T17:00:00.412Z — first 0 min (0.0h) of VN-2026-05-18 missing from dump.",
-    "window_start_utc": "2026-05-17T17:00:00.000Z",
-    "window_end_utc": "2026-05-18T17:00:00.000Z",
-    "first_event_in_window_utc": "2026-05-17T17:00:00.412Z",
-    "last_event_in_window_utc": "2026-05-18T16:59:59.683Z",
-    "raw_events_scanned": 1482789
+    "coverage_note": "First event in window is 2026-05-18T17:00:00.687Z — first 0 min (0.0h) of VN-2026-05-19 missing from dump.",
+    "window_start_utc": "2026-05-18T17:00:00.000Z",
+    "window_end_utc": "2026-05-19T17:00:00.000Z",
+    "first_event_in_window_utc": "2026-05-18T17:00:00.687Z",
+    "last_event_in_window_utc": "2026-05-19T16:59:59.920Z",
+    "raw_events_scanned": 1556369
   },
   "global": {
-    "total_sessions": 2560,
-    "total_devices": 1251,
+    "total_sessions": 2725,
+    "total_devices": 1317,
     "n_levels_with_data": 50,
     "n_levels_above_N_threshold": 50,
-    "cutscenes_shown": 1185,
-    "cutscenes_skipped": 874,
-    "cutscenes_completed": 246,
-    "reached_l50": 205
+    "cutscenes_shown": 1235,
+    "cutscenes_skipped": 909,
+    "cutscenes_completed": 245,
+    "reached_l50": 256
   },
   "tab_0": {
     "main_tiles": [
@@ -45,7 +45,7 @@
       },
       {
         "name": "Sessions / Day",
-        "value": "2.05",
+        "value": "2.07",
         "status": "warn",
         "spark": [
           null,
@@ -56,7 +56,7 @@
           null,
           null
         ],
-        "n": 1251
+        "n": 1317
       },
       {
         "name": "Avg Session Length",
@@ -71,42 +71,42 @@
           null,
           null
         ],
-        "n": 2501
+        "n": 2671
       },
       {
         "name": "Cutscene Skip Rate",
-        "value": "73.8%",
+        "value": "73.6%",
         "status": "kill",
         "spark": null,
-        "n": 1185
+        "n": 1235
       },
       {
         "name": "Cutscene Finish Rate",
-        "value": "20.8%",
+        "value": "19.8%",
         "status": "kill",
         "spark": null,
-        "n": 1185
+        "n": 1235
       },
       {
         "name": "L50 Reach",
-        "value": "16.4%",
+        "value": "19.4%",
         "status": "warn",
         "spark": null,
-        "n": 1251
+        "n": 1317
       },
       {
         "name": "Drop @ non-intro levels",
-        "value": "3.0%",
+        "value": "2.6%",
         "status": "pass",
         "spark": null,
         "n": 42
       },
       {
         "name": "Natural Drop Rate",
-        "value": "69.5%",
+        "value": "72.2%",
         "status": "kill",
         "spark": null,
-        "n": 2187
+        "n": 2345
       },
       {
         "name": "M17a corr (cutscene×D3)",
@@ -127,10 +127,10 @@
     "supporting_tiles": [
       {
         "name": "Time to first fail",
-        "value": "4.9min",
+        "value": "4.5min",
         "status": "pass",
         "spark": null,
-        "n": 879
+        "n": 881
       },
       {
         "name": "1st cutscene → Session 2",
@@ -139,7 +139,7 @@
       },
       {
         "name": "Win rate per level (avg)",
-        "value": "59.0%",
+        "value": "60.2%",
         "status": "warn",
         "spark": [
           null,
@@ -150,11 +150,11 @@
           null,
           null
         ],
-        "n": 19520
+        "n": 20791
       },
       {
         "name": "Fail rate per level (avg)",
-        "value": "41.0%",
+        "value": "39.8%",
         "status": "kill",
         "spark": [
           null,
@@ -165,11 +165,11 @@
           null,
           null
         ],
-        "n": 19520
+        "n": 20791
       },
       {
         "name": "Adaptive trigger count",
-        "value": "1.48/sess",
+        "value": "1.50/sess",
         "status": "pass",
         "spark": [
           null,
@@ -180,11 +180,11 @@
           null,
           null
         ],
-        "n": 19520
+        "n": 20791
       },
       {
         "name": "Move surplus (avg)",
-        "value": "+0.93",
+        "value": "+1.02",
         "status": "pass",
         "spark": [
           null,
@@ -195,7 +195,7 @@
           null,
           null
         ],
-        "n": 19520
+        "n": 20791
       },
       {
         "name": "Tutorial popup shown rate",
@@ -220,10 +220,10 @@
         "4+"
       ],
       "data": [
-        755,
-        228,
-        119,
-        149
+        810,
+        212,
+        115,
+        180
       ],
       "title": "Sessions per device (distribution)"
     },
@@ -238,13 +238,13 @@
         "30+"
       ],
       "data": [
-        401,
-        271,
-        260,
-        305,
-        555,
-        468,
-        290
+        409,
+        287,
+        269,
+        354,
+        599,
+        450,
+        337
       ],
       "title": "Session length distribution (min)"
     },
@@ -259,13 +259,13 @@
         "no-fail"
       ],
       "data": [
-        18,
-        295,
-        134,
-        156,
-        142,
-        96,
-        363
+        9,
+        321,
+        131,
+        139,
+        133,
+        113,
+        423
       ],
       "title": "Time to first fail (min)"
     },
@@ -283,11 +283,11 @@
         "L50"
       ],
       "actual": [
-        65.2,
-        47.1,
-        35.1,
-        26.5,
-        16.4
+        66.2,
+        49.7,
+        39.1,
+        28.6,
+        19.4
       ],
       "target": [
         70,
@@ -352,108 +352,108 @@
         "L50"
       ],
       "data": [
-        20.2,
-        4.2,
-        3,
-        3,
-        6,
-        1.2,
+        22.1,
+        4.4,
         3.2,
+        6.6,
+        4.9,
+        2,
         3.2,
-        1.6,
-        3.2,
-        2.7,
-        2.4,
-        0.3,
-        2.4,
-        -0.6,
-        2.5,
-        0.4,
         2.2,
+        1.4,
+        2.7,
+        3.1,
+        3.5,
+        1.3,
+        2.1,
+        -0.6,
+        0.3,
+        2.8,
+        2.7,
+        3.1,
+        3.5,
+        1.6,
+        3.4,
+        2.5,
+        1.8,
+        1.8,
+        3.2,
+        1.8,
+        0.7,
+        1.5,
+        5.9,
+        -0.5,
+        1.4,
+        1.1,
+        1.7,
+        0.5,
+        4.1,
+        1.7,
+        3.1,
+        1.6,
+        3.3,
+        1,
+        1.4,
+        3,
+        0.7,
+        2.3,
+        2.7,
+        1.3,
         2.9,
         3.6,
-        3.6,
-        1.5,
-        3.3,
-        3.1,
-        0.9,
-        4.7,
-        3.9,
-        2.2,
-        4.6,
-        3.6,
-        0.6,
-        1.3,
-        3.3,
-        1.7,
-        0,
-        3.5,
-        -0.5,
-        2.7,
-        3.8,
-        3.6,
-        2,
-        1.9,
-        1.9,
-        4.2,
-        7.2,
-        3.6,
-        4.3,
-        3.4,
-        1.8,
-        2.9
+        3.8
       ],
       "n_per_level": [
-        728,
-        591,
-        505,
-        504,
-        516,
-        434,
-        473,
-        501,
-        378,
-        536,
-        335,
-        413,
-        357,
-        531,
+        692,
+        542,
+        472,
+        486,
+        450,
+        406,
+        436,
+        417,
+        345,
+        477,
         321,
-        275,
-        275,
-        368,
-        518,
-        668,
-        221,
-        268,
-        274,
+        423,
+        381,
+        479,
+        332,
         286,
-        211,
-        299,
-        304,
-        277,
-        302,
-        581,
-        162,
-        224,
-        183,
-        177,
-        169,
-        312,
-        204,
+        290,
+        367,
+        590,
+        607,
         257,
-        208,
-        672,
-        153,
-        158,
-        259,
-        119,
-        277,
-        166,
-        162,
-        320,
-        225,
-        1628
+        324,
+        323,
+        285,
+        221,
+        380,
+        342,
+        288,
+        326,
+        591,
+        209,
+        276,
+        267,
+        233,
+        206,
+        341,
+        232,
+        291,
+        257,
+        519,
+        201,
+        209,
+        301,
+        146,
+        310,
+        301,
+        236,
+        375,
+        250,
+        2207
       ],
       "intro_levels": [
         1,
@@ -526,56 +526,56 @@
         "L50"
       ],
       "actual": [
-        98.4,
+        98.7,
         88,
-        94.7,
-        88.3,
-        85.1,
-        86.8,
-        76.4,
-        68.7,
-        94.6,
-        61.8,
-        99.7,
-        64.3,
-        77,
-        44.3,
-        99.1,
-        95.3,
-        94.2,
-        62,
-        37,
-        28.1,
-        94.5,
-        68.4,
-        60,
-        62.3,
-        95.3,
-        47.7,
-        50.4,
-        58.3,
-        48.6,
-        23.1,
-        91.5,
-        55.9,
-        66,
-        65.7,
-        78.5,
-        34.5,
-        57.6,
-        50.2,
-        60,
-        14.7,
-        67.1,
-        63.7,
-        34.7,
         95.7,
-        29.2,
-        46.4,
-        57.6,
-        26.8,
-        46,
-        27
+        89.6,
+        89.8,
+        84.7,
+        72.6,
+        74.6,
+        97.6,
+        67.1,
+        99.7,
+        61.2,
+        70.7,
+        52.5,
+        99.4,
+        91.2,
+        90.2,
+        63.2,
+        36.6,
+        35.5,
+        95.5,
+        64.9,
+        56.9,
+        71.2,
+        95.5,
+        47.5,
+        55.8,
+        65.1,
+        52.3,
+        27.5,
+        94.8,
+        58.1,
+        59,
+        68.7,
+        77.5,
+        41.5,
+        62,
+        47.1,
+        58.5,
+        24,
+        65.4,
+        65.3,
+        37.9,
+        88.7,
+        39.4,
+        42.3,
+        54.8,
+        30.6,
+        50.5,
+        32.9
       ],
       "designed": [
         50,
@@ -630,56 +630,56 @@
         50
       ],
       "n_per_level": [
-        559,
-        568,
-        493,
-        488,
-        483,
-        454,
-        495,
-        518,
-        373,
-        563,
-        323,
-        465,
-        374,
-        594,
-        325,
-        278,
-        277,
+        531,
+        515,
+        466,
+        460,
+        431,
+        430,
+        464,
+        429,
+        340,
+        489,
+        308,
+        467,
+        399,
+        524,
+        334,
+        297,
+        296,
         405,
-        610,
-        733,
-        218,
-        291,
-        325,
-        300,
-        211,
-        369,
-        349,
-        314,
-        348,
-        671,
-        165,
-        254,
-        206,
-        201,
-        181,
-        374,
-        231,
-        275,
-        225,
-        757,
-        164,
-        168,
-        320,
-        117,
-        329,
-        192,
-        172,
+        661,
+        670,
+        247,
+        345,
+        378,
+        306,
+        220,
+        440,
+        382,
+        318,
         373,
-        261,
-        1781
+        661,
+        210,
+        310,
+        307,
+        249,
+        218,
+        383,
+        258,
+        333,
+        294,
+        612,
+        217,
+        222,
+        356,
+        150,
+        368,
+        352,
+        272,
+        447,
+        291,
+        2356
       ]
     },
     "chart_adaptive": {
@@ -691,18 +691,18 @@
         "L41-50"
       ],
       "boost": [
-        0.483,
-        0.741,
-        1.884,
-        0.925,
-        2.303
+        0.509,
+        0.692,
+        1.874,
+        0.798,
+        2.147
       ],
       "suppress": [
-        0.391,
-        0.382,
-        0.128,
-        0.253,
-        0.096
+        0.388,
+        0.408,
+        0.134,
+        0.304,
+        0.106
       ],
       "unit": "switches/session"
     },
@@ -716,28 +716,28 @@
       ],
       "data": [
         1.5,
-        2.4,
-        -0.85,
-        1.03,
-        0.04
+        2.41,
+        -0.9,
+        1.19,
+        0.69
       ]
     },
     "insights": [
       {
         "level": "urgent",
-        "text": "Level 40 fail rate at 85.3% (N=757) — above 60% kill threshold."
+        "text": "Level 40 fail rate at 76.0% (N=612) — above 60% kill threshold."
       },
       {
         "level": "urgent",
-        "text": "Largest design drift: L15 actual 99.1% vs designed 50% (Δ +49.1pp, too easy, N=325). 35 levels with |Δ|≥15pp."
+        "text": "Largest design drift: L15 actual 99.4% vs designed 50% (Δ +49.4pp, too easy, N=334). 31 levels with |Δ|≥15pp."
       },
       {
         "level": "ok",
-        "text": "Adaptive trigger count = 1.48/session — pass band."
+        "text": "Adaptive trigger count = 1.50/session — pass band."
       },
       {
         "level": "ok",
-        "text": "Avg move surplus +0.93 — pass band."
+        "text": "Avg move surplus +1.02 — pass band."
       },
       {
         "level": "info",
@@ -762,55 +762,55 @@
         "L40 · 6.mp4"
       ],
       "data": [
-        62.1,
-        76.3,
-        76.5,
-        78.5,
-        82.7,
-        80.2,
-        81.1
+        58,
+        78,
+        79.2,
+        81.1,
+        82,
+        81.6,
+        81.6
       ],
       "tooltip_extra": [
         {
-          "N": 346,
+          "N": 369,
           "len": 49,
-          "avg_skip_sec": 22.7,
+          "avg_skip_sec": 290.8,
           "before_level": 1
         },
         {
-          "N": 215,
+          "N": 200,
           "len": 35,
-          "avg_skip_sec": 9,
+          "avg_skip_sec": 8.4,
           "before_level": 5
         },
         {
-          "N": 170,
+          "N": 173,
           "len": 24,
-          "avg_skip_sec": 6.7,
+          "avg_skip_sec": 18.5,
           "before_level": 10
         },
         {
-          "N": 158,
+          "N": 164,
           "len": 31,
-          "avg_skip_sec": 7,
+          "avg_skip_sec": 6.9,
           "before_level": 11
         },
         {
-          "N": 104,
+          "N": 128,
           "len": 42,
-          "avg_skip_sec": 5.6,
+          "avg_skip_sec": 5.3,
           "before_level": 21
         },
         {
-          "N": 81,
+          "N": 87,
           "len": 26,
-          "avg_skip_sec": 5,
+          "avg_skip_sec": 5.2,
           "before_level": 31
         },
         {
-          "N": 111,
+          "N": 114,
           "len": 36,
-          "avg_skip_sec": 4.1,
+          "avg_skip_sec": 4,
           "before_level": 40
         }
       ]
@@ -826,47 +826,47 @@
         "L40 · 6.mp4"
       ],
       "data": [
-        25.1,
-        18.1,
-        22.4,
-        17.7,
-        16.3,
-        19.8,
-        18.9
+        25.2,
+        18.5,
+        18.5,
+        17.1,
+        14.8,
+        18.4,
+        17.5
       ],
       "tooltip_extra": [
         {
-          "N": 346,
+          "N": 369,
           "len": 49,
           "before_level": 1
         },
         {
-          "N": 215,
+          "N": 200,
           "len": 35,
           "before_level": 5
         },
         {
-          "N": 170,
+          "N": 173,
           "len": 24,
           "before_level": 10
         },
         {
-          "N": 158,
+          "N": 164,
           "len": 31,
           "before_level": 11
         },
         {
-          "N": 104,
+          "N": 128,
           "len": 42,
           "before_level": 21
         },
         {
-          "N": 81,
+          "N": 87,
           "len": 26,
           "before_level": 31
         },
         {
-          "N": 111,
+          "N": 114,
           "len": 36,
           "before_level": 40
         }
@@ -874,39 +874,39 @@
     },
     "chart_m17a_status": "INSUFFICIENT — per-user cutscene-finish-rate × D3-retained correlation requires multi-day cohort extract.",
     "totals": {
-      "shown": 1185,
-      "skipped": 874,
-      "completed": 246,
+      "shown": 1235,
+      "skipped": 909,
+      "completed": 245,
       "unique_cutscenes": 7,
-      "agg_skip_pct": 73.8,
-      "agg_finish_pct": 20.8
+      "agg_skip_pct": 73.6,
+      "agg_finish_pct": 19.8
     },
     "insights": [
       {
         "level": "urgent",
-        "text": "Aggregate cutscene finish rate 20.8% — below 40% KILL threshold. Narrative bet (BR23 in v3.1 plan) is in serious trouble: of 1185 cutscene shows, only 246 reached completion."
+        "text": "Aggregate cutscene finish rate 19.8% — below 40% KILL threshold. Narrative bet (BR23 in v3.1 plan) is in serious trouble: of 1235 cutscene shows, only 245 reached completion."
       },
       {
         "level": "urgent",
-        "text": "Highest-skip cutscene: 4.mp4 (before L21) at 82.7% skip rate — above 60% kill threshold. N=104 shows."
+        "text": "Highest-skip cutscene: 4.mp4 (before L21) at 82% skip rate — above 60% kill threshold. N=128 shows."
       },
       {
         "level": "watch",
-        "text": "Finish rate trends DOWN across playthrough: first cutscene (before L1) = 25.1% → last (before L40) = 18.9%. Narrative fatigue signal across the saga."
+        "text": "Finish rate trends DOWN across playthrough: first cutscene (before L1) = 25.2% → last (before L40) = 17.5%. Narrative fatigue signal across the saga."
       },
       {
         "level": "watch",
-        "text": "Avg time-to-skip decreases over playthrough: first cutscene = 22.7s → last = 4.1s. Later scenes get insta-skipped — players are not even giving them a chance."
+        "text": "Avg time-to-skip decreases over playthrough: first cutscene = 290.8s → last = 4.0s. Later scenes get insta-skipped — players are not even giving them a chance."
       },
       {
         "level": "info",
-        "text": "BR23 critical flag (v3.1 plan): the ScienceDirect 2024 study found narrative consumption ≠ retention in mobile games. With current finish-rate numbers (20.8%), the M17a correlation that would counter-prove this is structurally hard to compute — but the prior odds of the cutscene-narrative wedge holding are low until aggregate finish rate climbs ≥40%."
+        "text": "BR23 critical flag (v3.1 plan): the ScienceDirect 2024 study found narrative consumption ≠ retention in mobile games. With current finish-rate numbers (19.8%), the M17a correlation that would counter-prove this is structurally hard to compute — but the prior odds of the cutscene-narrative wedge holding are low until aggregate finish rate climbs ≥40%."
       },
       {
         "level": "info",
         "text": "M17a correlation (cutscene_finish × D3_retention) needs multi-day cohort data — currently INSUFFICIENT. Re-run with multi-day extract before evaluating BR23 verdict."
       }
     ],
-    "alert_text": "Aggregate cutscene finish rate 20.8% across 7 cutscenes is BELOW the v3.1 KILL threshold (40%). All 7 cutscenes individually breach skip>60% kill band. M17a correlation is INSUFFICIENT (multi-day data required) — but the prior on BR23 (narrative ≠ retention) suggests the cutscene wedge needs counter-evidence to hold."
+    "alert_text": "Aggregate cutscene finish rate 19.8% across 7 cutscenes is BELOW the v3.1 KILL threshold (40%). All 7 cutscenes individually breach skip>60% kill band. M17a correlation is INSUFFICIENT (multi-day data required) — but the prior on BR23 (narrative ≠ retention) suggests the cutscene wedge needs counter-evidence to hold."
   }
 }

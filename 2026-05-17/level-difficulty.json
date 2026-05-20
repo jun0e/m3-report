@@ -1,12 +1,12 @@
 {
   "meta": {
-    "generated_at": "2026-05-18T02:33:10.218Z",
+    "generated_at": "2026-05-20T07:10:11.349Z",
     "window_utc_start": "2026-05-16T17:00:00.000Z",
     "window_utc_end": "2026-05-17T17:00:00.000Z",
     "window_vn_label": "VN [2026-05-17 00:00, 2026-05-18 00:00)",
     "window_hours": 24,
     "dirs_scanned": [
-      "C:\\Users\\CPU60395-local\\m3-data\\2026-05-17-and-prev"
+      "C:/Users/CPU60395-local/m3-data/2026-05-17-staging"
     ],
     "build_filter": null,
     "events_scanned": 1353379,

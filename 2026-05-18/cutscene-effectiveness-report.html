@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cutscene Effectiveness Report — VN 2026-05-17</title>
+<title>Cutscene Effectiveness Report — VN 2026-05-18</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -103,18 +103,18 @@
   <div class="cover-inner">
     <div class="eyebrow">Strategic decision report</div>
     <h1>Are the cutscenes working?</h1>
-    <div class="subtitle">Synthesis of VN 2026-05-17 event log + GrowthBook A/B causal holdout · 1210 users across both arms</div>
+    <div class="subtitle">Synthesis of VN 2026-05-18 event log + GrowthBook A/B causal holdout · 1263 users across both arms</div>
     <div class="badges">
-      <span class="badge">📅 <b>2026-05-17 (VN)</b> · 24.0h coverage</span>
-      <span class="badge">📊 <b>704,562</b> events in window</span>
-      <span class="badge">🅰️ <b>"on" N=613</b> · 🅱️ <b>"off" N=597</b></span>
+      <span class="badge">📅 <b>2026-05-18 (VN)</b> · 24.0h coverage</span>
+      <span class="badge">📊 <b>748,120</b> events in window</span>
+      <span class="badge">🅰️ <b>"on" N=625</b> · 🅱️ <b>"off" N=638</b></span>
       <span class="badge">⚙️ GrowthBook 50/50 holdout · live since alpha launch</span>
     </div>
 
     <div class="verdict-card">
       <div class="vt">Headline verdict</div>
-      <div class="vh">📈 Cutscenes drive -9.5% play time for the 67% who engage. The 10% who insta-skip self-select out.</div>
-      <div class="vd">Aggregate "on" arm: <b>-19.4%</b> more total minutes/user/day than holdout. Within the "on" arm, the <b>411 engaged users (67%)</b> play <b>-9.5%</b> more minutes/user/day (28.65 vs 31.65) than the holdout. The 61 insta-skippers (10.0%) barely play (17.01 min/day) and dilute the aggregate. <i>Caveat: single-day data; retention causality requires multi-day extract.</i></div>
+      <div class="vh">📈 Cutscenes drive +9.1% play time for the 59% who engage. The 9% who insta-skip self-select out.</div>
+      <div class="vd">Aggregate "on" arm: <b>-6.3%</b> more total minutes/user/day than holdout. Within the "on" arm, the <b>370 engaged users (59%)</b> play <b>+9.1%</b> more minutes/user/day (32.83 vs 30.10) than the holdout. The 59 insta-skippers (9.4%) barely play (17.64 min/day) and dilute the aggregate. <i>Caveat: single-day data; retention causality requires multi-day extract.</i></div>
     </div>
   </div>
 </header>
@@ -428,8 +428,8 @@
     <table class="matrix">
       <tbody>
         <tr><td><b>Source files</b></td><td><code>full-data.json</code> · <code>ab-cutscene-analysis.json</code> · <code>ABTestConfig.json</code> · <code>ABTestMgr.js</code></td></tr>
-        <tr><td><b>Window</b></td><td>VN 2026-05-17 [00:00, 24:00) = UTC [2026-05-16T17:00:00, 2026-05-17T17:00:00)</td></tr>
-        <tr><td><b>Observed bucket split</b></td><td>50.7% on / 49.3% off (target 50/50, N=1210)</td></tr>
+        <tr><td><b>Window</b></td><td>VN 2026-05-18 [00:00, 24:00) = UTC [2026-05-17T17:00:00, 2026-05-18T17:00:00)</td></tr>
+        <tr><td><b>Observed bucket split</b></td><td>49.4% on / 50.6% off (target 50/50, N=1262)</td></tr>
         <tr><td><b>Excluded</b></td><td>Forced-on QA: <code>10001</code>, <code>1009542061</code> · Forced-off QA: <code>10002</code> · Users with no <code>user_id</code> stamped</td></tr>
         <tr><td><b>Sanity check</b></td><td><span id="meth-leak-count">…</span>/<span id="meth-leak-total">…</span> cutscene_shown events came from "off" arm (should be 0; <span id="meth-leak-pct">…</span> leak attributed to pre-login default-user-id bug)</td></tr>
         <tr><td><b>Limits</b></td><td>Single day · N≈<span id="meth-n-per-arm">…</span>/arm (below Bayesian confirmatory threshold of 250/arm) · no retention lift (D1/D3) computable from 1 day</td></tr>
@@ -438,7 +438,7 @@
   </section>
 
   <footer>
-    Generated <span id="generated">2026-05-20 07:09:59 UTC</span> · raw data: <a href="./ab-cutscene-analysis.json">ab-cutscene-analysis.json</a> · <a href="./full-data.json">full-data.json</a> · <a href="./report.html">main dashboard</a> · <a href="./ab-cutscene-analysis.html">A/B detail view</a>
+    Generated <span id="generated">2026-05-20 07:10:25 UTC</span> · raw data: <a href="./ab-cutscene-analysis.json">ab-cutscene-analysis.json</a> · <a href="./full-data.json">full-data.json</a> · <a href="./report.html">main dashboard</a> · <a href="./ab-cutscene-analysis.html">A/B detail view</a>
   </footer>
 </main>
 
@@ -447,131 +447,131 @@
 // Inlined data (matches ab-cutscene-analysis.json + cutscene per-scene from full-data)
 // ──────────────────────────────────────────────────────────────────────────────
 const ON  = {
-  "users": 613,
-  "sessions": 1244,
-  "sessions_per_user": 2.03,
-  "total_session_minutes": 15629.8,
-  "total_session_minutes_per_user": 25.5,
-  "median_session_len_min": 8,
-  "mean_session_len_min": 14.4,
-  "win_rate_pct": 65.9,
-  "boss_win_rate_pct": 35.5,
-  "gold_granted": 148381,
-  "gold_spent_extra_move": 88550,
-  "gold_spent_extra_move_per_user": 144.5,
-  "lives_lost_abandon": 42,
-  "lives_lost_abandon_per_session": 0.034,
-  "cutscene_shown": 1234,
-  "cutscene_skipped": 891,
-  "cutscene_completed": 265,
-  "l5_users": 430,
-  "l5_reach_pct": 70.1,
-  "l10_users": 354,
-  "l10_reach_pct": 57.7,
-  "l20_users": 246,
-  "l20_reach_pct": 40.1,
-  "l30_users": 174,
-  "l30_reach_pct": 28.4,
-  "l40_users": 131,
-  "l40_reach_pct": 21.4,
-  "l50_users": 77,
-  "l50_reach_pct": 12.6
+  "users": 625,
+  "sessions": 1275,
+  "sessions_per_user": 2.04,
+  "total_session_minutes": 17630.2,
+  "total_session_minutes_per_user": 28.21,
+  "median_session_len_min": 8.1,
+  "mean_session_len_min": 14.9,
+  "win_rate_pct": 65.7,
+  "boss_win_rate_pct": 35.8,
+  "gold_granted": 152811,
+  "gold_spent_extra_move": 94300,
+  "gold_spent_extra_move_per_user": 150.9,
+  "lives_lost_abandon": 58,
+  "lives_lost_abandon_per_session": 0.045,
+  "cutscene_shown": 1183,
+  "cutscene_skipped": 871,
+  "cutscene_completed": 246,
+  "l5_users": 467,
+  "l5_reach_pct": 74.7,
+  "l10_users": 398,
+  "l10_reach_pct": 63.7,
+  "l20_users": 295,
+  "l20_reach_pct": 47.2,
+  "l30_users": 222,
+  "l30_reach_pct": 35.5,
+  "l40_users": 167,
+  "l40_reach_pct": 26.7,
+  "l50_users": 101,
+  "l50_reach_pct": 16.2
 };
 
 const OFF = {
-  "users": 597,
-  "sessions": 1267,
-  "sessions_per_user": 2.12,
-  "total_session_minutes": 18892.8,
-  "total_session_minutes_per_user": 31.65,
-  "median_session_len_min": 8.4,
-  "mean_session_len_min": 17,
-  "win_rate_pct": 65.6,
-  "boss_win_rate_pct": 41.3,
-  "gold_granted": 154994,
-  "gold_spent_extra_move": 94350,
-  "gold_spent_extra_move_per_user": 158,
-  "lives_lost_abandon": 52,
-  "lives_lost_abandon_per_session": 0.041,
-  "cutscene_shown": 0,
-  "cutscene_skipped": 0,
-  "cutscene_completed": 0,
-  "l5_users": 435,
-  "l5_reach_pct": 72.9,
-  "l10_users": 369,
-  "l10_reach_pct": 61.8,
-  "l20_users": 272,
-  "l20_reach_pct": 45.6,
-  "l30_users": 200,
-  "l30_reach_pct": 33.5,
-  "l40_users": 150,
-  "l40_reach_pct": 25.1,
-  "l50_users": 91,
-  "l50_reach_pct": 15.2
+  "users": 638,
+  "sessions": 1313,
+  "sessions_per_user": 2.06,
+  "total_session_minutes": 19202.1,
+  "total_session_minutes_per_user": 30.1,
+  "median_session_len_min": 9.2,
+  "mean_session_len_min": 17.1,
+  "win_rate_pct": 64.3,
+  "boss_win_rate_pct": 37.7,
+  "gold_granted": 152312,
+  "gold_spent_extra_move": 90950,
+  "gold_spent_extra_move_per_user": 142.6,
+  "lives_lost_abandon": 61,
+  "lives_lost_abandon_per_session": 0.046,
+  "cutscene_shown": 13,
+  "cutscene_skipped": 9,
+  "cutscene_completed": 3,
+  "l5_users": 487,
+  "l5_reach_pct": 76.3,
+  "l10_users": 427,
+  "l10_reach_pct": 66.9,
+  "l20_users": 303,
+  "l20_reach_pct": 47.5,
+  "l30_users": 225,
+  "l30_reach_pct": 35.3,
+  "l40_users": 171,
+  "l40_reach_pct": 26.8,
+  "l50_users": 109,
+  "l50_reach_pct": 17.1
 };
 
 // Per-cutscene (from per-date cutscene-segments.json)
 const CUTSCENES = [
   {
     "id": "CS_before_L1",
-    "shown": 397,
-    "skip_pct": 58.9,
-    "finish_pct": 25.7,
-    "avg_skip_sec": 24.3,
+    "shown": 357,
+    "skip_pct": 61.9,
+    "finish_pct": 25.2,
+    "avg_skip_sec": 22.4,
     "before_level": 1,
     "length_sec": 49
   },
   {
     "id": "CS_before_L5",
-    "shown": 229,
-    "skip_pct": 75.1,
-    "finish_pct": 20.1,
-    "avg_skip_sec": 9.1,
+    "shown": 215,
+    "skip_pct": 76.3,
+    "finish_pct": 18.1,
+    "avg_skip_sec": 9,
     "before_level": 5,
     "length_sec": 35
   },
   {
     "id": "CS_before_L10",
-    "shown": 171,
-    "skip_pct": 76.6,
-    "finish_pct": 21.6,
-    "avg_skip_sec": 6.9,
+    "shown": 170,
+    "skip_pct": 76.5,
+    "finish_pct": 22.4,
+    "avg_skip_sec": 6.7,
     "before_level": 10,
     "length_sec": 24
   },
   {
     "id": "CS_before_L11",
-    "shown": 152,
-    "skip_pct": 78.9,
-    "finish_pct": 20.4,
-    "avg_skip_sec": 7.6,
+    "shown": 158,
+    "skip_pct": 78.5,
+    "finish_pct": 17.7,
+    "avg_skip_sec": 7,
     "before_level": 11,
     "length_sec": 31
   },
   {
     "id": "CS_before_L21",
-    "shown": 93,
-    "skip_pct": 78.5,
-    "finish_pct": 20.4,
-    "avg_skip_sec": 15.9,
+    "shown": 104,
+    "skip_pct": 82.7,
+    "finish_pct": 16.3,
+    "avg_skip_sec": 5.6,
     "before_level": 21,
     "length_sec": 42
   },
   {
     "id": "CS_before_L31",
-    "shown": 74,
-    "skip_pct": 82.4,
-    "finish_pct": 17.6,
-    "avg_skip_sec": 5.4,
+    "shown": 81,
+    "skip_pct": 80.2,
+    "finish_pct": 19.8,
+    "avg_skip_sec": 5,
     "before_level": 31,
     "length_sec": 26
   },
   {
     "id": "CS_before_L40",
-    "shown": 118,
-    "skip_pct": 84.7,
-    "finish_pct": 14.4,
-    "avg_skip_sec": 4.8,
+    "shown": 111,
+    "skip_pct": 81.1,
+    "finish_pct": 18.9,
+    "avg_skip_sec": 4.1,
     "before_level": 40,
     "length_sec": 36
   }
@@ -581,39 +581,39 @@ const CUTSCENES = [
 const FULL_SEGMENTS = {
   "on-engaged": {
     "label": "on-engaged",
-    "users": 411,
-    "sessions_per_user": 2.01,
-    "total_session_minutes_per_user": 28.65,
-    "l50_reach_pct": 4.4,
-    "gold_extra_move_per_user": 163.4,
-    "abandon_per_session": 0.039
+    "users": 370,
+    "sessions_per_user": 1.98,
+    "total_session_minutes_per_user": 32.83,
+    "l50_reach_pct": 5.1,
+    "gold_extra_move_per_user": 177.8,
+    "abandon_per_session": 0.061
   },
   "on-insta-skip": {
     "label": "on-insta-skip",
-    "users": 61,
-    "sessions_per_user": 1.69,
-    "total_session_minutes_per_user": 17.01,
-    "l50_reach_pct": 13.1,
-    "gold_extra_move_per_user": 208.2,
-    "abandon_per_session": 0.019
+    "users": 59,
+    "sessions_per_user": 2.32,
+    "total_session_minutes_per_user": 17.64,
+    "l50_reach_pct": 5.1,
+    "gold_extra_move_per_user": 148.3,
+    "abandon_per_session": 0.015
   },
   "on-no-cutscene": {
     "label": "on-no-cutscene",
-    "users": 141,
-    "sessions_per_user": 2.23,
-    "total_session_minutes_per_user": 19.99,
-    "l50_reach_pct": 36.2,
-    "gold_extra_move_per_user": 61.7,
-    "abandon_per_session": 0.025
+    "users": 196,
+    "sessions_per_user": 2.07,
+    "total_session_minutes_per_user": 22.67,
+    "l50_reach_pct": 40.3,
+    "gold_extra_move_per_user": 100.8,
+    "abandon_per_session": 0.027
   },
   "off": {
     "label": "off",
-    "users": 597,
-    "sessions_per_user": 2.12,
-    "total_session_minutes_per_user": 31.65,
-    "l50_reach_pct": 15.2,
-    "gold_extra_move_per_user": 158,
-    "abandon_per_session": 0.041
+    "users": 638,
+    "sessions_per_user": 2.06,
+    "total_session_minutes_per_user": 30.1,
+    "l50_reach_pct": 17.1,
+    "gold_extra_move_per_user": 142.6,
+    "abandon_per_session": 0.046
   }
 };
 
@@ -954,28 +954,28 @@ const CS_SKIP_DIST = [
     "buckets": [
       0,
       0,
-      0,
-      0,
-      90,
-      90,
-      54,
-      102
+      3,
+      2,
+      105,
+      75,
+      36,
+      90
     ],
-    "total": 336
+    "total": 311
   },
   {
     "lv": 5,
     "buckets": [
       0,
-      0,
+      2,
       23,
-      97,
-      38,
+      92,
+      33,
       11,
       3,
-      46
+      39
     ],
-    "total": 218
+    "total": 203
   },
   {
     "lv": 10,
@@ -983,11 +983,11 @@ const CS_SKIP_DIST = [
       0,
       0,
       46,
-      62,
-      17,
-      6,
+      61,
+      22,
+      1,
       0,
-      37
+      38
     ],
     "total": 168
   },
@@ -996,56 +996,56 @@ const CS_SKIP_DIST = [
     "buckets": [
       0,
       0,
-      26,
-      75,
-      14,
-      3,
-      2,
-      31
+      30,
+      78,
+      11,
+      5,
+      0,
+      28
     ],
-    "total": 151
+    "total": 152
   },
   {
     "lv": 21,
     "buckets": [
       0,
-      11,
-      32,
-      17,
-      8,
-      3,
-      2,
-      19
+      16,
+      39,
+      20,
+      6,
+      4,
+      1,
+      17
     ],
-    "total": 92
+    "total": 103
   },
   {
     "lv": 31,
     "buckets": [
       0,
+      10,
+      31,
+      18,
       6,
-      34,
-      13,
-      6,
-      2,
       0,
-      13
+      0,
+      16
     ],
-    "total": 74
+    "total": 81
   },
   {
     "lv": 40,
     "buckets": [
       0,
-      23,
-      44,
-      27,
-      4,
+      15,
+      56,
+      13,
+      6,
       0,
-      2,
-      17
+      0,
+      21
     ],
-    "total": 117
+    "total": 111
   }
 ];
 // 8 buckets: 7 skip-time ranges + 1 "Completed" (no-skip outcome).
@@ -1121,23 +1121,23 @@ new Chart(document.getElementById('ch-insta-share'), {
 // Segment comparison — min/user/day
 const SEGMENTS = [
   {
-    "name": "on-engaged\\n(411 users)",
-    "value": 28.65,
+    "name": "on-engaged\\n(370 users)",
+    "value": 32.83,
     "color": "#10B981"
   },
   {
-    "name": "off\\n(597 users)",
-    "value": 31.65,
+    "name": "off\\n(638 users)",
+    "value": 30.1,
     "color": "#6B7280"
   },
   {
-    "name": "on-no-cutscene\\n(141 users)",
-    "value": 19.99,
+    "name": "on-no-cutscene\\n(196 users)",
+    "value": 22.67,
     "color": "#94A3B8"
   },
   {
-    "name": "on-insta-skip\\n(61 users)",
-    "value": 17.01,
+    "name": "on-insta-skip\\n(59 users)",
+    "value": 17.64,
     "color": "#DC2626"
   }
 ];
