@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VN-19 cross-section · cutscene-arm × platform · 2×2</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root { --slate:#1F2937; --cyan:#0EA5E9; --amber:#F59E0B; --pass:#10B981; --kill:#DC2626;
+    --pass-bg:#D1FAE5; --pass-fg:#065F46; --warn-bg:#FEF3C7; --warn-fg:#92400E; --kill-bg:#FEE2E2; --kill-fg:#991B1B;
+    --neutral-bg:#E5E7EB; --neutral-fg:#6B7280;
+    --gray-50:#F9FAFB; --gray-200:#E5E7EB; --gray-500:#6B7280; --bg:#F3F4F6; --card:#FFFFFF;
+    --ios:#0891B2; --android:#10B981; --on:#2563EB; --off:#F59E0B; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Inter',-apple-system,system-ui,Arial,sans-serif; background:var(--bg); color:#111; font-size:14px; line-height:1.55; }
+  header { background:linear-gradient(135deg,#1F2937 0%,#0F172A 100%); color:#fff; padding:32px 32px; }
+  header .inner { max-width:1240px; margin:0 auto; }
+  header .eyebrow { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:#94A3B8; }
+  header h1 { font-size:24px; margin:4px 0 6px; font-weight:800; }
+  header .sub { font-size:13px; color:#cbd5e1; max-width:920px; }
+  header .legend { margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.16); padding:5px 11px; border-radius:8px; font-size:11px; color:#e2e8f0; }
+  .chip b { color:#fff; }
+  main { max-width:1240px; margin:0 auto; padding:24px 32px 80px; }
+  section { margin:24px 0; }
+  section h2 { font-size:18px; margin:0 0 4px; color:var(--slate); border-left:4px solid var(--cyan); padding-left:10px; }
+  section .lede { color:var(--gray-500); font-size:12px; margin-bottom:14px; max-width:980px; }
+
+  /* 2x2 matrix table */
+  table.matrix2x2 { width:100%; border-collapse:collapse; background:var(--card); border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.06); font-size:12.5px; }
+  .matrix2x2 th, .matrix2x2 td { padding:9px 12px; text-align:left; border-bottom:1px solid var(--gray-200); border-right:1px solid var(--gray-200); }
+  .matrix2x2 th { background:var(--slate); color:#fff; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.4px; text-align:center; }
+  .matrix2x2 th.platform-ios { background:var(--ios); }
+  .matrix2x2 th.platform-android { background:var(--android); }
+  .matrix2x2 th.arm-on  { background:var(--on); }
+  .matrix2x2 th.arm-off { background:var(--off); }
+  .matrix2x2 td.num { text-align:right; font-variant-numeric:tabular-nums; font-family:'SF Mono',Monaco,monospace; }
+  .matrix2x2 td.row-label { font-weight:600; background:var(--gray-50); }
+  .matrix2x2 td.row-label.delta { font-style:italic; color:var(--gray-500); }
+  .matrix2x2 tr.delta-row { background:#FAFBFC; }
+  .matrix2x2 tr.delta-row td.num { font-weight:700; }
+
+  /* Delta pills */
+  .pill { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10.5px; font-weight:700; font-family:'SF Mono',Monaco,monospace; }
+  .pill.pro { background:var(--pass-bg); color:var(--pass-fg); }
+  .pill.anti { background:var(--kill-bg); color:var(--kill-fg); }
+  .pill.neutral { background:var(--neutral-bg); color:var(--neutral-fg); }
+
+  /* Charts */
+  .chart-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(440px,1fr)); gap:14px; }
+  .chart-card { background:var(--card); border-radius:10px; padding:14px 18px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .chart-card h3 { font-size:13px; margin:0 0 4px; color:var(--slate); }
+  .chart-card .meta { font-size:11px; color:var(--gray-500); margin-bottom:8px; }
+  .chart-canvas-wrap { position:relative; height:300px; width:100%; }
+
+  /* Cohort tiles */
+  .tile-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; }
+  .tile { background:var(--card); border-radius:10px; padding:14px 16px; box-shadow:0 1px 2px rgba(0,0,0,0.05); border-top:4px solid var(--cyan); }
+  .tile.ios-on  { border-top-color:var(--ios); background:linear-gradient(180deg, #ECFEFF 0%, #ffffff 70%); }
+  .tile.ios-off { border-top-color:var(--ios); background:linear-gradient(180deg, #FFFBEB 0%, #ffffff 70%); }
+  .tile.dro-on  { border-top-color:var(--android); background:linear-gradient(180deg, #ECFDF5 0%, #ffffff 70%); }
+  .tile.dro-off { border-top-color:var(--android); background:linear-gradient(180deg, #FFFBEB 0%, #ffffff 70%); }
+  .tile .label { font-size:11px; color:var(--gray-500); font-weight:700; text-transform:uppercase; letter-spacing:0.4px; }
+  .tile .v { font-size:24px; font-weight:800; color:var(--slate); margin:4px 0 2px; }
+  .tile .sub { font-size:11px; color:var(--gray-500); }
+</style>
+</head>
+<body>
+<header><div class="inner">
+  <div class="eyebrow">2×2 cross-section · VN-19 (2026-05-19)</div>
+  <h1>Cutscene-arm × Platform — within-platform wedge effects</h1>
+  <div class="sub">Same VN-day, four cohorts: <b>iOS-on</b>, <b>iOS-off</b>, <b>Android-on</b>, <b>Android-off</b>. Surfaces (1) whether the cutscene-wedge exists separately within each platform and (2) the platform gap within each arm. Cohort sizes from per-platform A/B analysis (<code>ab-cutscene-analysis.json</code>).</div>
+  <div class="legend">
+    <span class="chip">📱 <b>iOS</b> · 491 users bucketed</span>
+    <span class="chip">🤖 <b>Android</b> · 839 users bucketed</span>
+    <span class="chip">🅰️ <b>cutscene-on</b> (cyan)</span>
+    <span class="chip">🅱️ <b>cutscene-off</b> (amber)</span>
+  </div>
+</div></header>
+
+<main>
+
+<section>
+  <h2>Cohort sizes — 4 cells of the 2×2</h2>
+  <div class="lede">Bucketing comes from GrowthBook's deterministic hash. Splits are 50/50 within each platform's pool, so the platform mix is the dominant driver of cell-size differences.</div>
+  <div class="tile-grid">
+    <div class="tile ios-on">  <div class="label">📱 iOS · on</div>  <div class="v">264</div><div class="sub">users · 53.8% of iOS</div></div>
+    <div class="tile ios-off"> <div class="label">📱 iOS · off</div> <div class="v">227</div><div class="sub">users · 46.2% of iOS</div></div>
+    <div class="tile dro-on">  <div class="label">🤖 Android · on</div> <div class="v">415</div><div class="sub">users · 49.5% of Android</div></div>
+    <div class="tile dro-off"> <div class="label">🤖 Android · off</div><div class="v">424</div><div class="sub">users · 50.5% of Android</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Full 2×2 metric matrix + within-platform wedge</h2>
+  <div class="lede">Top 4 columns = the 4 cells. <span class="pill pro">+green</span> = better than holdout. <span class="pill anti">-red</span> = worse than holdout. Wedge rows (italic) compute on−off within each platform — sharp signal for whether cutscenes are pulling users up.</div>
+  <div style="overflow-x:auto;">
+  <table class="matrix2x2" id="m2x2"></table>
+  </div>
+</section>
+
+<section>
+  <h2>Within-platform wedge (on minus off)</h2>
+  <div class="lede">Side-by-side bars: iOS's wedge effect vs Android's wedge effect. Positive bars = cutscene-on cohort outperforms holdout. Look for sign disagreement between the two platforms.</div>
+  <div class="chart-row">
+    <div class="chart-card"><h3>Engagement & retention deltas</h3><div class="chart-canvas-wrap"><canvas id="ch-wedge-eng"></canvas></div></div>
+    <div class="chart-card"><h3>Win/skill deltas (pp)</h3><div class="chart-canvas-wrap"><canvas id="ch-wedge-skill"></canvas></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Cross-platform gap (iOS minus Android), within each arm</h2>
+  <div class="lede">Same metrics, but the delta is iOS − Android. Within the cutscene-on arm: how does iOS differ from Android among users seeing cutscenes? Within the off arm: how do they differ in the holdout? If platform gap is wider in one arm, the cutscene treatment is platform-specific.</div>
+  <div class="chart-row">
+    <div class="chart-card"><h3>Engagement (iOS − Android)</h3><div class="chart-canvas-wrap"><canvas id="ch-cross-eng"></canvas></div></div>
+    <div class="chart-card"><h3>Win/skill (iOS − Android, pp)</h3><div class="chart-canvas-wrap"><canvas id="ch-cross-skill"></canvas></div></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+// VN-19 data (from 2026-05-19-ios/ + 2026-05-19-android/ ab-cutscene-analysis.json · 2026-05-20)
+const CELLS = {
+  'ios-on':  { users:264, sessions_per_user:1.88, median_session_len_min:9.0, mean_session_len_min:16.6, total_session_minutes_per_user:27.49, win_rate_pct:69.1, l50_reach_pct:15.2, boss_win_rate_pct:50.4, cutscene_skip_pct:80.0, cutscene_finish_pct:13.7, lives_lost_abandon:27, gold_spent_extra_move:40900 },
+  'ios-off': { users:227, sessions_per_user:2.15, median_session_len_min:8.6, mean_session_len_min:19.9, total_session_minutes_per_user:31.69, win_rate_pct:66.2, l50_reach_pct:11.9, boss_win_rate_pct:46.5, cutscene_skip_pct:33.3, cutscene_finish_pct:0.0,  lives_lost_abandon:23, gold_spent_extra_move:36150 },
+  'dro-on':  { users:415, sessions_per_user:2.27, median_session_len_min:7.9, mean_session_len_min:20.0, total_session_minutes_per_user:31.68, win_rate_pct:66.1, l50_reach_pct:21.7, boss_win_rate_pct:48.1, cutscene_skip_pct:69.6, cutscene_finish_pct:23.8, lives_lost_abandon:24, gold_spent_extra_move:63050 },
+  'dro-off': { users:424, sessions_per_user:2.06, median_session_len_min:9.0, mean_session_len_min:16.1, total_session_minutes_per_user:29.73, win_rate_pct:64.9, l50_reach_pct:24.5, boss_win_rate_pct:42.5, cutscene_skip_pct:76.5, cutscene_finish_pct:17.6, lives_lost_abandon:41, gold_spent_extra_move:54500 }
+};
+
+const METRICS = [
+  { key:'users',                          label:'Users (N)',                    type:'int' },
+  { key:'sessions_per_user',              label:'Sessions / user',              type:'.2' },
+  { key:'median_session_len_min',         label:'Median session length (min)',  type:'.1' },
+  { key:'mean_session_len_min',           label:'Mean session length (min)',    type:'.1' },
+  { key:'total_session_minutes_per_user', label:'Total minutes / user / day ⭐',  type:'.2' },
+  { key:'win_rate_pct',                   label:'Win rate %',                   type:'pct', highBetter:true },
+  { key:'l50_reach_pct',                  label:'L50 reach %',                  type:'pct', highBetter:true },
+  { key:'boss_win_rate_pct',              label:'Boss win rate %',              type:'pct', highBetter:true },
+  { key:'cutscene_skip_pct',              label:'Cutscene skip rate %',         type:'pct', highBetter:false, offNote:true },
+  { key:'cutscene_finish_pct',            label:'Cutscene finish rate %',       type:'pct', highBetter:true,  offNote:true },
+  { key:'lives_lost_abandon',             label:'Lives lost (abandon)',         type:'int', highBetter:false },
+  { key:'gold_spent_extra_move',          label:'Gold spent on extra-move',     type:'int', highBetter:true }
+];
+
+function fmt(v, t) {
+  if (v == null || isNaN(v)) return '—';
+  if (t === 'int') return v.toLocaleString();
+  if (t === '.1')  return v.toFixed(1);
+  if (t === '.2')  return v.toFixed(2);
+  if (t === 'pct') return v.toFixed(1) + '%';
+  return v;
+}
+function deltaPill(d, type, highBetter) {
+  if (d == null || isNaN(d)) return '<span class="pill neutral">—</span>';
+  let sign = d >= 0 ? '+' : '';
+  let s;
+  if (type === 'pct') s = sign + d.toFixed(1) + 'pp';
+  else if (type === 'int') s = sign + d.toLocaleString();
+  else s = sign + d.toFixed(2);
+  let kind = 'neutral';
+  if (Math.abs(d) >= 0.5) {
+    const isPro = (highBetter === false) ? d < 0 : d > 0;
+    kind = isPro ? 'pro' : 'anti';
+  }
+  return '<span class="pill ' + kind + '">' + s + '</span>';
+}
+
+// ── Build the 2×2 matrix table ─────────────────────────────────────────────
+(function() {
+  const tbl = document.getElementById('m2x2');
+  let html = '<thead>' +
+    '<tr><th rowspan="2" style="vertical-align:bottom;">Metric</th>' +
+    '<th colspan="2" class="platform-ios">📱 iOS</th>' +
+    '<th colspan="2" class="platform-android">🤖 Android</th>' +
+    '<th colspan="2" style="background:#7C3AED">Within-platform wedge (on − off)</th></tr>' +
+    '<tr>' +
+    '<th class="arm-on">on</th>' +
+    '<th class="arm-off">off</th>' +
+    '<th class="arm-on">on</th>' +
+    '<th class="arm-off">off</th>' +
+    '<th class="platform-ios">iOS Δ</th>' +
+    '<th class="platform-android">Android Δ</th>' +
+    '</tr></thead><tbody>';
+  METRICS.forEach(m => {
+    const a = CELLS['ios-on'][m.key], b = CELLS['ios-off'][m.key];
+    const c = CELLS['dro-on'][m.key], d = CELLS['dro-off'][m.key];
+    const wedgeIos = (a != null && b != null) ? a - b : null;
+    const wedgeDro = (c != null && d != null) ? c - d : null;
+    html += '<tr>';
+    html += '<td class="row-label">' + m.label + (m.offNote ? '<br><small style="font-weight:400;color:#9CA3AF">off-arm value noisy (bucket leak)</small>' : '') + '</td>';
+    html += '<td class="num">' + fmt(a, m.type) + '</td>';
+    html += '<td class="num">' + fmt(b, m.type) + '</td>';
+    html += '<td class="num">' + fmt(c, m.type) + '</td>';
+    html += '<td class="num">' + fmt(d, m.type) + '</td>';
+    html += '<td class="num">' + (m.type === 'int' ? deltaPill(wedgeIos, m.type, m.highBetter) : deltaPill(wedgeIos, m.type, m.highBetter)) + '</td>';
+    html += '<td class="num">' + deltaPill(wedgeDro, m.type, m.highBetter) + '</td>';
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  tbl.innerHTML = html;
+})();
+
+// ── Wedge chart: engagement metrics (per platform) ─────────────────────────
+function wedge(platformPrefix, key) {
+  return CELLS[platformPrefix + '-on'][key] - CELLS[platformPrefix + '-off'][key];
+}
+
+new Chart(document.getElementById('ch-wedge-eng'), {
+  type:'bar',
+  data:{
+    labels:['Sessions/user','Median session (min)','Mean session (min)','Total min/user/day'],
+    datasets:[
+      { label:'📱 iOS wedge', data:[wedge('ios','sessions_per_user'), wedge('ios','median_session_len_min'), wedge('ios','mean_session_len_min'), wedge('ios','total_session_minutes_per_user')], backgroundColor:'#0891B2' },
+      { label:'🤖 Android wedge', data:[wedge('dro','sessions_per_user'), wedge('dro','median_session_len_min'), wedge('dro','mean_session_len_min'), wedge('dro','total_session_minutes_per_user')], backgroundColor:'#10B981' }
+    ]
+  },
+  options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'}, tooltip:{ callbacks:{ afterLabel: ctx => 'Δ = on − off · positive = cutscene-on outperforms holdout' } } }, scales:{ y:{ title:{display:true,text:'on − off'} } } }
+});
+
+new Chart(document.getElementById('ch-wedge-skill'), {
+  type:'bar',
+  data:{
+    labels:['Win rate (pp)','L50 reach (pp)','Boss WR (pp)'],
+    datasets:[
+      { label:'📱 iOS wedge', data:[wedge('ios','win_rate_pct'), wedge('ios','l50_reach_pct'), wedge('ios','boss_win_rate_pct')], backgroundColor:'#0891B2' },
+      { label:'🤖 Android wedge', data:[wedge('dro','win_rate_pct'), wedge('dro','l50_reach_pct'), wedge('dro','boss_win_rate_pct')], backgroundColor:'#10B981' }
+    ]
+  },
+  options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'}, tooltip:{ callbacks:{ afterLabel: ctx => 'percentage points · positive = cutscene-on better' } } }, scales:{ y:{ title:{display:true,text:'pp · on − off'} } } }
+});
+
+// ── Cross-platform chart: iOS minus Android, within each arm ──────────────
+function crossArm(arm, key) {
+  return CELLS['ios-' + arm][key] - CELLS['dro-' + arm][key];
+}
+
+new Chart(document.getElementById('ch-cross-eng'), {
+  type:'bar',
+  data:{
+    labels:['Sessions/user','Median session (min)','Mean session (min)','Total min/user/day'],
+    datasets:[
+      { label:'within ON arm (iOS − Android)',  data:[crossArm('on','sessions_per_user'), crossArm('on','median_session_len_min'), crossArm('on','mean_session_len_min'), crossArm('on','total_session_minutes_per_user')], backgroundColor:'#2563EB' },
+      { label:'within OFF arm (iOS − Android)', data:[crossArm('off','sessions_per_user'), crossArm('off','median_session_len_min'), crossArm('off','mean_session_len_min'), crossArm('off','total_session_minutes_per_user')], backgroundColor:'#F59E0B' }
+    ]
+  },
+  options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'} }, scales:{ y:{ title:{display:true,text:'iOS − Android'} } } }
+});
+
+new Chart(document.getElementById('ch-cross-skill'), {
+  type:'bar',
+  data:{
+    labels:['Win rate (pp)','L50 reach (pp)','Boss WR (pp)'],
+    datasets:[
+      { label:'within ON arm (iOS − Android)',  data:[crossArm('on','win_rate_pct'), crossArm('on','l50_reach_pct'), crossArm('on','boss_win_rate_pct')], backgroundColor:'#2563EB' },
+      { label:'within OFF arm (iOS − Android)', data:[crossArm('off','win_rate_pct'), crossArm('off','l50_reach_pct'), crossArm('off','boss_win_rate_pct')], backgroundColor:'#F59E0B' }
+    ]
+  },
+  options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'} }, scales:{ y:{ title:{display:true,text:'pp · iOS − Android'} } } }
+});
+</script>
+</body></html>
