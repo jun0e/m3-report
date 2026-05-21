@@ -5,7 +5,7 @@
     "source": "local-dump: C:\\Users\\CPU60395-local\\m3-data\\2026-05-20-and-prev",
     "target_date": "2026-05-20",
     "today_vn": "2026-05-21",
-    "generated_at": "2026-05-21T01:43:32.671Z",
+    "generated_at": "2026-05-21T01:50:29.465Z",
     "scope": "Tabs 0-5 (Tab 5 narrative now live) · multi-day retention INSUFFICIENT",
     "insufficient_n_threshold": 1,
     "spark_window_days": 0,
