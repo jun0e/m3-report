@@ -106,15 +106,15 @@
     <div class="subtitle">Synthesis of VN 2026-05-20 event log + GrowthBook A/B causal holdout · 1376 users across both arms</div>
     <div class="badges">
       <span class="badge">📅 <b>2026-05-20 (VN)</b> · 24.0h coverage</span>
-      <span class="badge">📊 <b>828,033</b> events in window</span>
+      <span class="badge">📊 <b>798,429</b> events in window</span>
       <span class="badge">🅰️ <b>"on" N=688</b> · 🅱️ <b>"off" N=688</b></span>
       <span class="badge">⚙️ GrowthBook 50/50 holdout · live since alpha launch</span>
     </div>
 
     <div class="verdict-card">
       <div class="vt">Headline verdict</div>
-      <div class="vh">📈 Cutscenes drive +14.2% play time for the 59% who engage. The 10% who insta-skip self-select out.</div>
-      <div class="vd">Aggregate "on" arm: <b>-5.0%</b> more total minutes/user/day than holdout. Within the "on" arm, the <b>405 engaged users (59%)</b> play <b>+14.2%</b> more minutes/user/day (35.11 vs 30.75) than the holdout. The 69 insta-skippers (10.0%) barely play (26.66 min/day) and dilute the aggregate. <i>Caveat: single-day data; retention causality requires multi-day extract.</i></div>
+      <div class="vh">📈 Cutscenes drive +12.2% play time for the 59% who engage. The 10% who insta-skip self-select out.</div>
+      <div class="vd">Aggregate "on" arm: <b>-6.1%</b> more total minutes/user/day than holdout. Within the "on" arm, the <b>405 engaged users (59%)</b> play <b>+12.2%</b> more minutes/user/day (34.49 vs 30.74) than the holdout. The 69 insta-skippers (10.0%) barely play (26.65 min/day) and dilute the aggregate. <i>Caveat: single-day data; retention causality requires multi-day extract.</i></div>
     </div>
   </div>
 </header>
@@ -438,7 +438,7 @@
   </section>
 
   <footer>
-    Generated <span id="generated">2026-05-21 01:59:29 UTC</span> · raw data: <a href="./ab-cutscene-analysis.json">ab-cutscene-analysis.json</a> · <a href="./full-data.json">full-data.json</a> · <a href="./report.html">main dashboard</a> · <a href="./ab-cutscene-analysis.html">A/B detail view</a>
+    Generated <span id="generated">2026-05-21 03:08:32 UTC</span> · raw data: <a href="./ab-cutscene-analysis.json">ab-cutscene-analysis.json</a> · <a href="./full-data.json">full-data.json</a> · <a href="./report.html">main dashboard</a> · <a href="./ab-cutscene-analysis.html">A/B detail view</a>
   </footer>
 </main>
 
@@ -448,24 +448,24 @@
 // ──────────────────────────────────────────────────────────────────────────────
 const ON  = {
   "users": 688,
-  "sessions": 1440,
+  "sessions": 1436,
   "sessions_per_user": 2.09,
-  "total_session_minutes": 20105.6,
-  "total_session_minutes_per_user": 29.22,
+  "total_session_minutes": 19851.4,
+  "total_session_minutes_per_user": 28.85,
   "median_session_len_min": 8.2,
-  "mean_session_len_min": 17.9,
+  "mean_session_len_min": 17.8,
   "win_rate_pct": 68.9,
   "boss_win_rate_pct": 59.3,
   "gold_granted": 173482,
   "gold_spent_extra_move": 91950,
   "gold_spent_extra_move_per_user": 133.6,
-  "lives_lost_abandon": 56,
-  "lives_lost_abandon_per_session": 0.039,
-  "cutscene_shown": 1233,
+  "lives_lost_abandon": 0,
+  "lives_lost_abandon_per_session": 0,
+  "cutscene_shown": 1232,
   "cutscene_skipped": 856,
   "cutscene_completed": 301,
-  "l5_users": 512,
-  "l5_reach_pct": 74.4,
+  "l5_users": 511,
+  "l5_reach_pct": 74.3,
   "l10_users": 447,
   "l10_reach_pct": 65,
   "l20_users": 338,
@@ -480,26 +480,26 @@ const ON  = {
 
 const OFF = {
   "users": 688,
-  "sessions": 1480,
+  "sessions": 1479,
   "sessions_per_user": 2.15,
-  "total_session_minutes": 21153.5,
-  "total_session_minutes_per_user": 30.75,
+  "total_session_minutes": 21149.7,
+  "total_session_minutes_per_user": 30.74,
   "median_session_len_min": 8.3,
   "mean_session_len_min": 17.9,
   "win_rate_pct": 68.1,
   "boss_win_rate_pct": 60.9,
-  "gold_granted": 175753,
+  "gold_granted": 175728,
   "gold_spent_extra_move": 93200,
   "gold_spent_extra_move_per_user": 135.5,
-  "lives_lost_abandon": 47,
-  "lives_lost_abandon_per_session": 0.032,
+  "lives_lost_abandon": 0,
+  "lives_lost_abandon_per_session": 0,
   "cutscene_shown": 0,
   "cutscene_skipped": 0,
   "cutscene_completed": 0,
-  "l5_users": 525,
-  "l5_reach_pct": 76.3,
-  "l10_users": 460,
-  "l10_reach_pct": 66.9,
+  "l5_users": 524,
+  "l5_reach_pct": 76.2,
+  "l10_users": 459,
+  "l10_reach_pct": 66.7,
   "l20_users": 353,
   "l20_reach_pct": 51.3,
   "l30_users": 286,
@@ -523,9 +523,9 @@ const CUTSCENES = [
   },
   {
     "id": "CS_before_L5",
-    "shown": 210,
-    "skip_pct": 72.4,
-    "finish_pct": 23.8,
+    "shown": 209,
+    "skip_pct": 72.7,
+    "finish_pct": 23.9,
     "avg_skip_sec": 8.9,
     "before_level": 5,
     "length_sec": 35
@@ -582,38 +582,38 @@ const FULL_SEGMENTS = {
   "on-engaged": {
     "label": "on-engaged",
     "users": 405,
-    "sessions_per_user": 2.09,
-    "total_session_minutes_per_user": 35.11,
+    "sessions_per_user": 2.08,
+    "total_session_minutes_per_user": 34.49,
     "l50_reach_pct": 10.1,
     "gold_extra_move_per_user": 174.6,
-    "abandon_per_session": 0.034
+    "abandon_per_session": 0
   },
   "on-insta-skip": {
     "label": "on-insta-skip",
     "users": 69,
     "sessions_per_user": 1.7,
-    "total_session_minutes_per_user": 26.66,
+    "total_session_minutes_per_user": 26.65,
     "l50_reach_pct": 18.8,
     "gold_extra_move_per_user": 144.2,
-    "abandon_per_session": 0.051
+    "abandon_per_session": 0
   },
   "on-no-cutscene": {
     "label": "on-no-cutscene",
     "users": 214,
     "sessions_per_user": 2.23,
-    "total_session_minutes_per_user": 18.91,
+    "total_session_minutes_per_user": 18.9,
     "l50_reach_pct": 50.5,
     "gold_extra_move_per_user": 52.8,
-    "abandon_per_session": 0.044
+    "abandon_per_session": 0
   },
   "off": {
     "label": "off",
     "users": 688,
     "sessions_per_user": 2.15,
-    "total_session_minutes_per_user": 30.75,
+    "total_session_minutes_per_user": 30.74,
     "l50_reach_pct": 24.1,
     "gold_extra_move_per_user": 135.5,
-    "abandon_per_session": 0.032
+    "abandon_per_session": 0
   }
 };
 
@@ -1122,22 +1122,22 @@ new Chart(document.getElementById('ch-insta-share'), {
 const SEGMENTS = [
   {
     "name": "on-engaged\\n(405 users)",
-    "value": 35.11,
+    "value": 34.49,
     "color": "#10B981"
   },
   {
     "name": "off\\n(688 users)",
-    "value": 30.75,
+    "value": 30.74,
     "color": "#6B7280"
   },
   {
     "name": "on-no-cutscene\\n(214 users)",
-    "value": 18.91,
+    "value": 18.9,
     "color": "#94A3B8"
   },
   {
     "name": "on-insta-skip\\n(69 users)",
-    "value": 26.66,
+    "value": 26.65,
     "color": "#DC2626"
   }
 ];

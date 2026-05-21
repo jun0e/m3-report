@@ -5,14 +5,14 @@
     "source": "local-dump: C:\\Users\\CPU60395-local\\m3-data\\2026-05-20-and-prev",
     "target_date": "2026-05-20",
     "today_vn": "2026-05-21",
-    "generated_at": "2026-05-21T01:59:22.330Z",
+    "generated_at": "2026-05-21T03:08:24.350Z",
     "scope": "Tabs 0-5 (Tab 5 narrative now live) · multi-day retention INSUFFICIENT",
     "insufficient_n_threshold": 1,
     "spark_window_days": 0,
     "sparklines_disabled": "No multi-day history in local dump",
     "designed_winrate_source": "v3.1 HTML formula — introLevels=[1,5,9,15,20,25,30,35,40,45,50] → 50%; others → 75%",
     "funnel_target_source": "03_Funnel sheet of m3_alpha_test_plan_v3.1.xlsx (L10:70% L20:50% L30:35% L40:25% L50:20%)",
-    "event_log_size": 828033,
+    "event_log_size": 798429,
     "cache_dir": null,
     "coverage_note": "First event in window is 2026-05-19T17:00:00.160Z — first 0 min (0.0h) of VN-2026-05-20 missing from dump.",
     "window_start_utc": "2026-05-19T17:00:00.000Z",
@@ -22,10 +22,10 @@
     "raw_events_scanned": 1644781
   },
   "global": {
-    "total_sessions": 2916,
-    "total_devices": 1365,
-    "n_levels_with_data": 50,
-    "n_levels_above_N_threshold": 50,
+    "total_sessions": 2915,
+    "total_devices": 1363,
+    "n_levels_with_data": 0,
+    "n_levels_above_N_threshold": 0,
     "cutscenes_shown": 1232,
     "cutscenes_skipped": 856,
     "cutscenes_completed": 301,
@@ -56,7 +56,7 @@
           null,
           null
         ],
-        "n": 1365
+        "n": 1363
       },
       {
         "name": "Avg Session Length",
@@ -71,7 +71,7 @@
           null,
           null
         ],
-        "n": 2841
+        "n": 2840
       },
       {
         "name": "Cutscene Skip Rate",
@@ -92,7 +92,7 @@
         "value": "23.7%",
         "status": "pass",
         "spark": null,
-        "n": 1365
+        "n": 1363
       },
       {
         "name": "Drop @ non-intro levels",
@@ -106,7 +106,7 @@
         "value": "71.7%",
         "status": "kill",
         "spark": null,
-        "n": 2483
+        "n": 2482
       },
       {
         "name": "M17a corr (cutscene×D3)",
@@ -139,8 +139,8 @@
       },
       {
         "name": "Win rate per level (avg)",
-        "value": "62.6%",
-        "status": "warn",
+        "value": "—",
+        "status": "insufficient",
         "spark": [
           null,
           null,
@@ -150,12 +150,12 @@
           null,
           null
         ],
-        "n": 21451
+        "n": 0
       },
       {
         "name": "Fail rate per level (avg)",
-        "value": "37.4%",
-        "status": "kill",
+        "value": "—",
+        "status": "insufficient",
         "spark": [
           null,
           null,
@@ -165,12 +165,12 @@
           null,
           null
         ],
-        "n": 21451
+        "n": 0
       },
       {
         "name": "Adaptive trigger count",
-        "value": "1.38/sess",
-        "status": "pass",
+        "value": "—",
+        "status": "insufficient",
         "spark": [
           null,
           null,
@@ -180,12 +180,12 @@
           null,
           null
         ],
-        "n": 21451
+        "n": 0
       },
       {
         "name": "Move surplus (avg)",
-        "value": "+1.69",
-        "status": "pass",
+        "value": "—",
+        "status": "insufficient",
         "spark": [
           null,
           null,
@@ -195,7 +195,7 @@
           null,
           null
         ],
-        "n": 21451
+        "n": 0
       },
       {
         "name": "Tutorial popup shown rate",
@@ -220,7 +220,7 @@
         "4+"
       ],
       "data": [
-        815,
+        814,
         240,
         113,
         196
@@ -238,12 +238,12 @@
         "30+"
       ],
       "data": [
-        473,
-        328,
+        474,
+        326,
         285,
         366,
-        620,
-        516,
+        621,
+        515,
         305
       ],
       "title": "Session length distribution (min)"
@@ -265,7 +265,7 @@
         144,
         113,
         99,
-        519
+        518
       ],
       "title": "Time to first fail (min)"
     },
@@ -284,8 +284,8 @@
       ],
       "actual": [
         65.9,
-        50.1,
-        41.1,
+        50.2,
+        41.2,
         31.4,
         23.7
       ],
@@ -416,7 +416,7 @@
         435,
         360,
         451,
-        369,
+        368,
         384,
         361,
         289,
@@ -526,56 +526,56 @@
         "L50"
       ],
       "actual": [
-        98.4,
-        84.6,
-        97.9,
-        90.5,
-        85.7,
-        84.8,
-        73.4,
-        87.6,
-        96.6,
-        76.1,
-        99.4,
-        55,
-        74.3,
-        70.1,
-        100,
-        87.5,
-        85.8,
-        60,
-        38,
-        49.2,
-        94.4,
-        62.6,
-        53.1,
-        62,
-        92.2,
-        67.2,
-        74.1,
-        67.3,
-        50.5,
-        34.4,
-        93.6,
-        57.7,
-        62.5,
-        62.8,
-        67.3,
-        31.8,
-        53,
-        46.2,
-        55.8,
-        36.9,
-        55.8,
-        73.1,
-        46.2,
-        95.4,
-        47.3,
-        45.7,
-        50.8,
-        46.7,
-        51.4,
-        39.3
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ],
       "designed": [
         50,
@@ -630,56 +630,56 @@
         50
       ],
       "n_per_level": [
-        569,
-        565,
-        477,
-        465,
-        454,
-        428,
-        462,
-        379,
-        353,
-        440,
-        345,
-        509,
-        378,
-        398,
-        358,
-        296,
-        295,
-        410,
-        589,
-        453,
-        231,
-        337,
-        386,
-        324,
-        219,
-        287,
-        286,
-        324,
-        380,
-        581,
-        236,
-        350,
-        317,
-        309,
-        281,
-        563,
-        315,
-        359,
-        301,
-        496,
-        301,
-        234,
-        357,
-        175,
-        334,
-        352,
-        319,
-        353,
-        311,
-        3210
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
       ]
     },
     "chart_adaptive": {
@@ -691,18 +691,18 @@
         "L41-50"
       ],
       "boost": [
-        0.468,
-        0.571,
-        1.677,
-        0.725,
-        1.894
+        null,
+        null,
+        null,
+        null,
+        null
       ],
       "suppress": [
-        0.404,
-        0.423,
-        0.144,
-        0.307,
-        0.103
+        null,
+        null,
+        null,
+        null,
+        null
       ],
       "unit": "switches/session"
     },
@@ -715,29 +715,21 @@
         "L41-50"
       ],
       "data": [
-        1.91,
-        2.45,
-        -0.36,
-        1.51,
-        2.26
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     "insights": [
       {
-        "level": "urgent",
-        "text": "Level 36 fail rate at 68.2% (N=563) — above 60% kill threshold."
+        "level": "info",
+        "text": "Adaptive trigger count — INSUFFICIENT (no events in window)."
       },
       {
-        "level": "urgent",
-        "text": "Largest design drift: L15 actual 100% vs designed 50% (Δ +50.0pp, too easy, N=358). 29 levels with |Δ|≥15pp."
-      },
-      {
-        "level": "ok",
-        "text": "Adaptive trigger count = 1.38/session — pass band."
-      },
-      {
-        "level": "ok",
-        "text": "Avg move surplus +1.69 — pass band."
+        "level": "info",
+        "text": "Avg move surplus — INSUFFICIENT (no per-level surplus data)."
       },
       {
         "level": "info",

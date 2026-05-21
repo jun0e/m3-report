@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-21T01:59:43.119Z",
+    "generated_at": "2026-05-21T03:08:48.104Z",
     "window_utc_start": "2026-05-19T17:00:00.000Z",
     "window_utc_end": "2026-05-20T17:00:00.000Z",
     "window_vn_label": "VN [2026-05-20 00:00, 2026-05-21 00:00)",
@@ -11,34 +11,13 @@
     "build_filter": null,
     "platform_filter": null,
     "events_scanned": 1644781,
-    "events_kept": 828033,
+    "events_kept": 798429,
     "events_out_of_window": 816748,
-    "events_wrong_build": 0,
+    "events_wrong_build": 29604,
     "distinct_users_in_window": 1376,
-    "distinct_levels_with_attempts": 55
+    "distinct_levels_with_attempts": 54
   },
   "levels": [
-    {
-      "level_id": -1,
-      "attempts": 0,
-      "unique_users": 0,
-      "wins": 0,
-      "fails": 0,
-      "win_rate_pct": null,
-      "first_try_win_rate_pct": 0,
-      "mean_attempts_per_user": null,
-      "median_attempts_per_user": null,
-      "max_attempts_per_user": null,
-      "designed_moves": 30,
-      "avg_moves_used_win": null,
-      "avg_moves_used_fail": null,
-      "avg_objectives_remaining_fail": null,
-      "avg_time_in_level_sec": null,
-      "avg_pu_total_per_attempt": null,
-      "avg_tpp_deviation_final": null,
-      "booster_use_rate_pct": 0,
-      "is_boss_share_pct": null
-    },
     {
       "level_id": 0,
       "attempts": 93,
@@ -314,9 +293,9 @@
     },
     {
       "level_id": 13,
-      "attempts": 361,
-      "unique_users": 283,
-      "wins": 285,
+      "attempts": 360,
+      "unique_users": 282,
+      "wins": 284,
       "fails": 76,
       "win_rate_pct": 78.9,
       "first_try_win_rate_pct": 0,
@@ -324,11 +303,11 @@
       "median_attempts_per_user": 1,
       "max_attempts_per_user": 5,
       "designed_moves": 18,
-      "avg_moves_used_win": 14.31,
+      "avg_moves_used_win": 14.3,
       "avg_moves_used_fail": 18,
       "avg_objectives_remaining_fail": 4.46,
-      "avg_time_in_level_sec": 135.29,
-      "avg_pu_total_per_attempt": 11.18,
+      "avg_time_in_level_sec": 135.51,
+      "avg_pu_total_per_attempt": 11.17,
       "avg_tpp_deviation_final": 0.198,
       "booster_use_rate_pct": 0,
       "is_boss_share_pct": 0
