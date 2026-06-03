@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>M3 — Power-up Usage & Damage (VN 2026-05-25 → 2026-05-29 · 5 days)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root { --slate:#1F2937; --cyan:#0EA5E9; --amber:#F59E0B; --pass:#10B981; --kill:#DC2626;
+    --pass-bg:#D1FAE5; --pass-fg:#065F46; --warn-bg:#FEF3C7; --warn-fg:#92400E; --kill-bg:#FEE2E2; --kill-fg:#991B1B;
+    --gray-50:#F9FAFB; --gray-200:#E5E7EB; --gray-500:#6B7280; --bg:#F3F4F6; --card:#FFFFFF;
+    --rocket:#2563EB; --plane:#10B981; --bomb:#DC2626; --rainbow:#7C3AED; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Inter',-apple-system,system-ui,Arial,sans-serif; background:var(--bg); color:#111; font-size:14px; line-height:1.55; }
+  header { background:linear-gradient(135deg,#1F2937 0%,#0F172A 100%); color:#fff; padding:32px 32px; }
+  header .inner { max-width:1320px; margin:0 auto; }
+  header .eyebrow { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:#94A3B8; }
+  header h1 { font-size:26px; margin:4px 0 6px; font-weight:800; }
+  header .sub { font-size:13px; color:#cbd5e1; max-width:980px; }
+  header .badges { margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.16); padding:5px 11px; border-radius:8px; font-size:11px; color:#e2e8f0; }
+  .chip b { color:#fff; }
+  main { max-width:1320px; margin:0 auto; padding:24px 32px 80px; }
+  section { margin:22px 0; }
+  section h2 { font-size:18px; margin:0 0 4px; color:var(--slate); border-left:4px solid var(--cyan); padding-left:10px; }
+  section .lede { color:var(--gray-500); font-size:12px; margin-bottom:14px; max-width:980px; }
+
+  .tile-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; }
+  .tile { background:var(--card); border-radius:8px; padding:14px 16px; box-shadow:0 1px 2px rgba(0,0,0,0.05); border-top:4px solid var(--cyan); }
+  .tile.bomb    { border-top-color:var(--bomb); }
+  .tile.rocket  { border-top-color:var(--rocket); }
+  .tile.plane   { border-top-color:var(--plane); }
+  .tile.rainbow { border-top-color:var(--rainbow); }
+  .tile .label { font-size:11px; color:var(--gray-500); font-weight:700; text-transform:uppercase; letter-spacing:0.4px; }
+  .tile .v { font-size:24px; font-weight:800; color:var(--slate); margin:4px 0 2px; }
+  .tile .sub { font-size:11px; color:var(--gray-500); }
+
+  table.matrix { width:100%; border-collapse:collapse; background:var(--card); border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.06); font-size:12px; }
+  .matrix th, .matrix td { padding:8px 10px; text-align:left; border-bottom:1px solid var(--gray-200); }
+  .matrix th { background:var(--slate); color:#fff; font-weight:700; font-size:10.5px; text-transform:uppercase; letter-spacing:0.4px; position:sticky; top:0; cursor:pointer; user-select:none; }
+  .matrix th:hover { background:#374151; }
+  .matrix th.num { text-align:right; }
+  .matrix td.num { text-align:right; font-variant-numeric:tabular-nums; font-family:'SF Mono',Monaco,monospace; }
+  .matrix tr:hover { background:#F9FAFB; }
+  .pu-cell { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10.5px; font-weight:700; color:#fff; }
+
+  .chart-card { background:var(--card); border-radius:10px; padding:14px 18px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .chart-card h3 { font-size:13px; margin:0 0 4px; color:var(--slate); }
+  .chart-card .meta { font-size:11px; color:var(--gray-500); margin-bottom:8px; }
+  .chart-canvas-wrap { position:relative; height:300px; width:100%; }
+  .chart-canvas-wrap.tall { height:380px; }
+  .chart-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(440px,1fr)); gap:14px; }
+
+  /* Combo heatmap */
+  .heatmap { background:var(--card); border-radius:10px; padding:14px 18px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .heatmap table { border-collapse:collapse; font-size:12px; }
+  .heatmap th, .heatmap td { padding:9px 14px; text-align:center; border:1px solid #FFFFFF; font-variant-numeric:tabular-nums; }
+  .heatmap th { background:var(--slate); color:#fff; font-weight:700; font-size:10.5px; text-transform:uppercase; }
+  .heatmap td.row-label { background:var(--slate); color:#fff; font-weight:700; text-align:left; }
+
+  .footnote { font-size:11px; color:var(--gray-500); margin-top:14px; padding:10px 14px; background:#FFFBEB; border-left:3px solid var(--amber); border-radius:4px; max-width:900px; }
+  .table-scroll { max-height:560px; overflow-y:auto; }
+</style></head>
+<body>
+<header><div class="inner">
+  <div class="eyebrow">Power-up usage &amp; damage · 5-day production window</div>
+  <h1>How power-ups are used and how much they destroy</h1>
+  <div class="sub">Per-PU-type creation, activation, combo participation, and inferred damage (cells &amp; blockers cleared per activation). Damage attribution via OLS regression on per-attempt cells cleared.</div>
+  <div class="badges">
+    <span class="chip">📅 <b>VN 2026-05-25 → 2026-05-29 · 5 days</b></span>
+    <span class="chip">⏱ <b>120h</b></span>
+    <span class="chip">📊 <b>3,637,526</b> events kept</span>
+    <span class="chip">🚀 <b>1,377,728</b> PUs created</span>
+    <span class="chip">✨ <b>1,673,913</b> activations</span>
+    <span class="chip">💥 <b>98,697</b> combos</span>
+    <span class="chip">🎯 <b>87,402</b> level attempts</span>
+    <span class="chip">🏭 production-only (Live-*)</span>
+  </div>
+</div></header>
+
+<main>
+
+<section>
+  <h2>Headline</h2>
+  <div class="lede">Snapshot tiles for the 5-day window. Activation-rate &gt; 100% means PUs detonate multiple times via cascading effects.</div>
+  <div class="tile-grid">
+    <div class="tile">
+      <div class="label">Total activations</div>
+      <div class="v">1,673,913</div>
+      <div class="sub">vs 1,377,728 created · ratio 121.5%</div>
+    </div>
+    <div class="tile bomb">
+      <div class="label">Most destructive (cells/activation)</div>
+      <div class="v">💣 Bomb</div>
+      <div class="sub">β = 11.05 cells/PU (OLS)</div>
+    </div>
+    <div class="tile rocket">
+      <div class="label">Most-activated type</div>
+      <div class="v">🚀 Rocket</div>
+      <div class="sub">849,478 activations · 50.7% of total</div>
+    </div>
+    <div class="tile">
+      <div class="label">Combo rate</div>
+      <div class="v">5.9%</div>
+      <div class="sub">combos / activations · combo pairs both fire as one</div>
+    </div>
+    <div class="tile">
+      <div class="label">Regression fit (R²)</div>
+      <div class="v">0.782</div>
+      <div class="sub">PU counts explain this much of cellsCleared variance</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Per-PU-type matrix — frequency, combo, and damage</h2>
+  <div class="lede">
+    Created vs activated counts (activated &gt; created means cascade re-triggers). Two damage estimates side-by-side:
+    <b>simple ratio</b> = avg cells cleared in attempts WITH this PU − avg WITHOUT (over-attributes since users who use one PU type often use others);
+    <b>OLS β</b> = regression coefficient = cells contributed per marginal PU of this type, controlling for other PU types' usage.
+  </div>
+  <table class="matrix" id="type-table"><thead><tr>
+    <th>PU type</th>
+    <th class="num">Created</th>
+    <th class="num">Activated</th>
+    <th class="num">Activation rate</th>
+    <th class="num">Combo participation</th>
+    <th class="num">Simple ratio · cells</th>
+    <th class="num">OLS β · cells/PU</th>
+    <th class="num">OLS β · blockers/PU</th>
+  </tr></thead><tbody>
+    <tr>
+      <td><span class="pu-cell" style="background:#2563EB">🚀 Rocket</span></td>
+      <td class="num">570,531</td>
+      <td class="num">849,478</td>
+      <td class="num">148.9%</td>
+      <td class="num">7.1%</td>
+      <td class="num">+105.56</td>
+      <td class="num"><b>9.43</b></td>
+      <td class="num">—</td>
+    </tr>
+    <tr>
+      <td><span class="pu-cell" style="background:#10B981">✈️ Plane</span></td>
+      <td class="num">430,197</td>
+      <td class="num">452,667</td>
+      <td class="num">105.2%</td>
+      <td class="num">10.3%</td>
+      <td class="num">+83.21</td>
+      <td class="num"><b>9.15</b></td>
+      <td class="num">—</td>
+    </tr>
+    <tr>
+      <td><span class="pu-cell" style="background:#DC2626">💣 Bomb</span></td>
+      <td class="num">280,715</td>
+      <td class="num">362,215</td>
+      <td class="num">129.0%</td>
+      <td class="num">10.7%</td>
+      <td class="num">+63.40</td>
+      <td class="num"><b>11.05</b></td>
+      <td class="num">—</td>
+    </tr>
+    <tr>
+      <td><span class="pu-cell" style="background:#7C3AED">🌈 Rainbow</span></td>
+      <td class="num">96,285</td>
+      <td class="num">9,553</td>
+      <td class="num">9.9%</td>
+      <td class="num">263.9%</td>
+      <td class="num">+42.78</td>
+      <td class="num"><b>9.87</b></td>
+      <td class="num">—</td>
+    </tr>
+  </tbody></table>
+  <div class="chart-row" style="margin-top:14px;">
+    <div class="chart-card"><h3>Created vs Activated count, per PU type</h3><div class="chart-canvas-wrap"><canvas id="ch-counts"></canvas></div></div>
+    <div class="chart-card"><h3>Damage attribution: simple ratio vs OLS β (cells/PU)</h3><div class="chart-canvas-wrap"><canvas id="ch-damage"></canvas></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Source pattern → PU type (board grammar)</h2>
+  <div class="lede">Which match shape produces which PU? Rows = source pattern observed in <code>pu_created.sourcePattern</code>; columns = puType. Validates designer intent (e.g., line4 → rocket, square → plane).</div>
+  <div class="heatmap"><table><thead><tr><th>Source pattern</th><th style="background:#2563EB">🚀 Rocket</th><th style="background:#10B981">✈️ Plane</th><th style="background:#DC2626">💣 Bomb</th><th style="background:#7C3AED">🌈 Rainbow</th><th>Row total</th></tr></thead><tbody>
+    <tr><td class="row-label">L</td><td style="background:#2563EB14;color:#111;font-weight:400;">0</td><td style="background:#10B98114;color:#111;font-weight:400;">0</td><td style="background:#DC2626d9;color:#fff;font-weight:700;">68,354<br><small>100%</small></td><td style="background:#7C3AED14;color:#111;font-weight:400;">0</td><td><b>68,354</b></td></tr><tr><td class="row-label">T</td><td style="background:#2563EB14;color:#111;font-weight:400;">0</td><td style="background:#10B98114;color:#111;font-weight:400;">0</td><td style="background:#DC2626d9;color:#fff;font-weight:700;">212,361<br><small>100%</small></td><td style="background:#7C3AED14;color:#111;font-weight:400;">0</td><td><b>212,361</b></td></tr><tr><td class="row-label">line4</td><td style="background:#2563EBd9;color:#fff;font-weight:700;">570,531<br><small>100%</small></td><td style="background:#10B98114;color:#111;font-weight:400;">0</td><td style="background:#DC262614;color:#111;font-weight:400;">0</td><td style="background:#7C3AED14;color:#111;font-weight:400;">0</td><td><b>570,531</b></td></tr><tr><td class="row-label">line5</td><td style="background:#2563EB14;color:#111;font-weight:400;">0</td><td style="background:#10B98114;color:#111;font-weight:400;">0</td><td style="background:#DC262614;color:#111;font-weight:400;">0</td><td style="background:#7C3AEDd9;color:#fff;font-weight:700;">96,285<br><small>100%</small></td><td><b>96,285</b></td></tr><tr><td class="row-label">square</td><td style="background:#2563EB14;color:#111;font-weight:400;">0</td><td style="background:#10B981d9;color:#fff;font-weight:700;">430,197<br><small>100%</small></td><td style="background:#DC262614;color:#111;font-weight:400;">0</td><td style="background:#7C3AED14;color:#111;font-weight:400;">0</td><td><b>430,197</b></td></tr>
+  </tbody></table></div>
+</section>
+
+<section>
+  <h2>Combo PERFORMANCE — damage per combo activation</h2>
+  <div class="lede">
+    Same dual-method approach as the per-PU damage table: <b>simple ratio</b> = avg cells cleared in attempts WITH ≥1 of this combo minus avg WITHOUT (over-attributes);
+    <b>OLS β</b> = the <i>additional</i> cells contributed per marginal combo of this type, controlling for individual PU counts AND all other combo counts.
+    Sorted by OLS β descending.
+    <b>Watch for negative β values</b> — they indicate the combo doesn't add cells over and above what its constituent PUs would clear individually.
+  </div>
+  <div class="chart-card" style="margin-bottom:14px;">
+    <h3>Combo damage attribution: simple ratio vs OLS β</h3>
+    <div class="meta">10 combos sorted by OLS β descending. Negative β = combo is no better than the constituent pieces solo.</div>
+    <div class="chart-canvas-wrap tall"><canvas id="ch-combo-perf"></canvas></div>
+  </div>
+  <table class="matrix" id="combo-perf-table"><thead><tr>
+    <th>Combo</th>
+    <th class="num">Total fired</th>
+    <th class="num">Attempts with</th>
+    <th class="num">Avg cells (with)</th>
+    <th class="num">Avg cells (without)</th>
+    <th class="num">Simple Δ</th>
+    <th class="num">OLS β (cells/combo)</th>
+  </tr></thead><tbody>
+    <tr>
+      <td><span class="pu-cell" style="background:#2563EB">🚀 Rocket</span> + <span class="pu-cell" style="background:#2563EB">🚀 Rocket</span></td>
+      <td class="num">11,394</td>
+      <td class="num">10,211</td>
+      <td class="num">224.81</td>
+      <td class="num">191.30</td>
+      <td class="num">+33.51</td>
+      <td class="num"><b style="color:#DC2626">-0.81</b></td>
+    </tr>
+    <tr>
+      <td><span class="pu-cell" style="background:#10B981">✈️ Plane</span> + <span class="pu-cell" style="background:#2563EB">🚀 Rocket</span></td>
+      <td class="num">18,481</td>
+      <td class="num">15,752</td>
+      <td class="num">223.29</td>
+      <td class="num">189.05</td>
+      <td class="num">+34.24</td>
+      <td class="num"><b style="color:#DC2626">-1.08</b></td>
+    </tr>
+    <tr>
+      <td><span class="pu-cell" style="background:#DC2626">💣 Bomb</span> + <span class="pu-cell" style="background:#DC2626">💣 Bomb</span></td>
+      <td class="num">3,242</td>
+      <td class="num">3,149</td>
+      <td class="num">239.52</td>
+      <td class="num">193.56</td>
+      <td class="num">+45.96</td>
+      <td class="num"><b style="color:#DC2626">-1.71</b></td>
+    </tr>
+    <tr>
+      <td><span class="pu-cell" style="background:#DC2626">💣 Bomb</span> + <span class="pu-cell" style="background:#10B981">✈️ Plane</span></td>
+      <td class="num">10,471</td>
+      <td class="num">9,595</td>
+      <td class="num">226.52</td>
+      <td class="num">191.36</td>
+      <td class="num">+35.16</td>
+      <td class="num"><b style="color:#DC2626">-2.17</b></td>
+    </tr>
+    <tr>
+      <td><span class="pu-cell" style="background:#10B981">✈️ Plane</span> + <span class="pu-cell" style="background:#10B981">✈️ Plane</span></td>
+      <td class="num">7,710</td>
+      <td class="num">7,193</td>
+      <td class="num">218.06</td>
+      <td class="num">193.17</td>
+      <td class="num">+24.89</td>
+      <td class="num"><b style="color:#DC2626">-2.63</b></td>
+    </tr>
+    <tr>
+      <td><span class="pu-cell" style="background:#DC2626">💣 Bomb</span> + <span class="pu-cell" style="background:#2563EB">🚀 Rocket</span></td>
+      <td class="num">16,503</td>
+      <td class="num">14,522</td>
+      <td class="num">228.57</td>
+      <td class="num">188.57</td>
+      <td class="num">+40.00</td>
+      <td class="num"><b style="color:#DC2626">-3.01</b></td>
+    </tr>
+    <tr>
+      <td><span class="pu-cell" style="background:#7C3AED">🌈 Rainbow</span> + <span class="pu-cell" style="background:#2563EB">🚀 Rocket</span></td>
+      <td class="num">9,710</td>
+      <td class="num">9,187</td>
+      <td class="num">223.32</td>
+      <td class="num">191.92</td>
+      <td class="num">+31.41</td>
+      <td class="num"><b style="color:#DC2626">-4.38</b></td>
+    </tr>
+    <tr>
+      <td><span class="pu-cell" style="background:#10B981">✈️ Plane</span> + <span class="pu-cell" style="background:#7C3AED">🌈 Rainbow</span></td>
+      <td class="num">6,938</td>
+      <td class="num">6,640</td>
+      <td class="num">213.56</td>
+      <td class="num">193.71</td>
+      <td class="num">+19.86</td>
+      <td class="num"><b style="color:#DC2626">-5.51</b></td>
+    </tr>
+    <tr>
+      <td><span class="pu-cell" style="background:#DC2626">💣 Bomb</span> + <span class="pu-cell" style="background:#7C3AED">🌈 Rainbow</span></td>
+      <td class="num">4,583</td>
+      <td class="num">4,498</td>
+      <td class="num">220.03</td>
+      <td class="num">193.87</td>
+      <td class="num">+26.16</td>
+      <td class="num"><b style="color:#DC2626">-7.41</b></td>
+    </tr>
+    <tr>
+      <td><span class="pu-cell" style="background:#7C3AED">🌈 Rainbow</span> + <span class="pu-cell" style="background:#7C3AED">🌈 Rainbow</span></td>
+      <td class="num">1,553</td>
+      <td class="num">1,540</td>
+      <td class="num">172.71</td>
+      <td class="num">195.62</td>
+      <td class="num">-22.91</td>
+      <td class="num"><b style="color:#DC2626">-19.61</b></td>
+    </tr>
+  </tbody></table>
+  <div class="footnote" style="margin-top:14px;">
+    <b>Why is the OLS β negative for most combos?</b>
+    The cells-cleared regression includes BOTH individual PU counts AND combo counts as predictors. The <code>pu_stats</code> aggregate appears to count combo participants in the individual counts (so a rocket+bomb combo adds 1 to <code>pu_stats.rocket</code> and 1 to <code>pu_stats.bomb</code>).
+    The combo β then represents the <i>additional</i> cells beyond what the constituent solo activations contribute. A near-zero or negative combo β means: <b>combos clear roughly the same number of cells as the same pieces would individually</b> — they're a visual UX moment, not a damage multiplier.
+    Rainbow+rainbow's exceptionally negative β (~-20) reflects that it wipes one color from the board in a single event but then the attempt has no remaining play — net cells cleared is lower than attempts without the wipe.
+    Extended-model R² = 0.7847 (vs basic-model R² = 0.7822) — adding combo predictors barely improves fit, which itself supports the "combos = solo equivalent" interpretation.
+  </div>
+</section>
+
+<section>
+  <h2>Combo FREQUENCY matrix (puType1 × puType2)</h2>
+  <div class="lede">How often each pair of PU types is combined. Symmetric (rocket+bomb = bomb+rocket counted once). Diagonal entries = same-type combos.</div>
+  <div class="heatmap"><table><thead><tr><th></th><th style="background:#2563EB">🚀 Rocket</th><th style="background:#10B981">✈️ Plane</th><th style="background:#DC2626">💣 Bomb</th><th style="background:#7C3AED">🌈 Rainbow</th></tr></thead><tbody>
+    <tr><td class="row-label" style="background:#2563EB">🚀 Rocket</td><td style="background:rgba(220,38,38,0.73);color:#fff;font-weight:700;">12,143</td><td style="background:rgba(220,38,38,0.08);color:#111;font-weight:400;">0</td><td style="background:rgba(220,38,38,0.08);color:#111;font-weight:400;">0</td><td style="background:rgba(220,38,38,0.08);color:#111;font-weight:400;">0</td></tr><tr><td class="row-label" style="background:#10B981">✈️ Plane</td><td style="background:rgba(220,38,38,0.73);color:#fff;font-weight:700;">19,657</td><td style="background:rgba(220,38,38,0.35);color:#111;font-weight:700;">8,225</td><td style="background:rgba(220,38,38,0.08);color:#111;font-weight:400;">0</td><td style="background:rgba(220,38,38,0.33);color:#111;font-weight:700;">7,532</td></tr><tr><td class="row-label" style="background:#DC2626">💣 Bomb</td><td style="background:rgba(220,38,38,0.73);color:#fff;font-weight:700;">18,039</td><td style="background:rgba(220,38,38,0.49);color:#fff;font-weight:700;">11,404</td><td style="background:rgba(220,38,38,0.22);color:#111;font-weight:400;">4,015</td><td style="background:rgba(220,38,38,0.27);color:#111;font-weight:400;">5,248</td></tr><tr><td class="row-label" style="background:#7C3AED">🌈 Rainbow</td><td style="background:rgba(220,38,38,0.73);color:#fff;font-weight:700;">10,719</td><td style="background:rgba(220,38,38,0.08);color:#111;font-weight:400;">0</td><td style="background:rgba(220,38,38,0.08);color:#111;font-weight:400;">0</td><td style="background:rgba(220,38,38,0.18);color:#111;font-weight:400;">1,715</td></tr>
+  </tbody></table></div>
+</section>
+
+<section>
+  <h2>Per-level breakdown</h2>
+  <div class="lede">For each level, total PUs created + activated and avg cells/blockers cleared per attempt. Levels with high avg cells but low PU count = match-heavy designs; levels with high PU count = PU-rich designs. Click any header to sort.</div>
+  <div class="table-scroll"><table class="matrix" id="level-table"><thead><tr>
+    <th data-k="level_id">Level</th>
+    <th class="num" data-k="attempts">Attempts</th>
+    <th class="num" data-k="total_created">PUs created</th>
+    <th class="num" data-k="total_activated">PUs activated</th>
+    <th class="num">Activated by type</th>
+    <th class="num" data-k="avg_cells_per_attempt">Avg cells/attempt</th>
+    <th class="num" data-k="avg_blockers_per_attempt">Avg blockers/attempt</th>
+  </tr></thead><tbody id="level-tbody"></tbody></table></div>
+</section>
+
+<section>
+  <h2>Activation timing — moveNum distribution per PU type</h2>
+  <div class="lede">When in a level does each PU type fire? Binned by 5-move windows. Stacked area chart — early bins = quick-trigger, late bins = save-for-later behavior.</div>
+  <div class="chart-card"><div class="chart-canvas-wrap tall"><canvas id="ch-movenum"></canvas></div></div>
+</section>
+
+<section>
+  <div class="footnote">
+    <b>Methodology</b>:
+    Window = 120 hours UTC. Production-only filter applied (build_name starting with "Live-").
+    Damage inference uses OLS regression on <code>87,402</code> level attempts:
+    <code>cellsCleared = β_rocket·#rockets + β_plane·#planes + β_bomb·#bombs + β_rainbow·#rainbows + intercept</code>.
+    The intercept (53.8 cells) represents an attempt's baseline clearance from regular match-3 with zero PUs.
+    R² = 0.782 — PU counts explain that share of variance in cells cleared.
+    Simple-ratio damage = avg cells in attempts WITH a PU type minus avg WITHOUT — it over-attributes credit because users who use one type often use others; the OLS β is the credibly causal estimate.
+    Per-activation damage is not directly logged (no <code>cellsCleared</code> field on <code>pu_activated</code>); all damage figures are inferred from per-attempt aggregates.
+  </div>
+</section>
+
+</main>
+
+<script>
+const DATA = {"per_type":[{"puType":"rocket","created":570531,"activated":849478,"activation_rate_pct":148.9,"combo_count_involving_type":60558,"combo_participation_pct":7.1,"simple_ratio_cells":{"with_mean":196.6,"without_mean":91.04,"diff":105.56,"n_with":86257,"n_without":1145},"simple_ratio_blockers":{"with_mean":0,"without_mean":0,"diff":0,"n_with":86257,"n_without":1145}},{"puType":"plane","created":430197,"activated":452667,"activation_rate_pct":105.2,"combo_count_involving_type":46818,"combo_participation_pct":10.3,"simple_ratio_cells":{"with_mean":197.94,"without_mean":114.73,"diff":83.21,"n_with":84539,"n_without":2863},"simple_ratio_blockers":{"with_mean":0,"without_mean":0,"diff":0,"n_with":84539,"n_without":2863}},{"puType":"bomb","created":280715,"activated":362215,"activation_rate_pct":129,"combo_count_involving_type":38706,"combo_participation_pct":10.7,"simple_ratio_cells":{"with_mean":202.01,"without_mean":138.61,"diff":63.4,"n_with":78035,"n_without":9367},"simple_ratio_blockers":{"with_mean":0,"without_mean":0,"diff":0,"n_with":78035,"n_without":9367}},{"puType":"rainbow","created":96285,"activated":9553,"activation_rate_pct":9.9,"combo_count_involving_type":25214,"combo_participation_pct":263.9,"simple_ratio_cells":{"with_mean":212.27,"without_mean":169.49,"diff":42.78,"n_with":52561,"n_without":34841},"simple_ratio_blockers":{"with_mean":0,"without_mean":0,"diff":0,"n_with":52561,"n_without":34841}}],"per_level":[{"level_id":1,"created":{"rocket":7295,"plane":6300,"bomb":3318,"rainbow":963},"activated":{"rocket":15430,"plane":5027,"bomb":6739,"rainbow":42},"attempts":2298,"cellsClearedTotal":279095,"blockersHitTotal":0,"avg_cells_per_attempt":121.5,"avg_blockers_per_attempt":0,"total_created":17876,"total_activated":27238},{"level_id":2,"created":{"rocket":11577,"plane":8057,"bomb":5517,"rainbow":2289},"activated":{"rocket":19622,"plane":7168,"bomb":8728,"rainbow":200},"attempts":2296,"cellsClearedTotal":380149,"blockersHitTotal":0,"avg_cells_per_attempt":165.6,"avg_blockers_per_attempt":0,"total_created":27440,"total_activated":35718},{"level_id":3,"created":{"rocket":6890,"plane":5525,"bomb":3694,"rainbow":1547},"activated":{"rocket":11860,"plane":4311,"bomb":5666,"rainbow":66},"attempts":2130,"cellsClearedTotal":262971,"blockersHitTotal":0,"avg_cells_per_attempt":123.5,"avg_blockers_per_attempt":0,"total_created":17656,"total_activated":21903},{"level_id":4,"created":{"rocket":11919,"plane":8985,"bomb":4470,"rainbow":1625},"activated":{"rocket":17078,"plane":7942,"bomb":5876,"rainbow":96},"attempts":1988,"cellsClearedTotal":368471,"blockersHitTotal":0,"avg_cells_per_attempt":185.3,"avg_blockers_per_attempt":0,"total_created":26999,"total_activated":30992},{"level_id":5,"created":{"rocket":8949,"plane":6770,"bomb":5384,"rainbow":1403},"activated":{"rocket":12869,"plane":5939,"bomb":7111,"rainbow":85},"attempts":1920,"cellsClearedTotal":297219,"blockersHitTotal":0,"avg_cells_per_attempt":154.8,"avg_blockers_per_attempt":0,"total_created":22506,"total_activated":26004},{"level_id":6,"created":{"rocket":9821,"plane":6823,"bomb":4230,"rainbow":2760},"activated":{"rocket":17183,"plane":9048,"bomb":7941,"rainbow":279},"attempts":1724,"cellsClearedTotal":309204,"blockersHitTotal":0,"avg_cells_per_attempt":179.4,"avg_blockers_per_attempt":0,"total_created":23634,"total_activated":34451},{"level_id":7,"created":{"rocket":15536,"plane":8627,"bomb":4995,"rainbow":1648},"activated":{"rocket":21195,"plane":8994,"bomb":6687,"rainbow":163},"attempts":1730,"cellsClearedTotal":391442,"blockersHitTotal":0,"avg_cells_per_attempt":226.3,"avg_blockers_per_attempt":0,"total_created":30806,"total_activated":37039},{"level_id":8,"created":{"rocket":4403,"plane":3743,"bomb":2315,"rainbow":2253},"activated":{"rocket":10205,"plane":3850,"bomb":4923,"rainbow":127},"attempts":1528,"cellsClearedTotal":175146,"blockersHitTotal":0,"avg_cells_per_attempt":114.6,"avg_blockers_per_attempt":0,"total_created":12714,"total_activated":19105},{"level_id":9,"created":{"rocket":6244,"plane":5176,"bomb":2670,"rainbow":1102},"activated":{"rocket":12694,"plane":5938,"bomb":5168,"rainbow":135},"attempts":1367,"cellsClearedTotal":196392,"blockersHitTotal":0,"avg_cells_per_attempt":143.7,"avg_blockers_per_attempt":0,"total_created":15192,"total_activated":23935},{"level_id":10,"created":{"rocket":6288,"plane":5407,"bomb":2476,"rainbow":1917},"activated":{"rocket":9239,"plane":5394,"bomb":3251,"rainbow":83},"attempts":1532,"cellsClearedTotal":222081,"blockersHitTotal":0,"avg_cells_per_attempt":145,"avg_blockers_per_attempt":0,"total_created":16088,"total_activated":17967},{"level_id":11,"created":{"rocket":5655,"plane":3827,"bomb":2928,"rainbow":771},"activated":{"rocket":10037,"plane":2991,"bomb":4462,"rainbow":42},"attempts":1259,"cellsClearedTotal":189271,"blockersHitTotal":0,"avg_cells_per_attempt":150.3,"avg_blockers_per_attempt":0,"total_created":13181,"total_activated":17532},{"level_id":12,"created":{"rocket":12347,"plane":10207,"bomb":6442,"rainbow":1770},"activated":{"rocket":17246,"plane":10513,"bomb":7220,"rainbow":178},"attempts":1826,"cellsClearedTotal":421736,"blockersHitTotal":0,"avg_cells_per_attempt":231,"avg_blockers_per_attempt":0,"total_created":30766,"total_activated":35157},{"level_id":13,"created":{"rocket":6870,"plane":5166,"bomb":3215,"rainbow":1017},"activated":{"rocket":9792,"plane":5287,"bomb":3745,"rainbow":108},"attempts":1417,"cellsClearedTotal":241226,"blockersHitTotal":0,"avg_cells_per_attempt":170.2,"avg_blockers_per_attempt":0,"total_created":16268,"total_activated":18932},{"level_id":14,"created":{"rocket":6388,"plane":5233,"bomb":3469,"rainbow":807},"activated":{"rocket":10091,"plane":5174,"bomb":4404,"rainbow":88},"attempts":1340,"cellsClearedTotal":209499,"blockersHitTotal":0,"avg_cells_per_attempt":156.3,"avg_blockers_per_attempt":0,"total_created":15897,"total_activated":19757},{"level_id":15,"created":{"rocket":3206,"plane":2225,"bomb":3207,"rainbow":420},"activated":{"rocket":8282,"plane":1578,"bomb":5022,"rainbow":34},"attempts":1490,"cellsClearedTotal":125963,"blockersHitTotal":0,"avg_cells_per_attempt":84.5,"avg_blockers_per_attempt":0,"total_created":9058,"total_activated":14916},{"level_id":16,"created":{"rocket":6425,"plane":4429,"bomb":3740,"rainbow":951},"activated":{"rocket":11687,"plane":4486,"bomb":5328,"rainbow":96},"attempts":1080,"cellsClearedTotal":204994,"blockersHitTotal":0,"avg_cells_per_attempt":189.8,"avg_blockers_per_attempt":0,"total_created":15545,"total_activated":21597},{"level_id":17,"created":{"rocket":6152,"plane":3866,"bomb":3535,"rainbow":768},"activated":{"rocket":13275,"plane":3752,"bomb":4860,"rainbow":83},"attempts":1105,"cellsClearedTotal":182135,"blockersHitTotal":0,"avg_cells_per_attempt":164.8,"avg_blockers_per_attempt":0,"total_created":14321,"total_activated":21970},{"level_id":18,"created":{"rocket":10151,"plane":7445,"bomb":5486,"rainbow":1294},"activated":{"rocket":15462,"plane":7820,"bomb":7185,"rainbow":151},"attempts":1561,"cellsClearedTotal":315210,"blockersHitTotal":0,"avg_cells_per_attempt":201.9,"avg_blockers_per_attempt":0,"total_created":24376,"total_activated":30618},{"level_id":19,"created":{"rocket":14216,"plane":10676,"bomb":7111,"rainbow":2276},"activated":{"rocket":19717,"plane":11675,"bomb":8084,"rainbow":255},"attempts":2089,"cellsClearedTotal":456671,"blockersHitTotal":0,"avg_cells_per_attempt":218.6,"avg_blockers_per_attempt":0,"total_created":34279,"total_activated":39731},{"level_id":20,"created":{"rocket":9175,"plane":6278,"bomb":4430,"rainbow":1326},"activated":{"rocket":11813,"plane":6042,"bomb":4918,"rainbow":117},"attempts":1670,"cellsClearedTotal":283203,"blockersHitTotal":0,"avg_cells_per_attempt":169.6,"avg_blockers_per_attempt":0,"total_created":21209,"total_activated":22890},{"level_id":21,"created":{"rocket":3183,"plane":2411,"bomb":1473,"rainbow":416},"activated":{"rocket":5277,"plane":2047,"bomb":2156,"rainbow":36},"attempts":971,"cellsClearedTotal":112726,"blockersHitTotal":0,"avg_cells_per_attempt":116.1,"avg_blockers_per_attempt":0,"total_created":7483,"total_activated":9516},{"level_id":22,"created":{"rocket":6382,"plane":5167,"bomb":2762,"rainbow":731},"activated":{"rocket":8699,"plane":4878,"bomb":3343,"rainbow":81},"attempts":1297,"cellsClearedTotal":231252,"blockersHitTotal":0,"avg_cells_per_attempt":178.3,"avg_blockers_per_attempt":0,"total_created":15042,"total_activated":17001},{"level_id":23,"created":{"rocket":11407,"plane":8796,"bomb":5640,"rainbow":1786},"activated":{"rocket":16816,"plane":9797,"bomb":6821,"rainbow":188},"attempts":1257,"cellsClearedTotal":353837,"blockersHitTotal":0,"avg_cells_per_attempt":281.5,"avg_blockers_per_attempt":0,"total_created":27629,"total_activated":33622},{"level_id":24,"created":{"rocket":9202,"plane":6811,"bomb":3872,"rainbow":1856},"activated":{"rocket":15787,"plane":9542,"bomb":6066,"rainbow":288},"attempts":1197,"cellsClearedTotal":293369,"blockersHitTotal":0,"avg_cells_per_attempt":245.1,"avg_blockers_per_attempt":0,"total_created":21741,"total_activated":31683},{"level_id":25,"created":{"rocket":5612,"plane":3915,"bomb":2811,"rainbow":844},"activated":{"rocket":7887,"plane":3612,"bomb":3624,"rainbow":64},"attempts":898,"cellsClearedTotal":174595,"blockersHitTotal":0,"avg_cells_per_attempt":194.4,"avg_blockers_per_attempt":0,"total_created":13182,"total_activated":15187},{"level_id":26,"created":{"rocket":6132,"plane":4809,"bomb":2493,"rainbow":799},"activated":{"rocket":6783,"plane":3773,"bomb":2465,"rainbow":40},"attempts":1028,"cellsClearedTotal":183445,"blockersHitTotal":0,"avg_cells_per_attempt":178.4,"avg_blockers_per_attempt":0,"total_created":14233,"total_activated":13061},{"level_id":27,"created":{"rocket":5385,"plane":3891,"bomb":2277,"rainbow":672},"activated":{"rocket":7302,"plane":3335,"bomb":2743,"rainbow":55},"attempts":1232,"cellsClearedTotal":167646,"blockersHitTotal":0,"avg_cells_per_attempt":136.1,"avg_blockers_per_attempt":0,"total_created":12225,"total_activated":13435},{"level_id":28,"created":{"rocket":7368,"plane":5645,"bomb":3061,"rainbow":1062},"activated":{"rocket":9893,"plane":5126,"bomb":3543,"rainbow":106},"attempts":1141,"cellsClearedTotal":250123,"blockersHitTotal":0,"avg_cells_per_attempt":219.2,"avg_blockers_per_attempt":0,"total_created":17136,"total_activated":18668},{"level_id":29,"created":{"rocket":7620,"plane":5805,"bomb":3566,"rainbow":936},"activated":{"rocket":8760,"plane":4662,"bomb":3164,"rainbow":68},"attempts":1223,"cellsClearedTotal":246988,"blockersHitTotal":0,"avg_cells_per_attempt":202,"avg_blockers_per_attempt":0,"total_created":17927,"total_activated":16654},{"level_id":30,"created":{"rocket":20177,"plane":14780,"bomb":10831,"rainbow":4198},"activated":{"rocket":27279,"plane":15653,"bomb":12342,"rainbow":337},"attempts":1943,"cellsClearedTotal":607683,"blockersHitTotal":0,"avg_cells_per_attempt":312.8,"avg_blockers_per_attempt":0,"total_created":49986,"total_activated":55611},{"level_id":31,"created":{"rocket":3216,"plane":1955,"bomb":1316,"rainbow":377},"activated":{"rocket":4996,"plane":1774,"bomb":1866,"rainbow":51},"attempts":803,"cellsClearedTotal":91498,"blockersHitTotal":0,"avg_cells_per_attempt":113.9,"avg_blockers_per_attempt":0,"total_created":6864,"total_activated":8687},{"level_id":32,"created":{"rocket":6264,"plane":4777,"bomb":2616,"rainbow":843},"activated":{"rocket":8945,"plane":4866,"bomb":3119,"rainbow":94},"attempts":1376,"cellsClearedTotal":203461,"blockersHitTotal":0,"avg_cells_per_attempt":147.9,"avg_blockers_per_attempt":0,"total_created":14500,"total_activated":17024},{"level_id":33,"created":{"rocket":5964,"plane":4536,"bomb":3028,"rainbow":816},"activated":{"rocket":9050,"plane":4835,"bomb":3623,"rainbow":113},"attempts":1021,"cellsClearedTotal":198636,"blockersHitTotal":0,"avg_cells_per_attempt":194.6,"avg_blockers_per_attempt":0,"total_created":14344,"total_activated":17621},{"level_id":34,"created":{"rocket":6334,"plane":4673,"bomb":2811,"rainbow":868},"activated":{"rocket":8998,"plane":4877,"bomb":3645,"rainbow":87},"attempts":1041,"cellsClearedTotal":204854,"blockersHitTotal":0,"avg_cells_per_attempt":196.8,"avg_blockers_per_attempt":0,"total_created":14686,"total_activated":17607},{"level_id":35,"created":{"rocket":7401,"plane":5357,"bomb":3586,"rainbow":1176},"activated":{"rocket":11582,"plane":6076,"bomb":4890,"rainbow":143},"attempts":935,"cellsClearedTotal":221519,"blockersHitTotal":0,"avg_cells_per_attempt":236.9,"avg_blockers_per_attempt":0,"total_created":17520,"total_activated":22691},{"level_id":36,"created":{"rocket":9680,"plane":7797,"bomb":4649,"rainbow":1543},"activated":{"rocket":12989,"plane":8129,"bomb":5198,"rainbow":143},"attempts":1698,"cellsClearedTotal":328927,"blockersHitTotal":0,"avg_cells_per_attempt":193.7,"avg_blockers_per_attempt":0,"total_created":23669,"total_activated":26459},{"level_id":37,"created":{"rocket":10006,"plane":7398,"bomb":5176,"rainbow":1673},"activated":{"rocket":15359,"plane":8524,"bomb":6575,"rainbow":194},"attempts":1142,"cellsClearedTotal":314142,"blockersHitTotal":0,"avg_cells_per_attempt":275.1,"avg_blockers_per_attempt":0,"total_created":24253,"total_activated":30652},{"level_id":38,"created":{"rocket":8687,"plane":7355,"bomb":3975,"rainbow":1287},"activated":{"rocket":13015,"plane":8827,"bomb":5276,"rainbow":195},"attempts":1364,"cellsClearedTotal":321449,"blockersHitTotal":0,"avg_cells_per_attempt":235.7,"avg_blockers_per_attempt":0,"total_created":21304,"total_activated":27313},{"level_id":39,"created":{"rocket":5661,"plane":4735,"bomb":2529,"rainbow":1884},"activated":{"rocket":9408,"plane":5792,"bomb":3374,"rainbow":244},"attempts":1098,"cellsClearedTotal":181080,"blockersHitTotal":0,"avg_cells_per_attempt":164.9,"avg_blockers_per_attempt":0,"total_created":14809,"total_activated":18818},{"level_id":40,"created":{"rocket":9297,"plane":6468,"bomb":3138,"rainbow":1138},"activated":{"rocket":9643,"plane":5764,"bomb":3256,"rainbow":58},"attempts":2247,"cellsClearedTotal":308282,"blockersHitTotal":0,"avg_cells_per_attempt":137.2,"avg_blockers_per_attempt":0,"total_created":20041,"total_activated":18721},{"level_id":41,"created":{"rocket":8974,"plane":8992,"bomb":5096,"rainbow":1753},"activated":{"rocket":15349,"plane":11285,"bomb":6736,"rainbow":209},"attempts":1091,"cellsClearedTotal":316184,"blockersHitTotal":0,"avg_cells_per_attempt":289.8,"avg_blockers_per_attempt":0,"total_created":24815,"total_activated":33579},{"level_id":42,"created":{"rocket":4772,"plane":4333,"bomb":2207,"rainbow":673},"activated":{"rocket":7770,"plane":4830,"bomb":2845,"rainbow":93},"attempts":862,"cellsClearedTotal":168835,"blockersHitTotal":0,"avg_cells_per_attempt":195.9,"avg_blockers_per_attempt":0,"total_created":11985,"total_activated":15538},{"level_id":43,"created":{"rocket":5861,"plane":4976,"bomb":2668,"rainbow":822},"activated":{"rocket":6504,"plane":4250,"bomb":2551,"rainbow":53},"attempts":1133,"cellsClearedTotal":207628,"blockersHitTotal":0,"avg_cells_per_attempt":183.3,"avg_blockers_per_attempt":0,"total_created":14327,"total_activated":13358},{"level_id":44,"created":{"rocket":5136,"plane":4418,"bomb":2854,"rainbow":802},"activated":{"rocket":10227,"plane":5341,"bomb":4668,"rainbow":144},"attempts":974,"cellsClearedTotal":180616,"blockersHitTotal":0,"avg_cells_per_attempt":185.4,"avg_blockers_per_attempt":0,"total_created":13210,"total_activated":20380},{"level_id":45,"created":{"rocket":5681,"plane":4114,"bomb":2891,"rainbow":1651},"activated":{"rocket":8837,"plane":5122,"bomb":3701,"rainbow":243},"attempts":1047,"cellsClearedTotal":193002,"blockersHitTotal":0,"avg_cells_per_attempt":184.3,"avg_blockers_per_attempt":0,"total_created":14337,"total_activated":17903},{"level_id":46,"created":{"rocket":11001,"plane":7857,"bomb":5236,"rainbow":1812},"activated":{"rocket":16434,"plane":9129,"bomb":6377,"rainbow":261},"attempts":1330,"cellsClearedTotal":312580,"blockersHitTotal":0,"avg_cells_per_attempt":235,"avg_blockers_per_attempt":0,"total_created":25906,"total_activated":32201},{"level_id":47,"created":{"rocket":3306,"plane":4063,"bomb":1551,"rainbow":422},"activated":{"rocket":4861,"plane":4124,"bomb":2031,"rainbow":48},"attempts":1182,"cellsClearedTotal":155978,"blockersHitTotal":0,"avg_cells_per_attempt":132,"avg_blockers_per_attempt":0,"total_created":9342,"total_activated":11064},{"level_id":48,"created":{"rocket":6310,"plane":4838,"bomb":2772,"rainbow":984},"activated":{"rocket":8316,"plane":5011,"bomb":3003,"rainbow":77},"attempts":1282,"cellsClearedTotal":194368,"blockersHitTotal":0,"avg_cells_per_attempt":151.6,"avg_blockers_per_attempt":0,"total_created":14904,"total_activated":16407},{"level_id":49,"created":{"rocket":5845,"plane":5584,"bomb":2333,"rainbow":758},"activated":{"rocket":7474,"plane":5233,"bomb":2760,"rainbow":59},"attempts":1156,"cellsClearedTotal":232187,"blockersHitTotal":0,"avg_cells_per_attempt":200.9,"avg_blockers_per_attempt":0,"total_created":14520,"total_activated":15526},{"level_id":50,"created":{"rocket":158488,"plane":115654,"bomb":78733,"rainbow":25611},"activated":{"rocket":217448,"plane":126627,"bomb":89385,"rainbow":2641},"attempts":19083,"cellsClearedTotal":4593373,"blockersHitTotal":0,"avg_cells_per_attempt":240.7,"avg_blockers_per_attempt":0,"total_created":378486,"total_activated":436101},{"level_id":"cr_1_0","created":{"rocket":8980,"plane":6845,"bomb":5689,"rainbow":2169},"activated":{"rocket":13819,"plane":7272,"bomb":9118,"rainbow":251},"attempts":0,"cellsClearedTotal":0,"blockersHitTotal":0,"avg_cells_per_attempt":null,"avg_blockers_per_attempt":null,"total_created":23683,"total_activated":30460},{"level_id":"cr_2_0","created":{"rocket":11874,"plane":9053,"bomb":7663,"rainbow":2766},"activated":{"rocket":22542,"plane":10965,"bomb":13231,"rainbow":280},"attempts":0,"cellsClearedTotal":0,"blockersHitTotal":0,"avg_cells_per_attempt":null,"avg_blockers_per_attempt":null,"total_created":31356,"total_activated":47018},{"level_id":"cr_3_0","created":{"rocket":9818,"plane":7624,"bomb":6780,"rainbow":2250},"activated":{"rocket":16652,"plane":8660,"bomb":11402,"rainbow":181},"attempts":0,"cellsClearedTotal":0,"blockersHitTotal":0,"avg_cells_per_attempt":null,"avg_blockers_per_attempt":null,"total_created":26472,"total_activated":36895}],"regression_cells_cleared":{"beta":{"rocket":9.431883051619478,"plane":9.154978869405728,"bomb":11.048639267632346,"rainbow":9.8658329695282,"intercept":53.76198634842155},"n":87402,"r_squared":0.7822,"y_mean":195.22,"y_std":74.37},"move_num_bins_by_type":{"rocket":{"0-4":75654,"5-9":198544,"15-19":204553,"20-24":139051,"10-14":216244,"25-29":15432},"plane":{"15-19":109013,"5-9":104549,"20-24":78218,"10-14":111172,"0-4":40330,"25-29":9385},"bomb":{"0-4":31824,"5-9":81395,"15-19":86769,"10-14":92359,"20-24":63059,"25-29":6809},"rainbow":{"10-14":2368,"5-9":2221,"15-19":2210,"20-24":1682,"0-4":875,"25-29":197}},"combo_performance":[{"combo":"rocket_rocket","puType1":"rocket","puType2":"rocket","total_combos":11394,"attempts_with":10211,"attempts_without":77191,"avg_cells_with":224.81,"avg_cells_without":191.3,"simple_ratio_diff":33.51,"ols_beta_cells":-0.81},{"combo":"plane_rocket","puType1":"plane","puType2":"rocket","total_combos":18481,"attempts_with":15752,"attempts_without":71650,"avg_cells_with":223.29,"avg_cells_without":189.05,"simple_ratio_diff":34.24,"ols_beta_cells":-1.08},{"combo":"bomb_bomb","puType1":"bomb","puType2":"bomb","total_combos":3242,"attempts_with":3149,"attempts_without":84253,"avg_cells_with":239.52,"avg_cells_without":193.56,"simple_ratio_diff":45.96,"ols_beta_cells":-1.71},{"combo":"bomb_plane","puType1":"bomb","puType2":"plane","total_combos":10471,"attempts_with":9595,"attempts_without":77807,"avg_cells_with":226.52,"avg_cells_without":191.36,"simple_ratio_diff":35.16,"ols_beta_cells":-2.17},{"combo":"plane_plane","puType1":"plane","puType2":"plane","total_combos":7710,"attempts_with":7193,"attempts_without":80209,"avg_cells_with":218.06,"avg_cells_without":193.17,"simple_ratio_diff":24.89,"ols_beta_cells":-2.63},{"combo":"bomb_rocket","puType1":"bomb","puType2":"rocket","total_combos":16503,"attempts_with":14522,"attempts_without":72880,"avg_cells_with":228.57,"avg_cells_without":188.57,"simple_ratio_diff":40,"ols_beta_cells":-3.01},{"combo":"rainbow_rocket","puType1":"rainbow","puType2":"rocket","total_combos":9710,"attempts_with":9187,"attempts_without":78215,"avg_cells_with":223.32,"avg_cells_without":191.92,"simple_ratio_diff":31.41,"ols_beta_cells":-4.38},{"combo":"plane_rainbow","puType1":"plane","puType2":"rainbow","total_combos":6938,"attempts_with":6640,"attempts_without":80762,"avg_cells_with":213.56,"avg_cells_without":193.71,"simple_ratio_diff":19.86,"ols_beta_cells":-5.51},{"combo":"bomb_rainbow","puType1":"bomb","puType2":"rainbow","total_combos":4583,"attempts_with":4498,"attempts_without":82904,"avg_cells_with":220.03,"avg_cells_without":193.87,"simple_ratio_diff":26.16,"ols_beta_cells":-7.41},{"combo":"rainbow_rainbow","puType1":"rainbow","puType2":"rainbow","total_combos":1553,"attempts_with":1540,"attempts_without":85862,"avg_cells_with":172.71,"avg_cells_without":195.62,"simple_ratio_diff":-22.91,"ols_beta_cells":-19.61}]};
+const PU_TYPES = ["rocket","plane","bomb","rainbow"];
+const PU_COLORS = {"rocket":"#2563EB","plane":"#10B981","bomb":"#DC2626","rainbow":"#7C3AED"};
+const PU_LABELS = {"rocket":"🚀 Rocket","plane":"✈️ Plane","bomb":"💣 Bomb","rainbow":"🌈 Rainbow"};
+
+// Created vs activated bar chart
+new Chart(document.getElementById('ch-counts'), {
+  type:'bar',
+  data:{ labels: PU_TYPES.map(t => PU_LABELS[t]),
+    datasets:[
+      { label:'Created',   data:DATA.per_type.map(t=>t.created),   backgroundColor:'#9CA3AF' },
+      { label:'Activated', data:DATA.per_type.map(t=>t.activated), backgroundColor: PU_TYPES.map(t=>PU_COLORS[t]) }
+    ]
+  },
+  options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'} }, scales:{ y:{ beginAtZero:true } } }
+});
+
+// Damage attribution (simple ratio vs OLS β)
+const simpleVals = DATA.per_type.map(t => t.simple_ratio_cells.diff || 0);
+const olsVals = DATA.per_type.map(t => DATA.regression_cells_cleared && DATA.regression_cells_cleared.beta ? DATA.regression_cells_cleared.beta[t.puType] : 0);
+new Chart(document.getElementById('ch-damage'), {
+  type:'bar',
+  data:{ labels: PU_TYPES.map(t => PU_LABELS[t]),
+    datasets:[
+      { label:'Simple ratio (over-attributes)', data:simpleVals, backgroundColor:'#9CA3AF' },
+      { label:'OLS β (per marginal PU)',        data:olsVals,    backgroundColor: PU_TYPES.map(t=>PU_COLORS[t]) }
+    ]
+  },
+  options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'} }, scales:{ y:{ beginAtZero:true, title:{display:true,text:'cells cleared per PU activation'} } } }
+});
+
+// Per-level table render (sortable)
+const tbody = document.getElementById('level-tbody');
+function renderRows(rows) {
+  tbody.innerHTML = rows.map(r => {
+    const breakdown = PU_TYPES.map(t => {
+      const c = r.activated[t] || 0;
+      return c > 0 ? '<span class="pu-cell" style="background:'+PU_COLORS[t]+';margin:0 2px;">'+c.toLocaleString()+'</span>' : '';
+    }).join('');
+    return '<tr>' +
+      '<td><b>L' + r.level_id + '</b></td>' +
+      '<td class="num">' + r.attempts.toLocaleString() + '</td>' +
+      '<td class="num">' + (r.total_created || 0).toLocaleString() + '</td>' +
+      '<td class="num">' + (r.total_activated || 0).toLocaleString() + '</td>' +
+      '<td class="num" style="text-align:left">' + breakdown + '</td>' +
+      '<td class="num">' + (r.avg_cells_per_attempt != null ? r.avg_cells_per_attempt.toFixed(1) : '—') + '</td>' +
+      '<td class="num">' + (r.avg_blockers_per_attempt != null ? r.avg_blockers_per_attempt.toFixed(1) : '—') + '</td>' +
+    '</tr>';
+  }).join('');
+}
+let cs = { key: 'level_id', dir: 1 };
+function sortBy(k) {
+  if (cs.key === k) cs.dir *= -1; else { cs = { key: k, dir: k === 'level_id' ? 1 : -1 }; }
+  const rows = DATA.per_level.slice().sort((a, b) => {
+    const av = a[k], bv = b[k];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1; if (bv == null) return -1;
+    if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * cs.dir;
+    return String(av).localeCompare(String(bv)) * cs.dir;
+  });
+  renderRows(rows);
+}
+document.querySelectorAll('#level-table th[data-k]').forEach(th => th.addEventListener('click', () => sortBy(th.dataset.k)));
+renderRows(DATA.per_level);
+
+// Combo performance chart — bars showing simple ratio vs OLS β per combo
+(function() {
+  const ctx = document.getElementById('ch-combo-perf');
+  if (!ctx || !DATA.combo_performance.length) return;
+  const labels = DATA.combo_performance.map(c => c.puType1 + '+' + c.puType2);
+  const simpleVals = DATA.combo_performance.map(c => c.simple_ratio_diff || 0);
+  const olsVals    = DATA.combo_performance.map(c => c.ols_beta_cells   || 0);
+  // Color each combo bar by the dominant PU (use puType1's color)
+  const olsColors = DATA.combo_performance.map(c => PU_COLORS[c.puType1] || '#6B7280');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Simple ratio (over-attributes)', data: simpleVals, backgroundColor: '#9CA3AF' },
+        { label: 'OLS β (per marginal combo)',     data: olsVals,    backgroundColor: olsColors }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: { callbacks: { afterLabel: ctx => {
+          const c = DATA.combo_performance[ctx.dataIndex];
+          return 'Fired ' + c.total_combos.toLocaleString() + ' times in ' + c.attempts_with.toLocaleString() + ' attempts';
+        }}}
+      },
+      scales: { y: { title: { display: true, text: 'cells cleared per combo activation' } } }
+    }
+  });
+})();
+
+// MoveNum chart — stacked area
+(function() {
+  const ctx = document.getElementById('ch-movenum');
+  const allBins = new Set();
+  PU_TYPES.forEach(t => Object.keys(DATA.move_num_bins_by_type[t] || {}).forEach(b => allBins.add(b)));
+  const binLabels = [...allBins].sort((a, b) => {
+    const aN = +a.split('-')[0], bN = +b.split('-')[0]; return aN - bN;
+  });
+  const datasets = PU_TYPES.map(t => ({
+    label: PU_LABELS[t],
+    data: binLabels.map(b => (DATA.move_num_bins_by_type[t] || {})[b] || 0),
+    backgroundColor: PU_COLORS[t] + '88',
+    borderColor: PU_COLORS[t],
+    borderWidth: 1.5,
+    fill: true,
+    tension: 0.25
+  }));
+  new Chart(ctx, {
+    type:'line',
+    data:{ labels: binLabels, datasets },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom'}, tooltip:{mode:'index',intersect:false} },
+      interaction:{mode:'index',intersect:false},
+      scales:{ x:{title:{display:true,text:'moveNum (binned)'}}, y:{ stacked:true, beginAtZero:true, title:{display:true,text:'activations'} } }
+    }
+  });
+})();
+</script>
+</body></html>
