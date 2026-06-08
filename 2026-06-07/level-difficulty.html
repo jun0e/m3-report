@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Level Difficulty — VN VN [2026-06-07 00:00, 2026-06-08 00:00)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root { --slate:#1F2937; --slate-2:#374151; --cyan:#0EA5E9; --amber:#F59E0B;
+    --pass:#10B981; --warn:#F59E0B; --kill:#DC2626;
+    --pass-bg:#D1FAE5; --pass-fg:#065F46; --warn-bg:#FEF3C7; --warn-fg:#92400E; --kill-bg:#FEE2E2; --kill-fg:#991B1B;
+    --gray-50:#F9FAFB; --gray-200:#E5E7EB; --gray-500:#6B7280;
+    --bg:#F3F4F6; --card:#FFFFFF; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Inter',-apple-system,system-ui,Arial,sans-serif; background:var(--bg); color:#111; font-size:14px; line-height:1.55; }
+  header { background:linear-gradient(135deg,#1F2937 0%,#0F172A 100%); color:#fff; padding:36px 32px; }
+  header .inner { max-width:1280px; margin:0 auto; }
+  header .eyebrow { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:#94A3B8; margin-bottom:6px; }
+  header h1 { font-size:28px; margin:0 0 6px; font-weight:800; letter-spacing:-0.3px; }
+  header .sub { font-size:13px; color:#cbd5e1; }
+  header .badges { margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
+  .badge { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.16); padding:4px 10px; border-radius:999px; font-size:11px; color:#e2e8f0; }
+  .badge b { color:#fff; }
+  main { max-width:1280px; margin:0 auto; padding:24px 32px 80px; }
+  section { margin:28px 0; }
+  section h2 { font-size:18px; margin:0 0 6px; color:var(--slate); border-left:4px solid var(--cyan); padding-left:10px; }
+  section .lede { color:var(--gray-500); font-size:12px; margin-bottom:14px; max-width:880px; }
+
+  .tile-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+  .tile { background:var(--card); border-radius:10px; padding:14px 16px; box-shadow:0 1px 3px rgba(0,0,0,0.06); border-top:4px solid var(--gray-200); }
+  .tile.pass { border-top-color:var(--pass); }
+  .tile.warn { border-top-color:var(--warn); }
+  .tile.kill { border-top-color:var(--kill); }
+  .tile .label { font-size:10.5px; color:var(--gray-500); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+  .tile .v { font-size:24px; font-weight:800; color:var(--slate); margin-top:4px; line-height:1.1; }
+  .tile .sub { font-size:11px; color:var(--gray-500); margin-top:4px; }
+
+  .chart-card { background:var(--card); border-radius:10px; padding:14px 18px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:14px; }
+  .chart-card h3 { font-size:14px; margin:0 0 4px; color:var(--slate); }
+  .chart-card .meta { font-size:11px; color:var(--gray-500); margin-bottom:10px; }
+  .chart-canvas-wrap { position:relative; height:300px; width:100%; }
+  .chart-canvas-wrap.tall { height:380px; }
+
+  table.matrix { width:100%; border-collapse:collapse; background:var(--card); border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.06); font-size:12px; }
+  .matrix th, .matrix td { padding:8px 11px; text-align:left; border-bottom:1px solid var(--gray-200); }
+  .matrix th { background:var(--slate); color:#fff; font-weight:700; font-size:10.5px; text-transform:uppercase; letter-spacing:0.4px; cursor:pointer; user-select:none; position:sticky; top:0; z-index:5; }
+  .matrix th.num { text-align:right; }
+  .matrix th:hover { background:#374151; }
+  .matrix td.num { text-align:right; font-variant-numeric:tabular-nums; font-family:'SF Mono',Monaco,monospace; }
+  .matrix tr:hover { background:#F9FAFB; }
+  .pill { display:inline-block; padding:1px 7px; border-radius:10px; font-size:10.5px; font-weight:700; }
+  .pill.pass { background:var(--pass-bg); color:var(--pass-fg); }
+  .pill.warn { background:var(--warn-bg); color:var(--warn-fg); }
+  .pill.kill { background:var(--kill-bg); color:var(--kill-fg); }
+  .pill.neutral { background:#E5E7EB; color:#6B7280; }
+  .table-scroll { overflow-x:auto; max-height:760px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <div class="eyebrow">Level Difficulty · standalone analysis</div>
+    <h1>Level difficulty in the 24-hour window</h1>
+    <div class="sub">Sliced from raw event log over an arbitrary UTC window — not constrained to a single VN day.</div>
+    <div class="badges">
+      <span class="badge">📅 <b>VN [2026-06-07 00:00, 2026-06-08 00:00)</b></span>
+      <span class="badge">⏱ <b>24h</b> coverage</span>
+      <span class="badge">👥 <b>1,319</b> users</span>
+      <span class="badge">📊 <b>681,967</b> events</span>
+      <span class="badge">🎯 <b>54</b> distinct levels</span>
+      
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <h2>Snapshot</h2>
+  <div class="lede">Headline tiles. The "hardest" picks use win-rate as the primary signal (lower = harder), with median-attempts as a secondary check.</div>
+  <div class="tile-grid" id="headline-tiles"></div>
+</section>
+
+<section>
+  <h2>Win rate per level</h2>
+  <div class="lede">Bar height = % of attempts that ended in a win. Color band: <span class="pill pass">≥ 65% PASS</span> <span class="pill warn">50–65% WARN</span> <span class="pill kill">&lt; 50% KILL</span>. Bosses pinned at the right end.</div>
+  <div class="chart-card"><div class="chart-canvas-wrap tall"><canvas id="ch-winrate"></canvas></div></div>
+</section>
+
+<section>
+  <h2>Median attempts per user (retry burden)</h2>
+  <div class="lede">For each level, the median number of attempts a user made before resolving the level (passing OR abandoning). Higher = more retries. King's industry rule of thumb: median ≤ 2 is easy, 3–5 is moderate, &gt; 5 starts to churn players. <b>Most bars sit at 1.0 because the typical user only attempts each level once — the few heavy retriers don't move the median. See the mean table below for the long-tail-sensitive view.</b></div>
+  <div class="chart-card"><div class="chart-canvas-wrap tall"><canvas id="ch-attempts"></canvas></div></div>
+</section>
+
+<section>
+  <h2>Mean attempts per user — sortable table</h2>
+  <div class="lede">Mean = total attempts ÷ unique users. Unlike median, this is <b>sensitive to the long retry tail</b> — a single user who retried a level 10× pulls the mean up noticeably. Sorted by mean DESC (most grindy at top). Click any header to re-sort.</div>
+  <div class="table-scroll" style="max-height:600px;">
+    <table class="matrix" id="mean-att-table">
+      <thead><tr>
+        <th data-k="level_id">Level</th>
+        <th class="num" data-k="mean_attempts_per_user">Mean atts/user</th>
+        <th class="num" data-k="median_attempts_per_user">Median</th>
+        <th class="num" data-k="max_attempts_per_user">Max</th>
+        <th class="num" data-k="attempts">Total atts</th>
+        <th class="num" data-k="unique_users">Users</th>
+        <th class="num" data-k="win_rate_pct">Win %</th>
+      </tr></thead>
+      <tbody id="mean-att-tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Near-miss intensity on fails</h2>
+  <div class="lede">Avg <code>objectivesRemaining</code> when a fail event fires. <b>Lower = closer to passing</b> = better near-miss design (engagement-positive). Higher = users fail with much left to do (frustration-negative).</div>
+  <div class="chart-card"><div class="chart-canvas-wrap tall"><canvas id="ch-nearmiss"></canvas></div></div>
+</section>
+
+<section>
+  <h2>Move budget vs spend (on wins)</h2>
+  <div class="lede">Blue = designedMoves budget. Orange = avg movesUsed when winning. Surplus = budget − spent (positive = generous design; negative = win-on-last-move discipline).</div>
+  <div class="chart-card"><div class="chart-canvas-wrap tall"><canvas id="ch-moves"></canvas></div></div>
+</section>
+
+<section>
+  <h2>TPP deviation</h2>
+  <div class="lede">The game's own difficulty calibration. <b>Negative = harder than designed</b>; positive = easier. Magnitude &gt; 0.30 suggests live-ops tuning needed.</div>
+  <div class="chart-card"><div class="chart-canvas-wrap tall"><canvas id="ch-tpp"></canvas></div></div>
+</section>
+
+<section>
+  <h2>Full per-level table (sortable — click a header)</h2>
+  <div class="lede">All metrics in one place. Click any column header to sort. Rows with <code>cr_*</code> ids are creative-mode levels.</div>
+  <div class="table-scroll">
+    <table class="matrix" id="lvl-table">
+      <thead><tr>
+        <th data-k="level_id">Level</th>
+        <th class="num" data-k="attempts">Attempts</th>
+        <th class="num" data-k="unique_users">Users</th>
+        <th class="num" data-k="win_rate_pct">Win %</th>
+        <th class="num" data-k="first_try_win_rate_pct">1st-try W%</th>
+        <th class="num" data-k="median_attempts_per_user">Med atts/user</th>
+        <th class="num" data-k="max_attempts_per_user">Max atts/user</th>
+        <th class="num" data-k="designed_moves">Designed</th>
+        <th class="num" data-k="avg_moves_used_win">Moves used (W)</th>
+        <th class="num" data-k="avg_moves_used_fail">Moves used (F)</th>
+        <th class="num" data-k="avg_objectives_remaining_fail">Obj remain (F)</th>
+        <th class="num" data-k="avg_time_in_level_sec">Time (s)</th>
+        <th class="num" data-k="avg_pu_total_per_attempt">PU/atmt</th>
+        <th class="num" data-k="avg_tpp_deviation_final">TPP dev</th>
+        <th class="num" data-k="booster_use_rate_pct">Booster %</th>
+        <th class="num" data-k="is_boss_share_pct">Boss %</th>
+      </tr></thead>
+      <tbody id="lvl-tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<script>
+const LEVELS = [{"level_id":0,"attempts":88,"unique_users":60,"wins":0,"fails":88,"win_rate_pct":0,"first_try_win_rate_pct":null,"mean_attempts_per_user":1.47,"median_attempts_per_user":1,"max_attempts_per_user":7,"designed_moves":null,"avg_moves_used_win":null,"avg_moves_used_fail":0,"avg_objectives_remaining_fail":0,"avg_time_in_level_sec":0,"avg_pu_total_per_attempt":null,"avg_tpp_deviation_final":null,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":1,"attempts":392,"unique_users":377,"wins":386,"fails":6,"win_rate_pct":98.5,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.04,"median_attempts_per_user":1,"max_attempts_per_user":3,"designed_moves":20,"avg_moves_used_win":10.56,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":1,"avg_time_in_level_sec":100.27,"avg_pu_total_per_attempt":7.2,"avg_tpp_deviation_final":0.069,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":2,"attempts":398,"unique_users":343,"wins":338,"fails":60,"win_rate_pct":84.9,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.16,"median_attempts_per_user":1,"max_attempts_per_user":6,"designed_moves":20,"avg_moves_used_win":12.01,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":4.17,"avg_time_in_level_sec":71.58,"avg_pu_total_per_attempt":11.49,"avg_tpp_deviation_final":0.056,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":3,"attempts":335,"unique_users":322,"wins":329,"fails":6,"win_rate_pct":98.2,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.04,"median_attempts_per_user":1,"max_attempts_per_user":2,"designed_moves":15,"avg_moves_used_win":8.36,"avg_moves_used_fail":15,"avg_objectives_remaining_fail":1.5,"avg_time_in_level_sec":53.07,"avg_pu_total_per_attempt":8.36,"avg_tpp_deviation_final":0.031,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":4,"attempts":323,"unique_users":299,"wins":286,"fails":37,"win_rate_pct":88.5,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.08,"median_attempts_per_user":1,"max_attempts_per_user":3,"designed_moves":25,"avg_moves_used_win":18.17,"avg_moves_used_fail":25,"avg_objectives_remaining_fail":5.03,"avg_time_in_level_sec":137.24,"avg_pu_total_per_attempt":13.49,"avg_tpp_deviation_final":-0.007,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":5,"attempts":307,"unique_users":268,"wins":268,"fails":39,"win_rate_pct":87.3,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.15,"median_attempts_per_user":1,"max_attempts_per_user":5,"designed_moves":15,"avg_moves_used_win":10.08,"avg_moves_used_fail":15,"avg_objectives_remaining_fail":7.28,"avg_time_in_level_sec":150.59,"avg_pu_total_per_attempt":11.5,"avg_tpp_deviation_final":0.005,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":6,"attempts":289,"unique_users":256,"wins":258,"fails":31,"win_rate_pct":89.3,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.13,"median_attempts_per_user":1,"max_attempts_per_user":6,"designed_moves":20,"avg_moves_used_win":12.71,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":2.9,"avg_time_in_level_sec":96.41,"avg_pu_total_per_attempt":13.76,"avg_tpp_deviation_final":0.239,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":7,"attempts":291,"unique_users":250,"wins":246,"fails":45,"win_rate_pct":84.5,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.16,"median_attempts_per_user":1,"max_attempts_per_user":5,"designed_moves":25,"avg_moves_used_win":19.08,"avg_moves_used_fail":25,"avg_objectives_remaining_fail":3.69,"avg_time_in_level_sec":109.97,"avg_pu_total_per_attempt":17.27,"avg_tpp_deviation_final":0.15,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":8,"attempts":276,"unique_users":241,"wins":243,"fails":33,"win_rate_pct":88,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.15,"median_attempts_per_user":1,"max_attempts_per_user":4,"designed_moves":22,"avg_moves_used_win":12.31,"avg_moves_used_fail":22,"avg_objectives_remaining_fail":1.52,"avg_time_in_level_sec":66.44,"avg_pu_total_per_attempt":8.55,"avg_tpp_deviation_final":0.09,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":9,"attempts":251,"unique_users":232,"wins":241,"fails":10,"win_rate_pct":96,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.08,"median_attempts_per_user":1,"max_attempts_per_user":5,"designed_moves":20,"avg_moves_used_win":11.83,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":1.9,"avg_time_in_level_sec":65.1,"avg_pu_total_per_attempt":11.07,"avg_tpp_deviation_final":0.167,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":10,"attempts":306,"unique_users":241,"wins":239,"fails":67,"win_rate_pct":78.1,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.27,"median_attempts_per_user":1,"max_attempts_per_user":8,"designed_moves":20,"avg_moves_used_win":14.57,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":0.99,"avg_time_in_level_sec":116.71,"avg_pu_total_per_attempt":10.32,"avg_tpp_deviation_final":0.088,"booster_use_rate_pct":0,"is_boss_share_pct":100},{"level_id":11,"attempts":228,"unique_users":219,"wins":222,"fails":6,"win_rate_pct":97.4,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.04,"median_attempts_per_user":1,"max_attempts_per_user":6,"designed_moves":20,"avg_moves_used_win":10.17,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":3,"avg_time_in_level_sec":67.79,"avg_pu_total_per_attempt":9.84,"avg_tpp_deviation_final":0.085,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":12,"attempts":341,"unique_users":218,"wins":213,"fails":128,"win_rate_pct":62.5,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.56,"median_attempts_per_user":1,"max_attempts_per_user":11,"designed_moves":20,"avg_moves_used_win":16.73,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":10.41,"avg_time_in_level_sec":119.98,"avg_pu_total_per_attempt":16.46,"avg_tpp_deviation_final":0.058,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":13,"attempts":279,"unique_users":204,"wins":199,"fails":80,"win_rate_pct":71.3,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.37,"median_attempts_per_user":1,"max_attempts_per_user":9,"designed_moves":18,"avg_moves_used_win":14.63,"avg_moves_used_fail":18,"avg_objectives_remaining_fail":5.61,"avg_time_in_level_sec":72.62,"avg_pu_total_per_attempt":10.85,"avg_tpp_deviation_final":0.185,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":14,"attempts":229,"unique_users":188,"wins":185,"fails":44,"win_rate_pct":80.8,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.22,"median_attempts_per_user":1,"max_attempts_per_user":4,"designed_moves":20,"avg_moves_used_win":15.15,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":1.45,"avg_time_in_level_sec":229.23,"avg_pu_total_per_attempt":11.66,"avg_tpp_deviation_final":0.03,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":15,"attempts":271,"unique_users":201,"wins":268,"fails":3,"win_rate_pct":98.9,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.35,"median_attempts_per_user":1,"max_attempts_per_user":6,"designed_moves":15,"avg_moves_used_win":6.99,"avg_moves_used_fail":15,"avg_objectives_remaining_fail":1,"avg_time_in_level_sec":89.21,"avg_pu_total_per_attempt":5.86,"avg_tpp_deviation_final":0.15,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":16,"attempts":195,"unique_users":176,"wins":183,"fails":12,"win_rate_pct":93.8,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.11,"median_attempts_per_user":1,"max_attempts_per_user":10,"designed_moves":20,"avg_moves_used_win":12.43,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":2.75,"avg_time_in_level_sec":66.67,"avg_pu_total_per_attempt":13.93,"avg_tpp_deviation_final":0.224,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":17,"attempts":218,"unique_users":175,"wins":192,"fails":26,"win_rate_pct":88.1,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.25,"median_attempts_per_user":1,"max_attempts_per_user":22,"designed_moves":20,"avg_moves_used_win":13.1,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":4.73,"avg_time_in_level_sec":77.35,"avg_pu_total_per_attempt":13.51,"avg_tpp_deviation_final":0.223,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":18,"attempts":290,"unique_users":182,"wins":173,"fails":117,"win_rate_pct":59.7,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.59,"median_attempts_per_user":1,"max_attempts_per_user":11,"designed_moves":20,"avg_moves_used_win":15.11,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":5.39,"avg_time_in_level_sec":98.18,"avg_pu_total_per_attempt":15.63,"avg_tpp_deviation_final":0.032,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":19,"attempts":377,"unique_users":183,"wins":157,"fails":220,"win_rate_pct":41.6,"first_try_win_rate_pct":0,"mean_attempts_per_user":2.06,"median_attempts_per_user":2,"max_attempts_per_user":12,"designed_moves":20,"avg_moves_used_win":17.36,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":12.82,"avg_time_in_level_sec":89.33,"avg_pu_total_per_attempt":15.76,"avg_tpp_deviation_final":-0.018,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":20,"attempts":264,"unique_users":159,"wins":145,"fails":119,"win_rate_pct":54.9,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.66,"median_attempts_per_user":1,"max_attempts_per_user":10,"designed_moves":20,"avg_moves_used_win":16.43,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":0.97,"avg_time_in_level_sec":84.91,"avg_pu_total_per_attempt":12.73,"avg_tpp_deviation_final":0.01,"booster_use_rate_pct":0,"is_boss_share_pct":100},{"level_id":21,"attempts":156,"unique_users":147,"wins":152,"fails":4,"win_rate_pct":97.4,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.06,"median_attempts_per_user":1,"max_attempts_per_user":3,"designed_moves":17,"avg_moves_used_win":11.27,"avg_moves_used_fail":17,"avg_objectives_remaining_fail":1.25,"avg_time_in_level_sec":68.01,"avg_pu_total_per_attempt":7.81,"avg_tpp_deviation_final":-0.034,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":22,"attempts":228,"unique_users":143,"wins":137,"fails":91,"win_rate_pct":60.1,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.59,"median_attempts_per_user":1,"max_attempts_per_user":8,"designed_moves":23,"avg_moves_used_win":18.72,"avg_moves_used_fail":23,"avg_objectives_remaining_fail":6.47,"avg_time_in_level_sec":99.77,"avg_pu_total_per_attempt":10.8,"avg_tpp_deviation_final":-0.074,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":23,"attempts":201,"unique_users":135,"wins":133,"fails":68,"win_rate_pct":66.2,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.49,"median_attempts_per_user":1,"max_attempts_per_user":8,"designed_moves":25,"avg_moves_used_win":21.67,"avg_moves_used_fail":25,"avg_objectives_remaining_fail":11.9,"avg_time_in_level_sec":113.94,"avg_pu_total_per_attempt":22.32,"avg_tpp_deviation_final":-0.057,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":24,"attempts":205,"unique_users":136,"wins":133,"fails":72,"win_rate_pct":64.9,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.51,"median_attempts_per_user":1,"max_attempts_per_user":10,"designed_moves":25,"avg_moves_used_win":19.32,"avg_moves_used_fail":25,"avg_objectives_remaining_fail":4.33,"avg_time_in_level_sec":104.23,"avg_pu_total_per_attempt":19.07,"avg_tpp_deviation_final":0.161,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":25,"attempts":155,"unique_users":134,"wins":141,"fails":14,"win_rate_pct":91,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.16,"median_attempts_per_user":1,"max_attempts_per_user":6,"designed_moves":20,"avg_moves_used_win":14.95,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":3.57,"avg_time_in_level_sec":77.78,"avg_pu_total_per_attempt":14.72,"avg_tpp_deviation_final":-0.083,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":26,"attempts":166,"unique_users":130,"wins":133,"fails":33,"win_rate_pct":80.1,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.28,"median_attempts_per_user":1,"max_attempts_per_user":7,"designed_moves":20,"avg_moves_used_win":16.44,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":3.7,"avg_time_in_level_sec":100.69,"avg_pu_total_per_attempt":13.69,"avg_tpp_deviation_final":-0.166,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":27,"attempts":204,"unique_users":148,"wins":160,"fails":44,"win_rate_pct":78.4,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.38,"median_attempts_per_user":1,"max_attempts_per_user":5,"designed_moves":20,"avg_moves_used_win":16.66,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":1.32,"avg_time_in_level_sec":83.69,"avg_pu_total_per_attempt":9.48,"avg_tpp_deviation_final":-0.196,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":28,"attempts":205,"unique_users":144,"wins":147,"fails":58,"win_rate_pct":71.7,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.42,"median_attempts_per_user":1,"max_attempts_per_user":9,"designed_moves":23,"avg_moves_used_win":19.24,"avg_moves_used_fail":23,"avg_objectives_remaining_fail":7.78,"avg_time_in_level_sec":134.5,"avg_pu_total_per_attempt":14.53,"avg_tpp_deviation_final":0.003,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":29,"attempts":218,"unique_users":134,"wins":127,"fails":91,"win_rate_pct":58.3,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.63,"median_attempts_per_user":1,"max_attempts_per_user":6,"designed_moves":22,"avg_moves_used_win":19.43,"avg_moves_used_fail":22,"avg_objectives_remaining_fail":7.82,"avg_time_in_level_sec":152.33,"avg_pu_total_per_attempt":14.09,"avg_tpp_deviation_final":-0.149,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":30,"attempts":325,"unique_users":149,"wins":131,"fails":194,"win_rate_pct":40.3,"first_try_win_rate_pct":0,"mean_attempts_per_user":2.18,"median_attempts_per_user":1,"max_attempts_per_user":10,"designed_moves":24,"avg_moves_used_win":20.58,"avg_moves_used_fail":24,"avg_objectives_remaining_fail":12.41,"avg_time_in_level_sec":146.65,"avg_pu_total_per_attempt":24.58,"avg_tpp_deviation_final":-0.134,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":31,"attempts":139,"unique_users":130,"wins":132,"fails":7,"win_rate_pct":95,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.07,"median_attempts_per_user":1,"max_attempts_per_user":4,"designed_moves":13,"avg_moves_used_win":8.53,"avg_moves_used_fail":13,"avg_objectives_remaining_fail":1.86,"avg_time_in_level_sec":69.4,"avg_pu_total_per_attempt":8.42,"avg_tpp_deviation_final":-0.051,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":32,"attempts":204,"unique_users":130,"wins":122,"fails":82,"win_rate_pct":59.8,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.57,"median_attempts_per_user":1,"max_attempts_per_user":5,"designed_moves":20,"avg_moves_used_win":16.2,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":4.65,"avg_time_in_level_sec":89.37,"avg_pu_total_per_attempt":10.39,"avg_tpp_deviation_final":0.05,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":33,"attempts":172,"unique_users":120,"wins":119,"fails":53,"win_rate_pct":69.2,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.43,"median_attempts_per_user":1,"max_attempts_per_user":7,"designed_moves":19,"avg_moves_used_win":15.7,"avg_moves_used_fail":19,"avg_objectives_remaining_fail":4.6,"avg_time_in_level_sec":109.66,"avg_pu_total_per_attempt":13.61,"avg_tpp_deviation_final":0,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":34,"attempts":171,"unique_users":116,"wins":116,"fails":55,"win_rate_pct":67.8,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.47,"median_attempts_per_user":1,"max_attempts_per_user":8,"designed_moves":20,"avg_moves_used_win":15.72,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":3.6,"avg_time_in_level_sec":103.02,"avg_pu_total_per_attempt":13.45,"avg_tpp_deviation_final":0.143,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":35,"attempts":159,"unique_users":117,"wins":121,"fails":38,"win_rate_pct":76.1,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.36,"median_attempts_per_user":1,"max_attempts_per_user":6,"designed_moves":25,"avg_moves_used_win":19.9,"avg_moves_used_fail":25,"avg_objectives_remaining_fail":5.21,"avg_time_in_level_sec":115.53,"avg_pu_total_per_attempt":19.08,"avg_tpp_deviation_final":0.044,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":36,"attempts":306,"unique_users":120,"wins":104,"fails":202,"win_rate_pct":34,"first_try_win_rate_pct":0,"mean_attempts_per_user":2.55,"median_attempts_per_user":2,"max_attempts_per_user":18,"designed_moves":20,"avg_moves_used_win":17.6,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":10.89,"avg_time_in_level_sec":96.89,"avg_pu_total_per_attempt":13.5,"avg_tpp_deviation_final":0.008,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":37,"attempts":210,"unique_users":109,"wins":104,"fails":106,"win_rate_pct":49.5,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.93,"median_attempts_per_user":1,"max_attempts_per_user":16,"designed_moves":24,"avg_moves_used_win":20.35,"avg_moves_used_fail":24,"avg_objectives_remaining_fail":8.58,"avg_time_in_level_sec":103.29,"avg_pu_total_per_attempt":20.88,"avg_tpp_deviation_final":-0.044,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":38,"attempts":241,"unique_users":116,"wins":106,"fails":135,"win_rate_pct":44,"first_try_win_rate_pct":0,"mean_attempts_per_user":2.08,"median_attempts_per_user":1,"max_attempts_per_user":18,"designed_moves":25,"avg_moves_used_win":21.17,"avg_moves_used_fail":25,"avg_objectives_remaining_fail":5.24,"avg_time_in_level_sec":114.44,"avg_pu_total_per_attempt":15.08,"avg_tpp_deviation_final":0.16,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":39,"attempts":183,"unique_users":112,"wins":105,"fails":78,"win_rate_pct":57.4,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.63,"median_attempts_per_user":1,"max_attempts_per_user":7,"designed_moves":23,"avg_moves_used_win":19.16,"avg_moves_used_fail":23,"avg_objectives_remaining_fail":8.87,"avg_time_in_level_sec":104.59,"avg_pu_total_per_attempt":13.31,"avg_tpp_deviation_final":0.013,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":40,"attempts":342,"unique_users":130,"wins":119,"fails":223,"win_rate_pct":34.8,"first_try_win_rate_pct":0,"mean_attempts_per_user":2.63,"median_attempts_per_user":2,"max_attempts_per_user":13,"designed_moves":20,"avg_moves_used_win":17.55,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":1,"avg_time_in_level_sec":167.87,"avg_pu_total_per_attempt":8.65,"avg_tpp_deviation_final":0.017,"booster_use_rate_pct":0,"is_boss_share_pct":100},{"level_id":41,"attempts":163,"unique_users":98,"wins":95,"fails":68,"win_rate_pct":58.3,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.66,"median_attempts_per_user":1,"max_attempts_per_user":11,"designed_moves":25,"avg_moves_used_win":21.15,"avg_moves_used_fail":25,"avg_objectives_remaining_fail":7.15,"avg_time_in_level_sec":168.77,"avg_pu_total_per_attempt":22.38,"avg_tpp_deviation_final":-0.384,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":42,"attempts":142,"unique_users":98,"wins":107,"fails":35,"win_rate_pct":75.4,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.45,"median_attempts_per_user":1,"max_attempts_per_user":21,"designed_moves":25,"avg_moves_used_win":20.87,"avg_moves_used_fail":25,"avg_objectives_remaining_fail":4.54,"avg_time_in_level_sec":99.35,"avg_pu_total_per_attempt":13.88,"avg_tpp_deviation_final":0.121,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":43,"attempts":183,"unique_users":110,"wins":111,"fails":72,"win_rate_pct":60.7,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.66,"median_attempts_per_user":1,"max_attempts_per_user":13,"designed_moves":23,"avg_moves_used_win":20.24,"avg_moves_used_fail":23,"avg_objectives_remaining_fail":7.11,"avg_time_in_level_sec":207.48,"avg_pu_total_per_attempt":12.77,"avg_tpp_deviation_final":-0.091,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":44,"attempts":135,"unique_users":105,"wins":128,"fails":7,"win_rate_pct":94.8,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.29,"median_attempts_per_user":1,"max_attempts_per_user":22,"designed_moves":22,"avg_moves_used_win":14.33,"avg_moves_used_fail":22,"avg_objectives_remaining_fail":3.14,"avg_time_in_level_sec":79.73,"avg_pu_total_per_attempt":13.67,"avg_tpp_deviation_final":0.233,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":45,"attempts":164,"unique_users":105,"wins":98,"fails":66,"win_rate_pct":59.8,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.56,"median_attempts_per_user":1,"max_attempts_per_user":5,"designed_moves":23,"avg_moves_used_win":19.77,"avg_moves_used_fail":23,"avg_objectives_remaining_fail":4.89,"avg_time_in_level_sec":107.56,"avg_pu_total_per_attempt":13.06,"avg_tpp_deviation_final":0.062,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":46,"attempts":245,"unique_users":118,"wins":111,"fails":134,"win_rate_pct":45.3,"first_try_win_rate_pct":0,"mean_attempts_per_user":2.08,"median_attempts_per_user":1,"max_attempts_per_user":25,"designed_moves":23,"avg_moves_used_win":20.26,"avg_moves_used_fail":23,"avg_objectives_remaining_fail":12.41,"avg_time_in_level_sec":123.76,"avg_pu_total_per_attempt":18.61,"avg_tpp_deviation_final":-0.048,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":47,"attempts":212,"unique_users":118,"wins":127,"fails":85,"win_rate_pct":59.9,"first_try_win_rate_pct":0,"mean_attempts_per_user":1.8,"median_attempts_per_user":1,"max_attempts_per_user":15,"designed_moves":22,"avg_moves_used_win":18.69,"avg_moves_used_fail":21.18,"avg_objectives_remaining_fail":7.86,"avg_time_in_level_sec":82.33,"avg_pu_total_per_attempt":7.68,"avg_tpp_deviation_final":-0.099,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":48,"attempts":245,"unique_users":118,"wins":104,"fails":141,"win_rate_pct":42.4,"first_try_win_rate_pct":0,"mean_attempts_per_user":2.08,"median_attempts_per_user":2,"max_attempts_per_user":11,"designed_moves":20,"avg_moves_used_win":17.36,"avg_moves_used_fail":20,"avg_objectives_remaining_fail":2,"avg_time_in_level_sec":92.13,"avg_pu_total_per_attempt":10.64,"avg_tpp_deviation_final":-0.23,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":49,"attempts":247,"unique_users":121,"wins":127,"fails":120,"win_rate_pct":51.4,"first_try_win_rate_pct":0,"mean_attempts_per_user":2.04,"median_attempts_per_user":1,"max_attempts_per_user":15,"designed_moves":25,"avg_moves_used_win":21.3,"avg_moves_used_fail":25,"avg_objectives_remaining_fail":7.09,"avg_time_in_level_sec":113.06,"avg_pu_total_per_attempt":12.07,"avg_tpp_deviation_final":-0.021,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":50,"attempts":4677,"unique_users":408,"wins":1934,"fails":2743,"win_rate_pct":41.4,"first_try_win_rate_pct":0,"mean_attempts_per_user":11.46,"median_attempts_per_user":6,"max_attempts_per_user":86,"designed_moves":25,"avg_moves_used_win":21.43,"avg_moves_used_fail":25,"avg_objectives_remaining_fail":1.77,"avg_time_in_level_sec":127.29,"avg_pu_total_per_attempt":19.38,"avg_tpp_deviation_final":-0.103,"booster_use_rate_pct":0,"is_boss_share_pct":0},{"level_id":"cr_1_0","attempts":0,"unique_users":0,"wins":0,"fails":0,"win_rate_pct":null,"first_try_win_rate_pct":0,"mean_attempts_per_user":null,"median_attempts_per_user":null,"max_attempts_per_user":null,"designed_moves":10,"avg_moves_used_win":null,"avg_moves_used_fail":null,"avg_objectives_remaining_fail":null,"avg_time_in_level_sec":null,"avg_pu_total_per_attempt":null,"avg_tpp_deviation_final":null,"booster_use_rate_pct":0,"is_boss_share_pct":null},{"level_id":"cr_2_0","attempts":0,"unique_users":0,"wins":0,"fails":0,"win_rate_pct":null,"first_try_win_rate_pct":0,"mean_attempts_per_user":null,"median_attempts_per_user":null,"max_attempts_per_user":null,"designed_moves":18,"avg_moves_used_win":null,"avg_moves_used_fail":null,"avg_objectives_remaining_fail":null,"avg_time_in_level_sec":null,"avg_pu_total_per_attempt":null,"avg_tpp_deviation_final":null,"booster_use_rate_pct":0,"is_boss_share_pct":null},{"level_id":"cr_3_0","attempts":0,"unique_users":0,"wins":0,"fails":0,"win_rate_pct":null,"first_try_win_rate_pct":0,"mean_attempts_per_user":null,"median_attempts_per_user":null,"max_attempts_per_user":null,"designed_moves":12,"avg_moves_used_win":null,"avg_moves_used_fail":null,"avg_objectives_remaining_fail":null,"avg_time_in_level_sec":null,"avg_pu_total_per_attempt":null,"avg_tpp_deviation_final":null,"booster_use_rate_pct":0,"is_boss_share_pct":null}];
+const META   = {"generated_at":"2026-06-08T01:00:44.446Z","window_utc_start":"2026-06-06T17:00:00.000Z","window_utc_end":"2026-06-07T17:00:00.000Z","window_vn_label":"VN [2026-06-07 00:00, 2026-06-08 00:00)","window_hours":24,"dirs_scanned":["C:\\Users\\CPU60395-local\\m3-data\\2026-06-07-and-prev"],"build_filter":null,"platform_filter":null,"events_scanned":1368826,"events_kept":681967,"events_out_of_window":661446,"events_wrong_build":25413,"distinct_users_in_window":1319,"distinct_levels_with_attempts":54};
+
+// Backfill mean_attempts_per_user for older JSON files that don't have it.
+LEVELS.forEach(l => {
+  if (l.mean_attempts_per_user == null && l.unique_users) {
+    l.mean_attempts_per_user = +(l.attempts / l.unique_users).toFixed(2);
+  }
+});
+
+// ── Snapshot tiles ──────────────────────────────────────────────────────────
+(function renderTiles() {
+  const grid = document.getElementById('headline-tiles');
+  // Hardest by win rate (min 30 attempts to be statistically interesting)
+  const candidates = LEVELS.filter(l => l.attempts >= 30 && l.win_rate_pct != null);
+  const hardest = candidates.slice().sort((a,b) => a.win_rate_pct - b.win_rate_pct)[0];
+  const easiest = candidates.slice().sort((a,b) => b.win_rate_pct - a.win_rate_pct)[0];
+  const grindiest = LEVELS.filter(l => l.median_attempts_per_user != null)
+                          .sort((a,b) => b.median_attempts_per_user - a.median_attempts_per_user)[0];
+  const totalAttempts = LEVELS.reduce((a,l) => a + l.attempts, 0);
+  const totalWins     = LEVELS.reduce((a,l) => a + l.wins, 0);
+  const overallWR = totalAttempts ? (totalWins / totalAttempts * 100).toFixed(1) : '—';
+
+  const tiles = [
+    { label: 'Total attempts',    v: totalAttempts.toLocaleString(), sub: 'across all levels' },
+    { label: 'Overall win rate',  v: overallWR + '%',                sub: 'weighted by attempt count', kind: overallWR >= 65 ? 'pass' : overallWR >= 50 ? 'warn' : 'kill' },
+    { label: 'Hardest (≥30 atts)', v: hardest ? 'L' + hardest.level_id : '—',
+      sub: hardest ? hardest.win_rate_pct + '% WR · ' + hardest.attempts + ' atts' : '', kind: 'kill' },
+    { label: 'Easiest (≥30 atts)', v: easiest ? 'L' + easiest.level_id : '—',
+      sub: easiest ? easiest.win_rate_pct + '% WR · ' + easiest.attempts + ' atts' : '', kind: 'pass' },
+    { label: 'Highest retry burden', v: grindiest ? 'L' + grindiest.level_id : '—',
+      sub: grindiest ? 'median ' + grindiest.median_attempts_per_user + ' atts/user' : '', kind: 'warn' }
+  ];
+  tiles.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'tile ' + (t.kind || '');
+    el.innerHTML = '<div class="label">' + t.label + '</div><div class="v">' + t.v + '</div><div class="sub">' + (t.sub||'') + '</div>';
+    grid.appendChild(el);
+  });
+})();
+
+// ── Charts ──────────────────────────────────────────────────────────────────
+function color_wr(pct) { return pct == null ? '#9CA3AF' : pct >= 65 ? '#10B981' : pct >= 50 ? '#F59E0B' : '#DC2626'; }
+const labels = LEVELS.map(l => 'L' + l.level_id);
+
+// Win rate
+new Chart(document.getElementById('ch-winrate'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [{
+      label: 'Win rate %',
+      data: LEVELS.map(l => l.win_rate_pct),
+      backgroundColor: LEVELS.map(l => color_wr(l.win_rate_pct))
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { afterLabel: ctx => 'N attempts: ' + LEVELS[ctx.dataIndex].attempts + ' · users: ' + LEVELS[ctx.dataIndex].unique_users }}
+    },
+    scales: { y: { beginAtZero:true, max:100, ticks:{ callback: v => v + '%' } } }
+  }
+});
+
+// Median attempts
+new Chart(document.getElementById('ch-attempts'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [{
+      label: 'Median attempts per user',
+      data: LEVELS.map(l => l.median_attempts_per_user),
+      backgroundColor: LEVELS.map(l => (l.median_attempts_per_user||0) >= 5 ? '#DC2626' : (l.median_attempts_per_user||0) >= 3 ? '#F59E0B' : '#10B981')
+    }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{ beginAtZero:true, title:{display:true,text:'attempts'} } } }
+});
+
+// Near-miss
+new Chart(document.getElementById('ch-nearmiss'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [{
+      label: 'Avg objectivesRemaining on fail',
+      data: LEVELS.map(l => l.avg_objectives_remaining_fail),
+      backgroundColor: '#7C3AED'
+    }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{ beginAtZero:true, title:{display:true,text:'objectives left (lower = closer to passing)'} } } }
+});
+
+// Move budget vs spend (wins)
+new Chart(document.getElementById('ch-moves'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [
+      { label: 'Designed moves',         data: LEVELS.map(l => l.designed_moves),       backgroundColor: '#2563EB' },
+      { label: 'Avg movesUsed (on win)', data: LEVELS.map(l => l.avg_moves_used_win),   backgroundColor: '#F59E0B' }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'} }, scales:{ y:{ beginAtZero:true } } }
+});
+
+// TPP
+new Chart(document.getElementById('ch-tpp'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [{
+      label: 'TPP deviation (final)',
+      data: LEVELS.map(l => l.avg_tpp_deviation_final),
+      backgroundColor: LEVELS.map(l => (l.avg_tpp_deviation_final||0) < -0.1 ? '#DC2626' : (l.avg_tpp_deviation_final||0) > 0.1 ? '#10B981' : '#9CA3AF')
+    }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{ title:{display:true,text:'TPP deviation · negative = harder than designed'} } } }
+});
+
+// ── Sortable table ──────────────────────────────────────────────────────────
+const tbody = document.getElementById('lvl-tbody');
+function wrPill(v) {
+  if (v == null) return '<span class="pill neutral">—</span>';
+  const k = v >= 65 ? 'pass' : v >= 50 ? 'warn' : 'kill';
+  return '<span class="pill ' + k + '">' + v.toFixed(1) + '%</span>';
+}
+function fmt(v, suffix) {
+  if (v == null || isNaN(v)) return '—';
+  return (typeof v === 'number') ? (v.toFixed(suffix === '%' ? 1 : suffix === '.3' ? 3 : suffix === '.2' ? 2 : 0) + (suffix === '%' ? '%' : '')) : v;
+}
+function renderRows(rows) {
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><b>L' + r.level_id + '</b></td>' +
+      '<td class="num">' + (r.attempts||0).toLocaleString() + '</td>' +
+      '<td class="num">' + (r.unique_users||0).toLocaleString() + '</td>' +
+      '<td class="num">' + wrPill(r.win_rate_pct) + '</td>' +
+      '<td class="num">' + (r.first_try_win_rate_pct == null ? '—' : r.first_try_win_rate_pct.toFixed(1) + '%') + '</td>' +
+      '<td class="num">' + (r.median_attempts_per_user || '—') + '</td>' +
+      '<td class="num">' + (r.max_attempts_per_user || '—') + '</td>' +
+      '<td class="num">' + (r.designed_moves || '—') + '</td>' +
+      '<td class="num">' + fmt(r.avg_moves_used_win, '.2') + '</td>' +
+      '<td class="num">' + fmt(r.avg_moves_used_fail, '.2') + '</td>' +
+      '<td class="num">' + fmt(r.avg_objectives_remaining_fail, '.2') + '</td>' +
+      '<td class="num">' + fmt(r.avg_time_in_level_sec, '.2') + '</td>' +
+      '<td class="num">' + fmt(r.avg_pu_total_per_attempt, '.2') + '</td>' +
+      '<td class="num">' + fmt(r.avg_tpp_deviation_final, '.3') + '</td>' +
+      '<td class="num">' + (r.booster_use_rate_pct == null ? '—' : r.booster_use_rate_pct.toFixed(1) + '%') + '</td>' +
+      '<td class="num">' + (r.is_boss_share_pct == null ? '—' : r.is_boss_share_pct.toFixed(0) + '%') + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+let currentSort = { key: 'level_id', dir: 1 };
+function sortBy(key) {
+  if (currentSort.key === key) currentSort.dir *= -1;
+  else { currentSort = { key, dir: key === 'level_id' ? 1 : -1 }; }
+  const rows = LEVELS.slice().sort((a, b) => {
+    const av = a[key], bv = b[key];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * currentSort.dir;
+    return String(av).localeCompare(String(bv)) * currentSort.dir;
+  });
+  renderRows(rows);
+}
+document.querySelectorAll('#lvl-table th[data-k]').forEach(th => {
+  th.addEventListener('click', () => sortBy(th.dataset.k));
+});
+renderRows(LEVELS);
+
+// ── Mean attempts table (sortable, default DESC by mean) ────────────────────
+const mTbody = document.getElementById('mean-att-tbody');
+function meanPill(v) {
+  if (v == null || isNaN(v)) return '<span class="pill neutral">—</span>';
+  const k = v >= 5 ? 'kill' : v >= 3 ? 'warn' : v >= 1.5 ? 'neutral' : 'pass';
+  return '<span class="pill ' + k + '">' + v.toFixed(2) + '</span>';
+}
+function renderMeanRows(rows) {
+  mTbody.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><b>L' + r.level_id + '</b></td>' +
+      '<td class="num">' + meanPill(r.mean_attempts_per_user) + '</td>' +
+      '<td class="num">' + (r.median_attempts_per_user != null ? r.median_attempts_per_user : '—') + '</td>' +
+      '<td class="num">' + (r.max_attempts_per_user != null ? r.max_attempts_per_user : '—') + '</td>' +
+      '<td class="num">' + (r.attempts || 0).toLocaleString() + '</td>' +
+      '<td class="num">' + (r.unique_users || 0).toLocaleString() + '</td>' +
+      '<td class="num">' + (r.win_rate_pct != null ? r.win_rate_pct.toFixed(1) + '%' : '—') + '</td>';
+    mTbody.appendChild(tr);
+  });
+}
+let mSort = { key: 'mean_attempts_per_user', dir: -1 };  // default: highest mean first
+function mSortBy(key) {
+  if (mSort.key === key) mSort.dir *= -1;
+  else { mSort = { key, dir: key === 'level_id' ? 1 : -1 }; }
+  const rows = LEVELS.slice().sort((a, b) => {
+    const av = a[key], bv = b[key];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * mSort.dir;
+    return String(av).localeCompare(String(bv)) * mSort.dir;
+  });
+  renderMeanRows(rows);
+}
+document.querySelectorAll('#mean-att-table th[data-k]').forEach(th => {
+  th.addEventListener('click', () => mSortBy(th.dataset.k));
+});
+// Initial render: sorted by mean DESC (hardest first)
+renderMeanRows(LEVELS.slice().sort((a, b) => {
+  const av = a.mean_attempts_per_user, bv = b.mean_attempts_per_user;
+  if (av == null && bv == null) return 0;
+  if (av == null) return 1;
+  if (bv == null) return -1;
+  return bv - av;
+}));
+</script>
+
+</body></html>
